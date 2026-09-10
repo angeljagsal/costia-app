@@ -7,18 +7,26 @@ import { readFileSync } from 'node:fs';
 
 function loadEnv(path) {
   const out = {};
-  for (const line of readFileSync(path, 'utf8').split('\n')) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#') || !trimmed.includes('=')) continue;
-    const idx = trimmed.indexOf('=');
-    const key = trimmed.slice(0, idx).trim();
-    let value = trimmed.slice(idx + 1).trim();
-    if (
-      (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      value = value.slice(1, -1);
+  for (const rawLine of readFileSync(path, 'utf8').split('\n')) {
+    let line = rawLine.trim().replace(/^\uFEFF/, '');
+    if (!line || line.startsWith('#') || !line.includes('=')) continue;
+    if (line.toLowerCase().startsWith('export ')) line = line.slice(7).trim();
+    // Tolerate the whole line wrapped in quotes.
+    if (line.length >= 2 && line.startsWith('"') && line.endsWith('"')) {
+      line = line.slice(1, -1);
     }
+    const idx = line.indexOf('=');
+    const key = line.slice(0, idx).trim();
+    let value = line.slice(idx + 1).trim();
+    if (
+      value.length >= 2 &&
+      ((value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'")))
+    ) {
+      value = value.slice(1, -1).trim();
+    }
+    // Tolerate a duplicated KEY= prefix: KEY=KEY=value.
+    if (value.startsWith(`${key}=`)) value = value.slice(key.length + 1);
     out[key] = value;
   }
   return out;
@@ -41,7 +49,18 @@ if (!url || !key) {
 
 // The URL must be the bare project URL. A common mistake is pasting the Data
 // API URL (with /rest/v1), which breaks Auth and every client call.
-const parsed = new URL(url);
+let parsed;
+try {
+  parsed = new URL(url);
+} catch {
+  console.error(
+    `FAIL: VITE_SUPABASE_URL is not a valid URL.\n` +
+      `  Got: ${url.slice(0, 80)}\n` +
+      `  Fix: it should be exactly https://<your-ref>.supabase.co with no key name,\n` +
+      `  no quotes, and no /rest/v1 path.`
+  );
+  process.exit(2);
+}
 if (parsed.pathname !== '/' && parsed.pathname !== '') {
   console.error(
     `FAIL: VITE_SUPABASE_URL must be the bare project URL with no path.\n` +
