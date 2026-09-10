@@ -10,19 +10,20 @@ const NAV = [
   { to: '/more', key: 'nav.more', end: false },
 ] as const;
 
+/** GitLab-style light sidebar link: blue pill when active. */
 function sidebarLinkClass({ isActive }: { isActive: boolean }) {
   const base =
-    'flex min-h-[44px] items-center rounded-md px-3 py-2.5 text-[0.9375rem] font-medium whitespace-nowrap transition-colors';
+    'flex min-h-[44px] items-center rounded-md px-3 py-2.5 text-[0.9375rem] whitespace-nowrap transition-colors';
   return isActive
-    ? `${base} bg-[var(--sidebar-active)] text-[var(--sidebar-text)]`
-    : `${base} text-[var(--sidebar-muted)] hover:bg-white/10 hover:text-[var(--sidebar-text)]`;
+    ? `${base} bg-[var(--accent-soft)] font-semibold text-[var(--accent-strong)]`
+    : `${base} font-medium text-[var(--sidebar-muted)] hover:bg-[var(--surface-2)] hover:text-[var(--sidebar-text)]`;
 }
 
 function topLinkClass({ isActive }: { isActive: boolean }) {
   const base =
-    'flex min-h-[48px] items-center rounded-md px-4 py-3 text-[0.9375rem] font-medium whitespace-nowrap transition-colors';
+    'flex min-h-[48px] flex-1 items-center justify-center rounded-md px-2 py-3 text-[0.9375rem] font-medium whitespace-nowrap transition-colors';
   return isActive
-    ? `${base} bg-[var(--surface-2)] text-[var(--text)]`
+    ? `${base} bg-[var(--accent-soft)] font-semibold text-[var(--accent-strong)]`
     : `${base} text-[var(--text-muted)] hover:bg-[var(--surface)] hover:text-[var(--text)]`;
 }
 
@@ -86,37 +87,47 @@ export function Layout() {
   );
 
   const signOutButton = session ? (
-    <button type="button" onClick={onSignOut} className="btn btn-secondary">
+    <button type="button" onClick={onSignOut} className="btn btn-secondary w-full">
       {t('header.logout')}
     </button>
   ) : null;
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-[var(--bg)] text-[var(--text)] md:flex-row">
-      {/* Sidebar (desktop): dark, GitLab-style */}
-      <aside className="hidden w-60 shrink-0 flex-col bg-[var(--sidebar-bg)] text-[var(--sidebar-text)] md:flex">
-        <div className="px-4 pb-2 pt-6">
-          <p className="truncate text-lg font-bold leading-tight">{t('app.name')}</p>
-          <p className="truncate text-sm text-[var(--sidebar-muted)]">{t('app.tagline')}</p>
+      {/* Sidebar (desktop): light GitLab style, fixed while content scrolls. */}
+      <aside className="sidebar-fixed hidden w-64 shrink-0 flex-col border-r border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] text-[var(--sidebar-text)] md:flex">
+        <div className="flex items-center gap-2.5 px-4 pb-2 pt-5">
+          <span className="logo-mark" aria-hidden="true">
+            C
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-base font-bold leading-tight">{t('app.name')}</p>
+            <p className="truncate text-xs text-[var(--sidebar-muted)]">{t('app.tagline')}</p>
+          </div>
         </div>
-        <nav aria-label="primary" className="flex flex-col gap-1 px-3 py-4">
+        <nav aria-label="primary" className="flex flex-col gap-0.5 px-3 py-3">
           {NAV.map((item) => (
             <NavLink key={item.to} to={item.to} end={item.end} className={sidebarLinkClass}>
               {t(item.key)}
             </NavLink>
           ))}
         </nav>
-        <div className="mt-auto flex flex-col gap-3 p-4">
+        <div className="mt-auto flex flex-col items-start gap-3 border-t border-[var(--sidebar-border)] p-4">
           {statusPill}
           {signOutButton}
         </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* Top header (mobile): name + status */}
+        {/* Top header (mobile): brand + status */}
         <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--surface)] md:hidden">
-          <div className="flex items-center justify-between gap-2 px-4 py-3">
-            <p className="truncate text-lg font-bold leading-tight">{t('app.name')}</p>
+          <div className="flex items-center justify-between gap-2 px-4 py-2.5">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="logo-mark" aria-hidden="true">
+                C
+              </span>
+              <p className="truncate text-base font-bold leading-tight">{t('app.name')}</p>
+            </div>
             <div className="flex shrink-0 items-center gap-2">{statusPill}</div>
           </div>
           {bypassed ? (
@@ -139,12 +150,12 @@ export function Layout() {
         </main>
       </div>
 
-      {/* Bottom nav (mobile): every section one tap away */}
+      {/* Bottom nav (mobile): four equal taps */}
       <nav
         aria-label="primary"
         className="bottom-nav fixed inset-x-0 bottom-0 z-10 border-t border-[var(--border)] bg-[var(--surface)] md:hidden"
       >
-        <div className="flex gap-1 overflow-x-auto px-2 py-2">
+        <div className="flex gap-1 px-2 py-2">
           {NAV.map((item) => (
             <NavLink key={item.to} to={item.to} end={item.end} className={topLinkClass}>
               {t(item.key)}
