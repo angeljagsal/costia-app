@@ -52,14 +52,22 @@ Note 2026-09-10: code verified (lint/typecheck/build green); end-to-end download
 check needs your live test in `02-data-sync.md`. Full CRUD workout in Phase 3.
 Doc: `context-docs/02-data-sync.md` + `supabase/migrations/*`.
 
-## Phase 3 — Transactions core
+## Phase 3 — Transactions core [DONE 2026-09-10]
 
-- Form: amount, currency MXN/USD, kind toggle, category (filtered), account, date, note, splits editor (sum == amount), tags multi-select.
-- List: text search (note), date-range / category / account / tag filters, pagination.
-- FX freeze: `base_amount = amount * rate(txn_date)` at creation only.
+- [x] Design pass first: GitLab-inspired tokens, dark sidebar, shared control
+  classes (`.btn/.input/.card`), 44px targets, theme-color per scheme.
+- [x] `src/data/` hooks + mutations (accounts/categories/tags/transactions).
+- [x] Form: kind toggle, amount (`,`/`.` tolerant), currency, category/account,
+  date defaulting to today, note, splits editor (cents-exact), tag chips + inline create.
+- [x] List: note search, category/account/tag/date filters, load-more, delete
+  with confirm, reactive updates, frozen `≈ base` per row.
+- [x] FX freeze at creation via `toBaseAmount`; missing rate blocks save.
 
 Accept: splits + tags + frozen FX covered by tests.
-Doc: `context-docs/03-transactions-fx.md`.
+Note 2026-09-10: code verified (lint/typecheck/build green); test the live
+round-trip in the app (create online → Supabase Table Editor; offline → saves
+instantly). Unit tests arrive in Phase 8 per plan.
+Doc: `context-docs/03-transactions.md`.
 
 ## Phase 4 — Accounts + Categories
 

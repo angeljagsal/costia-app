@@ -22,7 +22,8 @@ function todayLocal(): string {
 function parseAmount(raw: string): number {
   const s = raw.trim().replace(/\s/g, '');
   if (!s) return NaN;
-  const normalized = s.includes(',') && !s.includes('.') ? s.replace(',', '.') : s.replace(/,/g, '');
+  const normalized =
+    s.includes(',') && !s.includes('.') ? s.replace(',', '.') : s.replace(/,/g, '');
   return Number(normalized);
 }
 
@@ -48,7 +49,7 @@ function toRow(categoryId: string, amount: number): SplitRow {
   return {
     key: crypto.randomUUID(),
     categoryId,
-    amount: Number.isFinite(amount) ? String(amount) : ''
+    amount: Number.isFinite(amount) ? String(amount) : '',
   };
 }
 
@@ -79,7 +80,7 @@ export function TransactionForm({ mode }: { mode: 'new' | 'edit' }) {
     date: tx?.txn_date ?? todayLocal(),
     note: tx?.note ?? '',
     splits: existing.splits.map((s) => toRow(s.category_id, s.amount)),
-    tagIds: existing.tagIds
+    tagIds: existing.tagIds,
   };
   return <TransactionFormInner key={id ?? 'new'} mode={mode} editId={id} initial={initial} />;
 }
@@ -87,7 +88,7 @@ export function TransactionForm({ mode }: { mode: 'new' | 'edit' }) {
 function TransactionFormInner({
   mode,
   editId,
-  initial
+  initial,
 }: {
   mode: 'new' | 'edit';
   editId: string | undefined;
@@ -155,7 +156,7 @@ function TransactionFormInner({
         txnDate: date,
         note,
         splits: splits.map((s) => ({ categoryId: s.categoryId, amount: parseAmount(s.amount) })),
-        tagIds
+        tagIds,
       };
       if (mode === 'new' || !editId) {
         await createTransaction(db, householdId, loadBaseCurrency(), input);
@@ -183,7 +184,7 @@ function TransactionFormInner({
       <h1 className="page-title">{t(mode === 'new' ? 'tx.new' : 'tx.edit')}</h1>
 
       <div className="grid grid-cols-2 gap-2" role="group" aria-label={t('tx.kindExpense')}>
-        {( ['expense', 'income'] as Kind[] ).map((k) => (
+        {(['expense', 'income'] as Kind[]).map((k) => (
           <button
             key={k}
             type="button"
@@ -213,7 +214,11 @@ function TransactionFormInner({
         </label>
         <label className="label">
           {t('tx.currency')}
-          <select className="input" value={currency} onChange={(e) => setCurrency(e.target.value as Currency)}>
+          <select
+            className="input"
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value as Currency)}
+          >
             <option value="MXN">MXN — MX$</option>
             <option value="USD">USD — US$</option>
           </select>
@@ -223,7 +228,11 @@ function TransactionFormInner({
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <label className="label">
           {t('tx.category')}
-          <select className="input" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+          <select
+            className="input"
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
+          >
             <option value="">{t('tx.category')}</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
@@ -234,7 +243,11 @@ function TransactionFormInner({
         </label>
         <label className="label">
           {t('tx.account')}
-          <select className="input" value={accountId} onChange={(e) => setAccountId(e.target.value)}>
+          <select
+            className="input"
+            value={accountId}
+            onChange={(e) => setAccountId(e.target.value)}
+          >
             <option value="">{t('tx.account')}</option>
             {accounts.map((a) => (
               <option key={a.id} value={a.id}>
@@ -248,7 +261,12 @@ function TransactionFormInner({
 
       <label className="label">
         {t('tx.date')}
-        <input type="date" className="input" value={date} onChange={(e) => setDate(e.target.value)} />
+        <input
+          type="date"
+          className="input"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+        />
       </label>
 
       <label className="label">
@@ -273,7 +291,9 @@ function TransactionFormInner({
                 className="input"
                 value={s.categoryId}
                 onChange={(e) =>
-                  setSplits((rows) => rows.map((r) => (r.key === s.key ? { ...r, categoryId: e.target.value } : r)))
+                  setSplits((rows) =>
+                    rows.map((r) => (r.key === s.key ? { ...r, categoryId: e.target.value } : r))
+                  )
                 }
               >
                 <option value="">—</option>
@@ -291,7 +311,9 @@ function TransactionFormInner({
                 inputMode="decimal"
                 value={s.amount}
                 onChange={(e) =>
-                  setSplits((rows) => rows.map((r) => (r.key === s.key ? { ...r, amount: e.target.value } : r)))
+                  setSplits((rows) =>
+                    rows.map((r) => (r.key === s.key ? { ...r, amount: e.target.value } : r))
+                  )
                 }
                 placeholder="0.00"
               />
@@ -326,7 +348,9 @@ function TransactionFormInner({
                 key={tag.id}
                 type="button"
                 aria-pressed={on}
-                onClick={() => setTagIds((ids) => (on ? ids.filter((x) => x !== tag.id) : [...ids, tag.id]))}
+                onClick={() =>
+                  setTagIds((ids) => (on ? ids.filter((x) => x !== tag.id) : [...ids, tag.id]))
+                }
                 className={`btn ${on ? 'btn-primary' : 'btn-secondary'}`}
               >
                 {tag.name}
@@ -343,13 +367,22 @@ function TransactionFormInner({
             maxLength={40}
             aria-label={t('tx.newTag')}
           />
-          <button type="button" className="btn btn-secondary" onClick={onAddTag} aria-label={t('tx.newTag')}>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={onAddTag}
+            aria-label={t('tx.newTag')}
+          >
             +
           </button>
         </div>
       </fieldset>
 
-      {error ? <p className="error-text" role="alert">{error}</p> : null}
+      {error ? (
+        <p className="error-text" role="alert">
+          {error}
+        </p>
+      ) : null}
 
       <div className="flex gap-2">
         <button type="submit" disabled={saving} className="btn btn-primary flex-1">

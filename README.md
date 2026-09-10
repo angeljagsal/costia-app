@@ -8,11 +8,10 @@ Offline-first personal finance app (Windows + Android). See `context-docs/` for 
 
 ## Status
 
-Phase 2 done: offline-first data layer — Supabase schema + RLS + cron,
-PowerSync Sync Streams deployed, live connector + local SQLite in the app
-(`lint`, `typecheck`, `build` green).
-Next: Phase 3 transactions core — or your live sync test first
-(see `context-docs/02-data-sync.md`).
+Phase 3 done: transactions core — GitLab-inspired all-ages design, reactive
+data layer, full transaction form (splits, tags, FX freeze) and filterable
+list (`lint`, `typecheck`, `build` green).
+Next: Phase 4 accounts & categories CRUD (see `context-docs/03-transactions.md`).
 
 ## Quickstart
 

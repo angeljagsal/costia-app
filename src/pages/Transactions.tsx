@@ -79,7 +79,11 @@ export function Transactions() {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label className="label">
             {t('tx.filterCategory')}
-            <select className="input" value={filters.categoryId} onChange={(e) => patch({ categoryId: e.target.value })}>
+            <select
+              className="input"
+              value={filters.categoryId}
+              onChange={(e) => patch({ categoryId: e.target.value })}
+            >
               <option value="">{t('common.all')}</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -90,7 +94,11 @@ export function Transactions() {
           </label>
           <label className="label">
             {t('tx.filterAccount')}
-            <select className="input" value={filters.accountId} onChange={(e) => patch({ accountId: e.target.value })}>
+            <select
+              className="input"
+              value={filters.accountId}
+              onChange={(e) => patch({ accountId: e.target.value })}
+            >
               <option value="">{t('common.all')}</option>
               {accounts.map((a) => (
                 <option key={a.id} value={a.id}>
@@ -101,7 +109,11 @@ export function Transactions() {
           </label>
           <label className="label">
             {t('tx.tags')}
-            <select className="input" value={filters.tagId} onChange={(e) => patch({ tagId: e.target.value })}>
+            <select
+              className="input"
+              value={filters.tagId}
+              onChange={(e) => patch({ tagId: e.target.value })}
+            >
               <option value="">{t('common.all')}</option>
               {tags.map((tag) => (
                 <option key={tag.id} value={tag.id}>
@@ -113,15 +125,29 @@ export function Transactions() {
           <div className="grid grid-cols-2 gap-2">
             <label className="label">
               {t('tx.filterFrom')}
-              <input type="date" className="input" value={filters.from} onChange={(e) => patch({ from: e.target.value })} />
+              <input
+                type="date"
+                className="input"
+                value={filters.from}
+                onChange={(e) => patch({ from: e.target.value })}
+              />
             </label>
             <label className="label">
               {t('tx.filterTo')}
-              <input type="date" className="input" value={filters.to} onChange={(e) => patch({ to: e.target.value })} />
+              <input
+                type="date"
+                className="input"
+                value={filters.to}
+                onChange={(e) => patch({ to: e.target.value })}
+              />
             </label>
           </div>
         </div>
-        <button type="button" className="btn btn-secondary self-start" onClick={() => patch({ ...EMPTY_FILTERS })}>
+        <button
+          type="button"
+          className="btn btn-secondary self-start"
+          onClick={() => patch({ ...EMPTY_FILTERS })}
+        >
           {t('common.clear')}
         </button>
       </div>
@@ -145,9 +171,7 @@ export function Transactions() {
                     {day(locale, row.txn_date)}
                     {row.note ? ` · ${row.note}` : ''}
                   </p>
-                  <p className="hint">
-                    ≈ {money(locale, row.base_amount, baseCurrency)}
-                  </p>
+                  <p className="hint">≈ {money(locale, row.base_amount, baseCurrency)}</p>
                 </div>
                 <p
                   className="shrink-0 text-lg font-bold"
@@ -157,7 +181,11 @@ export function Transactions() {
                   {money(locale, row.amount, row.currency)}
                 </p>
                 <div className="flex shrink-0 flex-col gap-1">
-                  <Link to={`/transactions/${row.id}/edit`} className="btn btn-secondary" aria-label={t('tx.edit')}>
+                  <Link
+                    to={`/transactions/${row.id}/edit`}
+                    className="btn btn-secondary"
+                    aria-label={t('tx.edit')}
+                  >
                     {t('tx.edit')}
                   </Link>
                   <button
@@ -176,7 +204,11 @@ export function Transactions() {
       )}
 
       {hasMore ? (
-        <button type="button" className="btn btn-secondary self-center" onClick={() => setLimit((l) => l + PAGE_SIZE)}>
+        <button
+          type="button"
+          className="btn btn-secondary self-center"
+          onClick={() => setLimit((l) => l + PAGE_SIZE)}
+        >
           {t('common.loadMore')}
         </button>
       ) : null}
