@@ -203,7 +203,9 @@
     "clear": "Clear",
     "all": "All",
     "showAll": "Show all",
-    "showLess": "Show less"
+    "showLess": "Show less",
+    "add": "Add",
+    "remove": "Remove"
   },
   "tx": {
     "title": "Transactions",

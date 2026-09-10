@@ -203,7 +203,9 @@
     "clear": "Limpiar",
     "all": "Todos",
     "showAll": "Ver todo",
-    "showLess": "Ver menos"
+    "showLess": "Ver menos",
+    "add": "Agregar",
+    "remove": "Quitar"
   },
   "tx": {
     "title": "Movimientos",

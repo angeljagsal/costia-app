@@ -24,6 +24,7 @@
   --focus-ring: rgba(31, 117, 203, 0.22);
   --success: #108548;
   --danger: #d02a0e;
+  --danger-soft: #fdecea;
   --warning-bg: #fdf1e0;
   --warning-text: #8a5a00;
   --sidebar-bg: #ffffff;
@@ -54,6 +55,7 @@
   --focus-ring: rgba(73, 158, 215, 0.3);
   --success: #2da160;
   --danger: #f06a4d;
+  --danger-soft: #3d1f18;
   --warning-bg: #3a2c10;
   --warning-text: #f2c14e;
   --sidebar-bg: #242424;
@@ -194,27 +196,52 @@ select.input {
 
 .btn-primary {
   background: var(--accent);
+  border-color: var(--accent-hover);
   color: var(--accent-text);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
 .btn-primary:hover:not(:disabled) {
   background: var(--accent-hover);
 }
 
+.btn-primary:active:not(:disabled) {
+  box-shadow: none;
+}
+
 .btn-secondary {
   background: var(--surface);
   color: var(--text);
-  border-color: var(--border);
+  border-color: var(--input-border);
 }
 
 .btn-secondary:hover:not(:disabled) {
   background: var(--surface-2);
+  border-color: var(--text-muted);
 }
 
 .btn-danger {
   background: var(--surface);
   color: var(--danger);
   border-color: var(--danger);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: var(--danger-soft);
+}
+
+/* Quiet text action for secondary choices like Cancel beside Save. */
+.btn-quiet {
+  background: transparent;
+  color: var(--text-muted);
+  border-color: transparent;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.btn-quiet:hover:not(:disabled) {
+  color: var(--text);
+  background: var(--surface-2);
 }
 
 .card {
