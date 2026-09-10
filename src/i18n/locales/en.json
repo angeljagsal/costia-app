@@ -13,11 +13,28 @@
     "reports": "Reports",
     "settings": "Settings"
   },
+  "categories": {
+    "food_dining": "Food & Dining",
+    "transportation": "Transportation",
+    "housing": "Housing",
+    "utilities": "Utilities",
+    "entertainment": "Entertainment",
+    "health_fitness": "Health & Fitness",
+    "education": "Education",
+    "shopping": "Shopping",
+    "other_expense": "Other Expense",
+    "salary": "Salary",
+    "freelance": "Freelance",
+    "other_income": "Other Income"
+  },
   "header": {
     "logout": "Sign out",
     "offline": "Offline",
     "online": "Online",
     "localOnly": "Local only",
+    "syncing": "Syncing…",
+    "synced": "Synced",
+    "syncError": "Sync error",
     "devNoBackend": "Backend not configured — auth bypassed for dev"
   },
   "auth": {

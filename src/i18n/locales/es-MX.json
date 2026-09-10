@@ -13,11 +13,28 @@
     "reports": "Reportes",
     "settings": "Ajustes"
   },
+  "categories": {
+    "food_dining": "Comida y restaurantes",
+    "transportation": "Transporte",
+    "housing": "Vivienda",
+    "utilities": "Servicios",
+    "entertainment": "Entretenimiento",
+    "health_fitness": "Salud y deporte",
+    "education": "Educación",
+    "shopping": "Compras",
+    "other_expense": "Otro gasto",
+    "salary": "Salario",
+    "freelance": "Freelance",
+    "other_income": "Otro ingreso"
+  },
   "header": {
     "logout": "Cerrar sesión",
     "offline": "Sin conexión",
     "online": "En línea",
     "localOnly": "Solo local",
+    "syncing": "Sincronizando…",
+    "synced": "Sincronizado",
+    "syncError": "Error de sincronización",
     "devNoBackend": "Backend no configurado — autenticación omitida (dev)"
   },
   "auth": {
