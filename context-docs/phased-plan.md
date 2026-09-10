@@ -69,12 +69,18 @@ round-trip in the app (create online → Supabase Table Editor; offline → save
 instantly). Unit tests arrive in Phase 8 per plan.
 Doc: `context-docs/03-transactions.md`.
 
-## Phase 4 — Accounts + Categories
+## Phase 4 — Accounts + Categories [DONE 2026-09-11]
 
-- Accounts CRUD (bank|cash|credit|digital_wallet|investment); balance = Σ signed `base_amount`; delete blocked if transactions exist.
-- Categories CRUD (expense|income); same delete guard.
+- [x] Migration 0009: custom categories (`label` + nullable `key`, scoped RLS).
+- [x] Accounts CRUD (bank|cash|credit|digital_wallet|investment); live balances
+  = Σ signed `base_amount`; delete blocked if transactions exist.
+- [x] Categories CRUD (catalog read-only + custom create/rename/delete with
+  usage guard across transactions, splits, budgets, recurring).
+- [x] Auth revised same day: password-first login, magic link fallback (ADR-007).
 
 Accept: balances correct in base currency, bilingual names.
+Note: re-deploy `powersync/sync-config.yaml` in dashboard (categories scope
+changed); apply `0009` in SQL editor.
 Doc: `context-docs/04-accounts-categories.md`.
 
 ## Phase 5 — Budgets + Recurring

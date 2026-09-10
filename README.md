@@ -8,10 +8,11 @@ Offline-first personal finance app (Windows + Android). See `context-docs/` for 
 
 ## Status
 
-Phase 3 done: transactions core — GitLab-inspired all-ages design, reactive
-data layer, full transaction form (splits, tags, FX freeze) and filterable
-list (`lint`, `typecheck`, `build` green).
-Next: Phase 4 accounts & categories CRUD (see `context-docs/03-transactions.md`).
+Phase 4 done: accounts & categories CRUD with live balances, custom household
+categories (migration 0009), and password-first login (`lint`, `typecheck`,
+`build` green).
+Next: Phase 5 budgets & recurring UI (see `context-docs/04-accounts-categories.md`
+for your two dashboard steps: apply 0009, re-deploy sync config).
 
 ## Quickstart
 
