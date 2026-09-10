@@ -38,7 +38,7 @@ const categories = new Table(
     kind: column.text,
     sort: column.integer,
     household_id: column.text,
-    label: column.text
+    label: column.text,
   },
   { indexes: { household: ['household_id'] } }
 );
