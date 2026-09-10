@@ -388,7 +388,7 @@ function TransactionFormInner({
           <div className="min-w-0 flex-1">
             <p className="hint">{t('tx.amount')}</p>
             <p
-              className="amount truncate text-2xl"
+              className="amount truncate text-xl"
               style={{ color: kind === 'expense' ? 'var(--danger)' : 'var(--success)' }}
             >
               {kind === 'expense' ? '−' : '+'}
@@ -398,7 +398,7 @@ function TransactionFormInner({
           <button type="submit" disabled={saving} className="btn btn-primary flex-1">
             {saving ? t('common.saving') : t('common.save')}
           </button>
-          <Link to="/transactions" className="btn btn-quiet shrink-0">
+          <Link to="/transactions" className="btn btn-secondary flex-1">
             {t('common.cancel')}
           </Link>
         </div>
