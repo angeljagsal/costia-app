@@ -1,16 +1,6 @@
 import { Page } from '../components/Page';
 import { useI18n } from '../i18n/useI18n';
 
-export function Accounts() {
-  const { t } = useI18n();
-  return <Page title={t('pages.accounts.title')} body={t('pages.accounts.body')} />;
-}
-
-export function Categories() {
-  const { t } = useI18n();
-  return <Page title={t('pages.categories.title')} body={t('pages.categories.body')} />;
-}
-
 export function Budgets() {
   const { t } = useI18n();
   return <Page title={t('pages.budgets.title')} body={t('pages.budgets.body')} />;
