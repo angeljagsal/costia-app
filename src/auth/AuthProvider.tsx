@@ -41,6 +41,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { ok: false, message: error.status === 429 ? 'rateLimited' : 'error' };
   }, []);
 
+  const signInWithPassword = useCallback(async (email: string, password: string) => {
+    const sb = getSupabase();
+    if (!sb) return { ok: false, message: 'notConfigured' as const };
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (!error) return { ok: true, message: 'signedIn' };
+    const msg = error.message.toLowerCase();
+    if (msg.includes('invalid login credentials'))
+      return { ok: false, message: 'invalidCredentials' };
+    if (msg.includes('email not confirmed')) return { ok: false, message: 'confirmEmail' };
+    return { ok: false, message: 'error' };
+  }, []);
+
+  const signUpWithPassword = useCallback(async (email: string, password: string) => {
+    const sb = getSupabase();
+    if (!sb) return { ok: false, message: 'notConfigured' as const };
+    const { data, error } = await sb.auth.signUp({ email, password });
+    if (!error) {
+      // With "Confirm email" OFF, Supabase returns a session immediately.
+      // With it ON, the user must click the confirmation link first.
+      return data.session
+        ? { ok: true, message: 'signedIn' }
+        : { ok: true, message: 'confirmEmail' };
+    }
+    const msg = error.message.toLowerCase();
+    if (msg.includes('already registered') || msg.includes('already exists'))
+      return { ok: false, message: 'emailInUse' };
+    if (msg.includes('password')) return { ok: false, message: 'weakPassword' };
+    return { ok: false, message: 'error' };
+  }, []);
+
   const signOut = useCallback(async () => {
     await getSupabase()?.auth.signOut();
     setSession(null);
@@ -53,9 +83,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session,
       loading,
       sendMagicLink,
+      signInWithPassword,
+      signUpWithPassword,
       signOut,
     }),
-    [session, loading, sendMagicLink, signOut]
+    [session, loading, sendMagicLink, signInWithPassword, signUpWithPassword, signOut]
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
