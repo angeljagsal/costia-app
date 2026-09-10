@@ -10,15 +10,12 @@ import type { ThemeChoice } from '../theme/ThemeProvider';
 
 function row(title: string, control: ReactNode) {
   return (
-    <label className="flex items-center justify-between gap-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
-      <span className="text-sm font-medium">{title}</span>
+    <label className="card flex items-center justify-between gap-4">
+      <span className="font-medium">{title}</span>
       {control}
     </label>
   );
 }
-
-const selectClass =
-  'rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--text)]';
 
 export function Settings() {
   const { t, locale, setLocale } = useI18n();
@@ -31,13 +28,13 @@ export function Settings() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold tracking-tight">{t('settings.title')}</h1>
+      <h1 className="page-title">{t('settings.title')}</h1>
 
       {row(
         t('settings.language'),
         <select
           aria-label={t('settings.language')}
-          className={selectClass}
+          className="input w-auto"
           value={locale}
           onChange={(e) => setLocale(e.target.value as Locale)}
         >
@@ -50,7 +47,7 @@ export function Settings() {
         t('settings.theme'),
         <select
           aria-label={t('settings.theme')}
-          className={selectClass}
+          className="input w-auto"
           value={choice}
           onChange={(e) => setChoice(e.target.value as ThemeChoice)}
         >
@@ -65,7 +62,7 @@ export function Settings() {
           t('settings.baseCurrency'),
           <select
             aria-label={t('settings.baseCurrency')}
-            className={selectClass}
+            className="input w-auto"
             value={currency}
             onChange={(e) => setCurrency(e.target.value as BaseCurrency)}
           >
@@ -73,12 +70,12 @@ export function Settings() {
             <option value="USD">USD — US$</option>
           </select>
         )}
-        <p className="text-xs text-[var(--text-muted)]">{t('settings.baseCurrencyHint')}</p>
+        <p className="hint">{t('settings.baseCurrencyHint')}</p>
       </div>
 
       {row(
         t('settings.backend'),
-        <span className="text-sm text-[var(--text-muted)]">
+        <span className="hint">
           {isSupabaseConfigured ? t('settings.backendConfigured') : t('settings.backendMissing')}
         </span>
       )}

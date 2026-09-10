@@ -15,12 +15,12 @@ export function Dashboard() {
   const { t } = useI18n();
   return (
     <Page title={t('dashboard.title')} body={t('dashboard.welcome')}>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {CARDS.map((c) => (
           <Link
             key={c.to}
             to={c.to}
-            className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm font-medium hover:bg-[var(--surface-2)]"
+            className="card text-lg font-semibold hover:bg-[var(--surface-2)]"
           >
             {t(c.key)}
           </Link>
