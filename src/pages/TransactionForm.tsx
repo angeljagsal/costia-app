@@ -4,7 +4,6 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import { usePowerSync } from '@powersync/react';
 import { AccountPicker } from '../components/AccountPicker';
 import { CategoryGrid } from '../components/CategoryGrid';
-import { CheckIcon, PlusIcon, XIcon } from '../components/icons';
 import { useAccountBalances, useAccounts } from '../data/accounts';
 import { categoryName, useCategories } from '../data/categories';
 import { useHouseholdId } from '../data/household';
@@ -321,7 +320,7 @@ function TransactionFormInner({
                 onClick={() => setSplits((rows) => rows.filter((r) => r.key !== s.key))}
                 aria-label={t('tx.removeSplit')}
               >
-                <XIcon size={18} />
+                {t('common.remove')}
               </button>
             </div>
           ))}
@@ -331,7 +330,6 @@ function TransactionFormInner({
             </p>
           ) : null}
           <button type="button" className="btn btn-secondary self-start" onClick={onAddSplit}>
-            <PlusIcon size={18} />
             {t('tx.addSplit')}
           </button>
         </div>
@@ -373,7 +371,7 @@ function TransactionFormInner({
               onClick={onAddTag}
               aria-label={t('tx.newTag')}
             >
-              <PlusIcon size={18} />
+              {t('common.add')}
             </button>
           </div>
         </div>
@@ -386,8 +384,8 @@ function TransactionFormInner({
       ) : null}
 
       <div className="form-cta">
-        <div className="mx-auto flex w-full max-w-xl items-center gap-3">
-          <div className="min-w-0">
+        <div className="mx-auto flex w-full max-w-xl items-center gap-4">
+          <div className="min-w-0 flex-1">
             <p className="hint">{t('tx.amount')}</p>
             <p
               className="amount truncate text-2xl"
@@ -398,21 +396,13 @@ function TransactionFormInner({
             </p>
           </div>
           <button type="submit" disabled={saving} className="btn btn-primary flex-1">
-            {saving ? (
-              t('common.saving')
-            ) : (
-              <>
-                <CheckIcon size={18} />
-                {t('common.save')}
-              </>
-            )}
+            {saving ? t('common.saving') : t('common.save')}
           </button>
+          <Link to="/transactions" className="btn btn-quiet shrink-0">
+            {t('common.cancel')}
+          </Link>
         </div>
       </div>
-
-      <Link to="/transactions" className="btn btn-secondary self-center">
-        {t('common.cancel')}
-      </Link>
     </form>
   );
 }
