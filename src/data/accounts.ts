@@ -54,3 +54,15 @@ export async function deleteAccount(db: AppDatabase, id: string): Promise<void> 
   if ((used?.n ?? 0) > 0) throw new Error('accounts.errHasTransactions');
   await db.execute('DELETE FROM accounts WHERE id = ?', [id]);
 }
+
+/** Localized account-type name. */
+export function accountTypeLabel(t: (key: string) => string, type: AccountType): string {
+  const map: Record<AccountType, string> = {
+    bank: t('accounts.typeBank'),
+    cash: t('accounts.typeCash'),
+    credit: t('accounts.typeCredit'),
+    digital_wallet: t('accounts.typeWallet'),
+    investment: t('accounts.typeInvestment'),
+  };
+  return map[type];
+}

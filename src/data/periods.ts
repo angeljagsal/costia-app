@@ -38,6 +38,24 @@ export function monthRange(fromMonth: string, toMonth: string): string[] {
   return out;
 }
 
+/** First day of a YYYY-MM month. */
+export function monthStart(month: string): string {
+  return `${month}-01`;
+}
+
+/** Last day of a YYYY-MM month. */
+export function monthEnd(month: string): string {
+  const [y, m] = month.split('-').map(Number);
+  return toISODate(new Date(y, m, 0));
+}
+
+/** Shift a YYYY-MM month by delta months (negative allowed). */
+export function shiftMonth(month: string, delta: number): string {
+  const [y, m] = month.split('-').map(Number);
+  const d = new Date(y, m - 1 + delta, 1);
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+}
+
 /** Calendar month / calendar year / Monday-start week containing refISO. */
 export function getPeriodRange(period: BudgetPeriod, refISO: string): DateRange {
   const d = new Date(`${refISO}T00:00:00`);

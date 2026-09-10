@@ -1,31 +1,311 @@
 import { Link } from 'react-router';
-import { Page } from '../components/Page';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
+import { BudgetBar } from '../components/BudgetBar';
+import { UpcomingBills } from '../components/UpcomingBills';
+import { accountTypeLabel, useAccountBalances, useAccounts } from '../data/accounts';
+import { useBudgetSpent, useBudgets } from '../data/budgets';
+import type { BudgetView } from '../data/budgets';
+import { categoryName } from '../data/categories';
+import { useHouseholdId } from '../data/household';
+import {
+  getPeriodRange,
+  monthEnd,
+  monthRange,
+  monthStart,
+  shiftMonth,
+  todayLocal,
+} from '../data/periods';
+import { useCategoryTotals, useMonthlyFlow } from '../data/reports';
+import { useTransactions } from '../data/transactions';
+import { EMPTY_FILTERS } from '../data/types';
+import type { AccountType } from '../data/types';
 import { useI18n } from '../i18n/useI18n';
+import { formatDay, formatMoney, formatMonthLabel } from '../lib/format';
+import { loadBaseCurrency } from '../lib/prefs';
 
-const CARDS = [
-  { to: '/transactions', key: 'nav.transactions' },
-  { to: '/budgets', key: 'nav.budgets' },
-  { to: '/recurring', key: 'nav.recurring' },
-  { to: '/accounts', key: 'nav.accounts' },
-  { to: '/categories', key: 'nav.categories' },
-  { to: '/reports', key: 'nav.reports' },
-] as const;
+const PIE_COLORS = [
+  '#1f75cb',
+  '#108548',
+  '#e8930c',
+  '#d02a0e',
+  '#6e49cb',
+  '#0098a1',
+  '#c0349e',
+  '#7a7a7a',
+];
+const INCOME_COLOR = '#108548';
+const EXPENSE_COLOR = '#1f75cb';
+
+const tooltipStyle = {
+  backgroundColor: 'var(--surface)',
+  border: '1px solid var(--border)',
+  borderRadius: 8,
+  color: 'var(--text)',
+};
+
+function MiniBudgetRow({ budget }: { budget: BudgetView }) {
+  const { t, locale } = useI18n();
+  const householdId = useHouseholdId();
+  const baseCurrency = loadBaseCurrency();
+  const range = getPeriodRange(budget.period, todayLocal());
+  const spent = useBudgetSpent(householdId, budget.category_id, range.from, range.to);
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-baseline justify-between gap-2 text-sm">
+        <span className="truncate font-medium">{categoryName(t, budget)}</span>
+        <span className="hint shrink-0">
+          {formatMoney(locale, spent, baseCurrency)} /{' '}
+          {formatMoney(locale, budget.limit_amount, baseCurrency)}
+        </span>
+      </div>
+      <BudgetBar spent={spent} limit={budget.limit_amount} label={categoryName(t, budget)} />
+    </div>
+  );
+}
+
+function BudgetOverview() {
+  const { t } = useI18n();
+  const householdId = useHouseholdId();
+  const budgets = useBudgets(householdId);
+  return (
+    <section
+      className="card flex min-w-0 flex-col gap-3"
+      aria-label={t('dashboard.budgetOverview')}
+    >
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">{t('dashboard.budgetOverview')}</h2>
+        <Link to="/budgets" className="text-sm font-medium underline">
+          {t('dashboard.viewAll')}
+        </Link>
+      </div>
+      {budgets.length === 0 ? (
+        <p className="hint">{t('budgets.empty')}</p>
+      ) : (
+        budgets.map((b) => <MiniBudgetRow key={b.id} budget={b} />)
+      )}
+    </section>
+  );
+}
+
+function RecentTransactions() {
+  const { t, locale } = useI18n();
+  const householdId = useHouseholdId();
+  const rows = useTransactions(householdId, EMPTY_FILTERS, 10, 0);
+  return (
+    <section className="card flex min-w-0 flex-col gap-2" aria-label={t('dashboard.recentTx')}>
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">{t('dashboard.recentTx')}</h2>
+        <Link to="/transactions" className="text-sm font-medium underline">
+          {t('dashboard.viewAll')}
+        </Link>
+      </div>
+      {rows.length === 0 ? (
+        <p className="hint">{t('common.empty')}</p>
+      ) : (
+        <ul className="flex flex-col gap-2">
+          {rows.map((r) => {
+            const expense = r.kind === 'expense';
+            return (
+              <li key={r.id} className="flex items-center gap-2 text-sm">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-medium">{categoryName(t, r)}</p>
+                  <p className="hint">{formatDay(locale, r.txn_date)}</p>
+                </div>
+                <p
+                  className="shrink-0 font-bold"
+                  style={{ color: expense ? 'var(--danger)' : 'var(--success)' }}
+                >
+                  {expense ? '−' : '+'}
+                  {formatMoney(locale, r.amount, r.currency)}
+                </p>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function CategoryBreakdown() {
+  const { t, locale } = useI18n();
+  const householdId = useHouseholdId();
+  const baseCurrency = loadBaseCurrency();
+  const today = todayLocal();
+  const range = getPeriodRange('monthly', today);
+  const totals = useCategoryTotals(householdId, 'expense', range.from, range.to);
+  const data = totals.map((row, i) => ({
+    name: categoryName(t, row),
+    value: row.total,
+    fill: PIE_COLORS[i % PIE_COLORS.length],
+  }));
+  return (
+    <section
+      className="card flex min-w-0 flex-col gap-2"
+      aria-label={t('dashboard.categoryBreakdown')}
+    >
+      <h2 className="text-lg font-semibold">{t('dashboard.categoryBreakdown')}</h2>
+      {data.length === 0 ? (
+        <p className="hint">{t('dashboard.noData')}</p>
+      ) : (
+        <>
+          <div className="h-48 text-[var(--text)]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={data} dataKey="value" nameKey="name" innerRadius={45} outerRadius={75}>
+                  {data.map((d) => (
+                    <Cell key={d.name} fill={d.fill} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={tooltipStyle}
+                  formatter={(value) => formatMoney(locale, Number(value ?? 0), baseCurrency)}
+                />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <ul className="flex flex-col gap-1 text-sm">
+            {data.map((d) => (
+              <li key={d.name} className="flex items-center gap-2">
+                <span
+                  aria-hidden="true"
+                  className="inline-block h-3 w-3 rounded-sm"
+                  style={{ background: d.fill }}
+                />
+                <span className="flex-1 truncate">{d.name}</span>
+                <span className="font-semibold">{formatMoney(locale, d.value, baseCurrency)}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </section>
+  );
+}
+
+function IncomeVsExpenses() {
+  const { t, locale } = useI18n();
+  const householdId = useHouseholdId();
+  const baseCurrency = loadBaseCurrency();
+  const endMonth = todayLocal().slice(0, 7);
+  const startMonth = shiftMonth(endMonth, -5);
+  const flow = useMonthlyFlow(householdId, monthStart(startMonth), monthEnd(endMonth));
+  const byMonth = new Map(flow.map((f) => [f.month, f]));
+  const data = monthRange(startMonth, endMonth).map((m) => ({
+    month: formatMonthLabel(locale, m),
+    [t('reports.income')]: byMonth.get(m)?.income ?? 0,
+    [t('reports.expenses')]: byMonth.get(m)?.expenses ?? 0,
+  }));
+  const hasAny = flow.some((f) => (f.income ?? 0) > 0 || (f.expenses ?? 0) > 0);
+  return (
+    <section className="card flex min-w-0 flex-col gap-2" aria-label={t('dashboard.trend')}>
+      <h2 className="text-lg font-semibold">{t('dashboard.trend')}</h2>
+      {!householdId || !hasAny ? (
+        <p className="hint">{t('dashboard.noData')}</p>
+      ) : (
+        <div className="h-52 text-[var(--text-muted)]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#999" strokeOpacity={0.4} />
+              <XAxis dataKey="month" tick={{ fill: 'currentColor', fontSize: 12 }} />
+              <YAxis tick={{ fill: 'currentColor', fontSize: 12 }} width={48} />
+              <Tooltip
+                contentStyle={tooltipStyle}
+                formatter={(value) => formatMoney(locale, Number(value ?? 0), baseCurrency)}
+              />
+              <Legend wrapperStyle={{ fontSize: 12 }} />
+              <Bar dataKey={t('reports.income')} fill={INCOME_COLOR} radius={[4, 4, 0, 0]} />
+              <Bar dataKey={t('reports.expenses')} fill={EXPENSE_COLOR} radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </section>
+  );
+}
+
+const ACCOUNT_TYPE_ORDER: AccountType[] = [
+  'bank',
+  'cash',
+  'credit',
+  'digital_wallet',
+  'investment',
+];
+
+function Balances() {
+  const { t, locale } = useI18n();
+  const householdId = useHouseholdId();
+  const baseCurrency = loadBaseCurrency();
+  const accounts = useAccounts(householdId);
+  const balances = useAccountBalances(householdId);
+  const balanceOf = (id: string) => balances.find((b) => b.account_id === id)?.balance ?? 0;
+  const total = balances.reduce((sum, b) => sum + (b.balance ?? 0), 0);
+  return (
+    <section className="card flex min-w-0 flex-col gap-3" aria-label={t('dashboard.balances')}>
+      <h2 className="text-lg font-semibold">{t('dashboard.balances')}</h2>
+      {accounts.length === 0 ? (
+        <p className="hint">{t('accounts.empty')}</p>
+      ) : (
+        <>
+          {ACCOUNT_TYPE_ORDER.map((type) => {
+            const group = accounts.filter((a) => a.type === type);
+            if (group.length === 0) return null;
+            const subtotal = group.reduce((sum, a) => sum + balanceOf(a.id), 0);
+            return (
+              <div key={type} className="flex flex-col gap-1">
+                <p className="text-sm font-semibold text-[var(--text-muted)]">
+                  {accountTypeLabel(t, type)} · {formatMoney(locale, subtotal, baseCurrency)}
+                </p>
+                {group.map((a) => (
+                  <p key={a.id} className="flex justify-between gap-2 text-sm">
+                    <span className="truncate">{a.name}</span>
+                    <span className="font-semibold">
+                      {formatMoney(locale, balanceOf(a.id), baseCurrency)}
+                    </span>
+                  </p>
+                ))}
+              </div>
+            );
+          })}
+          <p className="flex justify-between border-t border-[var(--border)] pt-2 font-bold">
+            <span>{t('accounts.totalBalance')}</span>
+            <span>{formatMoney(locale, total, baseCurrency)}</span>
+          </p>
+        </>
+      )}
+    </section>
+  );
+}
 
 export function Dashboard() {
   const { t } = useI18n();
   return (
-    <Page title={t('dashboard.title')} body={t('dashboard.welcome')}>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {CARDS.map((c) => (
-          <Link
-            key={c.to}
-            to={c.to}
-            className="card text-lg font-semibold hover:bg-[var(--surface-2)]"
-          >
-            {t(c.key)}
-          </Link>
-        ))}
+    <div className="flex flex-col gap-4">
+      <div>
+        <h1 className="page-title">{t('dashboard.title')}</h1>
+        <p className="page-sub">{t('dashboard.welcome')}</p>
       </div>
-    </Page>
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        <BudgetOverview />
+        <RecentTransactions />
+        <CategoryBreakdown />
+        <IncomeVsExpenses />
+        <UpcomingBills />
+        <Balances />
+      </div>
+    </div>
   );
 }

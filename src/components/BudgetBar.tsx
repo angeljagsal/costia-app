@@ -4,7 +4,7 @@ import { budgetBarColor, budgetStateFor } from '../data/budgets';
 export function BudgetBar({
   spent,
   limit,
-  label
+  label,
 }: {
   spent: number;
   limit: number;

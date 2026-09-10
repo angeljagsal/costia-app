@@ -2,24 +2,19 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { usePowerSync } from '@powersync/react';
 import { Page } from '../components/Page';
-import { createAccount, deleteAccount, useAccountBalances, useAccounts } from '../data/accounts';
+import {
+  createAccount,
+  deleteAccount,
+  accountTypeLabel,
+  useAccountBalances,
+  useAccounts,
+} from '../data/accounts';
 import { useHouseholdId } from '../data/household';
 import type { AccountType } from '../data/types';
 import { useI18n } from '../i18n/useI18n';
 import { loadBaseCurrency } from '../lib/prefs';
 
 const TYPES: AccountType[] = ['bank', 'cash', 'credit', 'digital_wallet', 'investment'];
-
-function typeLabel(t: (k: string) => string, type: AccountType): string {
-  const map: Record<AccountType, string> = {
-    bank: t('accounts.typeBank'),
-    cash: t('accounts.typeCash'),
-    credit: t('accounts.typeCredit'),
-    digital_wallet: t('accounts.typeWallet'),
-    investment: t('accounts.typeInvestment'),
-  };
-  return map[type];
-}
 
 function money(locale: string, amount: number, currency: string): string {
   const tag = locale === 'es-MX' ? 'es-MX' : 'en-US';
@@ -109,7 +104,7 @@ export function Accounts() {
               >
                 {TYPES.map((ty) => (
                   <option key={ty} value={ty}>
-                    {typeLabel(t, ty)}
+                    {accountTypeLabel(t, ty)}
                   </option>
                 ))}
               </select>
@@ -132,7 +127,7 @@ export function Accounts() {
                 <li key={a.id} className="card flex items-center gap-3">
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold">{a.name}</p>
-                    <p className="hint">{typeLabel(t, a.type)}</p>
+                    <p className="hint">{accountTypeLabel(t, a.type)}</p>
                   </div>
                   <p className="shrink-0 text-lg font-bold">
                     {money(locale, balanceOf(a.id), baseCurrency)}
