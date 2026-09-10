@@ -17,15 +17,23 @@ export function useCategories(kind?: Kind, householdId?: string | null): Categor
   return data;
 }
 
-/** Display name: custom label wins, then localized catalog key. */
+/** Display name: custom label wins, then localized catalog key. Accepts both
+ *  Category rows ({ key, label }) and joined views ({ category_key, category_label }). */
 export function categoryName(
   t: (key: string) => string,
-  c: { key: string | null; label: string | null }
+  c: {
+    key?: string | null;
+    label?: string | null;
+    category_key?: string | null;
+    category_label?: string | null;
+  }
 ): string {
-  if (c.label?.trim()) return c.label.trim();
-  if (c.key) {
-    const hit = t(`categories.${c.key}`);
-    return hit === `categories.${c.key}` ? c.key.replace(/_/g, ' ') : hit;
+  const label = c.label ?? c.category_label;
+  if (label?.trim()) return label.trim();
+  const key = c.key ?? c.category_key;
+  if (key) {
+    const hit = t(`categories.${key}`);
+    return hit === `categories.${key}` ? key.replace(/_/g, ' ') : hit;
   }
   return '?';
 }
