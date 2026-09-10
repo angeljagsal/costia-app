@@ -80,9 +80,12 @@ console.log(`key: ${kind}, ${key.length} chars`);
 
 // getSession() alone never touches the network when no session is stored,
 // so probe the Auth health endpoint for a real round-trip instead.
-const health = await fetch(`${url}/auth/v1/health`);
+// The apikey header is required — Auth answers 401 without it.
+const health = await fetch(`${url}/auth/v1/health`, { headers: { apikey: key } });
+await health.text(); // consume the body so the socket closes cleanly on Windows
 if (!health.ok) {
   console.error(`FAIL: Auth health check returned HTTP ${health.status}.`);
   process.exit(1);
 }
 console.log('OK: reachable, Auth responding. (No session is expected — sign in via the UI.)');
+process.exit(0);
