@@ -6,7 +6,10 @@
 - ADR-004: `pg_cron` for FX refresh + recurring generation (no extra host).
 - ADR-005: Frankfurter API for FX (free, no key, ECB data).
 - ADR-006: Cloudflare Pages for static PWA hosting (decided 2026-09-10).
-- ADR-007: Supabase Auth email magic link only for v1 (decided 2026-09-10).
+- ADR-007: Supabase Auth email magic link only for v1 (decided 2026-09-10,
+  revised 2026-09-11: magic links proved flaky — OTP rate limits + inbox delays.
+  Email + password is now the primary sign-in, magic link stays as fallback.
+  No dashboard change needed; both use the built-in Email provider.)
 - ADR-008: Notifications = in-app Upcoming Bills only, no push v1 (decided 2026-09-10).
 - ADR-009: UI locales en + es-MX from day one, user-choosable (decided 2026-09-10).
 - ADR-010: `base_amount` frozen forever, even on base-currency switch (decided 2026-09-10).
