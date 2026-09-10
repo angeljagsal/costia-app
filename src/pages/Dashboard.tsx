@@ -15,6 +15,7 @@ import {
   YAxis,
 } from 'recharts';
 import { BudgetProgressRow } from '../components/BudgetProgress';
+import { ChevronRightIcon, MinusIcon, PlusIcon } from '../components/icons';
 import { UpcomingBills } from '../components/UpcomingBills';
 import { accountTypeLabel, useAccountBalances, useAccounts } from '../data/accounts';
 import { useBudgets } from '../data/budgets';
@@ -83,10 +84,12 @@ function Hero() {
       </div>
       <div className="flex gap-2">
         <Link to="/transactions/new?kind=expense" className="hero-action hero-action-primary">
-          − {t('dashboard.newExpense')}
+          <MinusIcon size={20} />
+          {t('dashboard.newExpense')}
         </Link>
         <Link to="/transactions/new?kind=income" className="hero-action hero-action-secondary">
-          + {t('dashboard.newIncome')}
+          <PlusIcon size={20} />
+          {t('dashboard.newIncome')}
         </Link>
       </div>
     </section>
@@ -104,8 +107,12 @@ function BudgetOverview() {
     >
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">{t('dashboard.budgetOverview')}</h2>
-        <Link to="/budgets" className="text-sm font-medium underline">
+        <Link
+          to="/budgets"
+          className="inline-flex items-center gap-1 text-sm font-medium underline"
+        >
           {t('dashboard.viewAll')}
+          <ChevronRightIcon size={16} />
         </Link>
       </div>
       {budgets.length === 0 ? (
@@ -125,8 +132,12 @@ function RecentTransactions() {
     <section className="card flex min-w-0 flex-col gap-2" aria-label={t('dashboard.recentTx')}>
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">{t('dashboard.recentTx')}</h2>
-        <Link to="/transactions" className="text-sm font-medium underline">
+        <Link
+          to="/transactions"
+          className="inline-flex items-center gap-1 text-sm font-medium underline"
+        >
           {t('dashboard.viewAll')}
+          <ChevronRightIcon size={16} />
         </Link>
       </div>
       {rows.length === 0 ? (
