@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { usePowerSync, useQuery } from '@powersync/react';
+import { usePowerSync } from '@powersync/react';
 import { Page } from '../components/Page';
-import { createAccount, deleteAccount, useAccounts } from '../data/accounts';
+import { createAccount, deleteAccount, useAccountBalances, useAccounts } from '../data/accounts';
 import { useHouseholdId } from '../data/household';
 import type { AccountType } from '../data/types';
 import { useI18n } from '../i18n/useI18n';
@@ -42,11 +42,7 @@ export function Accounts() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const { data: balances } = useQuery<{ account_id: string; balance: number }>(
-    `SELECT account_id, SUM(CASE WHEN kind = 'expense' THEN -base_amount ELSE base_amount END) AS balance
-     FROM transactions WHERE household_id = ? GROUP BY account_id`,
-    [householdId ?? '']
-  );
+  const balances = useAccountBalances(householdId);
   const balanceOf = (id: string) => balances.find((b) => b.account_id === id)?.balance ?? 0;
   const total = balances.reduce((sum, b) => sum + (b.balance ?? 0), 0);
 

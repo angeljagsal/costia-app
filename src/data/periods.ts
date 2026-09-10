@@ -22,6 +22,22 @@ export function addDaysISO(iso: string, days: number): string {
   return toISODate(d);
 }
 
+/** Inclusive YYYY-MM list from fromMonth to toMonth. */
+export function monthRange(fromMonth: string, toMonth: string): string[] {
+  const out: string[] = [];
+  let [y, m] = fromMonth.split('-').map(Number);
+  const [ey, em] = toMonth.split('-').map(Number);
+  while (y < ey || (y === ey && m <= em)) {
+    out.push(`${y}-${pad(m)}`);
+    m += 1;
+    if (m > 12) {
+      m = 1;
+      y += 1;
+    }
+  }
+  return out;
+}
+
 /** Calendar month / calendar year / Monday-start week containing refISO. */
 export function getPeriodRange(period: BudgetPeriod, refISO: string): DateRange {
   const d = new Date(`${refISO}T00:00:00`);

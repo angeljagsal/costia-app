@@ -15,6 +15,21 @@ export function useAccount(id: string | undefined): Account | null {
   return data[0] ?? null;
 }
 
+export interface AccountBalance {
+  account_id: string;
+  balance: number;
+}
+
+/** Signed base_amount totals per account (expenses negative). */
+export function useAccountBalances(householdId: string | null): AccountBalance[] {
+  const { data } = useQuery<AccountBalance>(
+    `SELECT account_id, SUM(CASE WHEN kind = 'expense' THEN -base_amount ELSE base_amount END) AS balance
+     FROM transactions WHERE household_id = ? GROUP BY account_id`,
+    [householdId ?? '']
+  );
+  return data;
+}
+
 export async function createAccount(
   db: AppDatabase,
   householdId: string,

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { usePowerSync } from '@powersync/react';
 import { Page } from '../components/Page';
+import { BudgetBar, budgetBarColor, budgetStateFor } from '../components/BudgetBar';
 import {
   createBudget,
   deleteBudget,
@@ -41,10 +42,8 @@ function BudgetCard({ budget }: { budget: BudgetView }) {
   const range = getPeriodRange(budget.period, todayLocal());
   const spent = useBudgetSpent(householdId, budget.category_id, range.from, range.to);
   const ratio = budget.limit_amount > 0 ? spent / budget.limit_amount : 0;
-  const pct = Math.min(100, Math.round(ratio * 100));
-  const state = ratio >= 1 ? 'overLimit' : ratio >= 0.8 ? 'nearLimit' : 'onTrack';
-  const barColor =
-    state === 'overLimit' ? 'var(--danger)' : state === 'nearLimit' ? '#e8930c' : 'var(--success)';
+  const state = budgetStateFor(spent, budget.limit_amount);
+  const barColor = budgetBarColor(state);
 
   const showError = (e: unknown) => {
     const msg = e instanceof Error ? e.message : String(e);
@@ -87,16 +86,7 @@ function BudgetCard({ budget }: { budget: BudgetView }) {
           {t(`budgets.${state}`)}
         </span>
       </div>
-      <div
-        role="progressbar"
-        aria-valuenow={pct}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-label={categoryName(t, budget)}
-        className="h-2.5 overflow-hidden rounded-full bg-[var(--surface-2)]"
-      >
-        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: barColor }} />
-      </div>
+      <BudgetBar spent={spent} limit={budget.limit_amount} label={categoryName(t, budget)} />
       <p className="hint">
         {ratio >= 1
           ? `${t('budgets.overBy')} ${money(locale, spent - budget.limit_amount, baseCurrency)}`
