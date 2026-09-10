@@ -9,15 +9,15 @@ streams:
   household_data:
     auto_subscribe: true
     queries:
-      - SELECT * FROM households WHERE id = (SELECT household_id FROM users WHERE id = auth.user_id())
-      - SELECT * FROM users WHERE household_id = (SELECT household_id FROM users WHERE id = auth.user_id())
-      - SELECT * FROM accounts WHERE household_id = (SELECT household_id FROM users WHERE id = auth.user_id())
-      - SELECT * FROM transactions WHERE household_id = (SELECT household_id FROM users WHERE id = auth.user_id())
-      - SELECT transaction_splits.* FROM transaction_splits INNER JOIN transactions ON transaction_splits.transaction_id = transactions.id WHERE transactions.household_id = (SELECT household_id FROM users WHERE id = auth.user_id())
-      - SELECT * FROM tags WHERE household_id = (SELECT household_id FROM users WHERE id = auth.user_id())
-      - SELECT transaction_tags.* FROM transaction_tags INNER JOIN transactions ON transaction_tags.transaction_id = transactions.id WHERE transactions.household_id = (SELECT household_id FROM users WHERE id = auth.user_id())
-      - SELECT * FROM budgets WHERE household_id = (SELECT household_id FROM users WHERE id = auth.user_id())
-      - SELECT * FROM recurring_rules WHERE household_id = (SELECT household_id FROM users WHERE id = auth.user_id())
+      - SELECT * FROM households WHERE id IN (SELECT household_id FROM users WHERE id = auth.user_id())
+      - SELECT * FROM users WHERE household_id IN (SELECT household_id FROM users WHERE id = auth.user_id())
+      - SELECT * FROM accounts WHERE household_id IN (SELECT household_id FROM users WHERE id = auth.user_id())
+      - SELECT * FROM transactions WHERE household_id IN (SELECT household_id FROM users WHERE id = auth.user_id())
+      - SELECT transaction_splits.* FROM transaction_splits INNER JOIN transactions ON transaction_splits.transaction_id = transactions.id WHERE transactions.household_id IN (SELECT household_id FROM users WHERE id = auth.user_id())
+      - SELECT * FROM tags WHERE household_id IN (SELECT household_id FROM users WHERE id = auth.user_id())
+      - SELECT transaction_tags.* FROM transaction_tags INNER JOIN transactions ON transaction_tags.transaction_id = transactions.id WHERE transactions.household_id IN (SELECT household_id FROM users WHERE id = auth.user_id())
+      - SELECT * FROM budgets WHERE household_id IN (SELECT household_id FROM users WHERE id = auth.user_id())
+      - SELECT * FROM recurring_rules WHERE household_id IN (SELECT household_id FROM users WHERE id = auth.user_id())
   catalog_data:
     auto_subscribe: true
     queries:
