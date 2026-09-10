@@ -156,6 +156,7 @@
     "errSplitMismatch": "La suma de las divisiones debe dar el total.",
     "errNoFxRate": "No hay tipo de cambio para esta moneda y fecha. Sincroniza para descargar tasas.",
     "errNoAccount": "Primero crea una cuenta (pestaña Cuentas).",
-    "deleted": "Movimiento eliminado."
+    "deleted": "Movimiento eliminado.",
+    "waitSync": "Esperando la primera sincronización para cargar tus datos…"
   }
 }

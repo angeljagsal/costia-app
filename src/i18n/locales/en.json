@@ -156,6 +156,7 @@
     "errSplitMismatch": "Split amounts must add up to the total.",
     "errNoFxRate": "No exchange rate available for this currency and date. Sync to download rates.",
     "errNoAccount": "Create an account first (Accounts tab).",
-    "deleted": "Transaction deleted."
+    "deleted": "Transaction deleted.",
+    "waitSync": "Waiting for the first sync to load your data…"
   }
 }
