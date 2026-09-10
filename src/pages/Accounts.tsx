@@ -2,7 +2,6 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { usePowerSync } from '@powersync/react';
 import { Page } from '../components/Page';
-import { PlusIcon, TrashIcon } from '../components/icons';
 import {
   createAccount,
   deleteAccount,
@@ -116,14 +115,7 @@ export function Accounts() {
               </p>
             ) : null}
             <button type="submit" disabled={saving} className="btn btn-primary self-start">
-              {saving ? (
-                t('common.saving')
-              ) : (
-                <>
-                  <PlusIcon size={18} />
-                  {t('accounts.create')}
-                </>
-              )}
+              {saving ? t('common.saving') : t('accounts.create')}
             </button>
           </form>
 
@@ -146,7 +138,6 @@ export function Accounts() {
                     onClick={() => onDelete(a.id)}
                     aria-label={`${t('common.delete')}: ${a.name}`}
                   >
-                    <TrashIcon size={16} />
                     {t('common.delete')}
                   </button>
                 </li>

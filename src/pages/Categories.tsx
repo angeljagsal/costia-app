@@ -2,7 +2,6 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { usePowerSync } from '@powersync/react';
 import { Page } from '../components/Page';
-import { CheckIcon, PencilIcon, PlusIcon, TrashIcon } from '../components/icons';
 import {
   categoryName,
   createCategory,
@@ -104,7 +103,6 @@ export function Categories() {
                       className="btn btn-primary"
                       onClick={() => onRename(c.id)}
                     >
-                      <CheckIcon size={16} />
                       {t('common.save')}
                     </button>
                     <button
@@ -129,7 +127,6 @@ export function Categories() {
                         setEditingLabel(c.label ?? '');
                       }}
                     >
-                      <PencilIcon size={16} />
                       {t('categories.rename')}
                     </button>
                     <button
@@ -138,7 +135,6 @@ export function Categories() {
                       onClick={() => onDelete(c.id)}
                       aria-label={`${t('common.delete')}: ${categoryName(t, c)}`}
                     >
-                      <TrashIcon size={16} />
                       {t('common.delete')}
                     </button>
                   </>
@@ -182,14 +178,7 @@ export function Categories() {
               </p>
             ) : null}
             <button type="submit" disabled={saving} className="btn btn-primary self-start">
-              {saving ? (
-                t('common.saving')
-              ) : (
-                <>
-                  <PlusIcon size={18} />
-                  {t('categories.create')}
-                </>
-              )}
+              {saving ? t('common.saving') : t('categories.create')}
             </button>
           </form>
 

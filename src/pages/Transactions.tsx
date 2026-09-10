@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import { usePowerSync } from '@powersync/react';
 import { Page } from '../components/Page';
-import { PencilIcon, PlusIcon, SearchIcon, TrashIcon } from '../components/icons';
+import { PencilIcon, PlusIcon, SearchIcon } from '../components/icons';
 import { useAccounts } from '../data/accounts';
 import { categoryName, useCategories } from '../data/categories';
 import { useHouseholdId } from '../data/household';
@@ -200,7 +200,6 @@ export function Transactions() {
                     onClick={() => onDelete(row.id)}
                     aria-label={`${t('common.delete')}: ${categoryName(t, { key: row.category_key, label: row.category_label })}`}
                   >
-                    <TrashIcon size={16} />
                     {t('common.delete')}
                   </button>
                 </div>
