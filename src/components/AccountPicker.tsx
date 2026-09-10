@@ -10,7 +10,7 @@ export function AccountPicker({
   baseCurrency,
   value,
   onChange,
-  label
+  label,
 }: {
   accounts: Account[];
   balanceOf: (id: string) => number;
@@ -40,7 +40,9 @@ export function AccountPicker({
                 <span className="block truncate font-semibold">{a.name}</span>
                 <span className="hint block">{accountTypeLabel(t, a.type)}</span>
               </span>
-              <span className="amount shrink-0">{formatMoney(locale, balanceOf(a.id), baseCurrency)}</span>
+              <span className="amount shrink-0">
+                {formatMoney(locale, balanceOf(a.id), baseCurrency)}
+              </span>
             </button>
           );
         })}

@@ -2,13 +2,16 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import { usePowerSync } from '@powersync/react';
-import { useAccounts } from '../data/accounts';
+import { AccountPicker } from '../components/AccountPicker';
+import { CategoryGrid } from '../components/CategoryGrid';
+import { useAccountBalances, useAccounts } from '../data/accounts';
 import { categoryName, useCategories } from '../data/categories';
 import { useHouseholdId } from '../data/household';
 import { createTag, useTags } from '../data/tags';
 import { createTransaction, updateTransaction, useTransaction } from '../data/transactions';
 import type { Currency, Kind } from '../data/types';
 import { useI18n } from '../i18n/useI18n';
+import { formatMoney } from '../lib/format';
 import { loadBaseCurrency } from '../lib/prefs';
 
 function todayLocal(): string {
@@ -97,10 +100,11 @@ function TransactionFormInner({
   editId: string | undefined;
   initial: Initial;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const navigate = useNavigate();
   const db = usePowerSync();
   const householdId = useHouseholdId();
+  const baseCurrency = loadBaseCurrency();
 
   const [kind, setKind] = useState<Kind>(initial.kind);
   const [amount, setAmount] = useState(initial.amount);
@@ -117,7 +121,12 @@ function TransactionFormInner({
 
   const categories = useCategories(kind, householdId);
   const accounts = useAccounts(householdId);
+  const balances = useAccountBalances(householdId);
   const tags = useTags(householdId);
+  const balanceOf = (id: string) => balances.find((b) => b.account_id === id)?.balance ?? 0;
+
+  const parsed = parseAmount(amount);
+  const preview = Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 
   const splitTotal = splits.reduce((sum, s) => {
     const n = parseAmount(s.amount);
@@ -126,7 +135,6 @@ function TransactionFormInner({
 
   const showError = (e: unknown) => {
     const msg = e instanceof Error ? e.message : String(e);
-    // Mutations throw i18n keys; anything else is shown raw (should not happen).
     setError(msg.startsWith('tx.') || msg.startsWith('tags.') ? t(msg) : msg);
   };
 
@@ -183,10 +191,10 @@ function TransactionFormInner({
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex max-w-xl flex-col gap-4">
+    <form onSubmit={onSubmit} className="mx-auto flex w-full max-w-xl flex-col gap-5">
       <h1 className="page-title">{t(mode === 'new' ? 'tx.new' : 'tx.edit')}</h1>
 
-      <div className="grid grid-cols-2 gap-2" role="group" aria-label={t('tx.kindExpense')}>
+      <div className="segmented" role="group" aria-label={t('tx.kindExpense')}>
         {(['expense', 'income'] as Kind[]).map((k) => (
           <button
             key={k}
@@ -196,190 +204,178 @@ function TransactionFormInner({
               setKind(k);
               setCategoryId('');
             }}
-            className={`btn ${kind === k ? 'btn-primary' : 'btn-secondary'}`}
           >
-            {t(k === 'expense' ? 'tx.kindExpense' : 'tx.kindIncome')}
+            {k === 'expense' ? `− ${t('tx.kindExpense')}` : `+ ${t('tx.kindIncome')}`}
           </button>
         ))}
       </div>
+
+      <div className="amount-hero">
+        <input
+          inputMode="decimal"
+          autoComplete="off"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          placeholder="0.00"
+          aria-label={t('tx.amount')}
+        />
+        <div className="currency-chips" role="group" aria-label={t('tx.currency')}>
+          {(['MXN', 'USD'] as Currency[]).map((c) => (
+            <button
+              key={c}
+              type="button"
+              aria-pressed={currency === c}
+              onClick={() => setCurrency(c)}
+            >
+              {c === 'MXN' ? 'MX$' : 'US$'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <CategoryGrid
+        categories={categories}
+        value={categoryId}
+        onChange={setCategoryId}
+        label={t('tx.category')}
+      />
+
+      {accounts.length === 0 ? (
+        <p className="hint">{t('tx.errNoAccount')}</p>
+      ) : (
+        <AccountPicker
+          accounts={accounts}
+          balanceOf={balanceOf}
+          baseCurrency={baseCurrency}
+          value={accountId}
+          onChange={setAccountId}
+          label={t('tx.account')}
+        />
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <label className="label">
-          {t('tx.amount')}
+          {t('tx.date')}
           <input
+            type="date"
             className="input"
-            inputMode="decimal"
-            autoComplete="off"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="0.00"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
           />
         </label>
         <label className="label">
-          {t('tx.currency')}
-          <select
+          {t('tx.note')}
+          <input
             className="input"
-            value={currency}
-            onChange={(e) => setCurrency(e.target.value as Currency)}
-          >
-            <option value="MXN">MXN — MX$</option>
-            <option value="USD">USD — US$</option>
-          </select>
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder={t('tx.notePlaceholder')}
+            maxLength={280}
+          />
         </label>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <label className="label">
-          {t('tx.category')}
-          <select
-            className="input"
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-          >
-            <option value="">{t('tx.category')}</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {categoryName(t, c)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="label">
-          {t('tx.account')}
-          <select
-            className="input"
-            value={accountId}
-            onChange={(e) => setAccountId(e.target.value)}
-          >
-            <option value="">{t('tx.account')}</option>
-            {accounts.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-      {accounts.length === 0 ? <p className="hint">{t('tx.errNoAccount')}</p> : null}
-
-      <label className="label">
-        {t('tx.date')}
-        <input
-          type="date"
-          className="input"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-        />
-      </label>
-
-      <label className="label">
-        {t('tx.note')}
-        <input
-          className="input"
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          placeholder={t('tx.notePlaceholder')}
-          maxLength={280}
-        />
-      </label>
-
-      <fieldset className="card flex flex-col gap-3">
-        <legend className="px-1 font-semibold">{t('tx.splits')}</legend>
-        <p className="hint">{t('tx.splitsHint')}</p>
-        {splits.map((s) => (
-          <div key={s.key} className="grid grid-cols-[1fr_7rem_auto] items-end gap-2">
-            <label className="label">
-              {t('tx.splitCategory')}
-              <select
-                className="input"
-                value={s.categoryId}
-                onChange={(e) =>
-                  setSplits((rows) =>
-                    rows.map((r) => (r.key === s.key ? { ...r, categoryId: e.target.value } : r))
-                  )
-                }
+      <details className="advanced">
+        <summary>{t('tx.splits')}</summary>
+        <div className="advanced-body">
+          <p className="hint">{t('tx.splitsHint')}</p>
+          {splits.map((s) => (
+            <div key={s.key} className="grid grid-cols-[1fr_7rem_auto] items-end gap-2">
+              <label className="label">
+                {t('tx.splitCategory')}
+                <select
+                  className="input"
+                  value={s.categoryId}
+                  onChange={(e) =>
+                    setSplits((rows) =>
+                      rows.map((r) => (r.key === s.key ? { ...r, categoryId: e.target.value } : r))
+                    )
+                  }
+                >
+                  <option value="">—</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {categoryName(t, c)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="label">
+                {t('tx.splitAmount')}
+                <input
+                  className="input"
+                  inputMode="decimal"
+                  value={s.amount}
+                  onChange={(e) =>
+                    setSplits((rows) =>
+                      rows.map((r) => (r.key === s.key ? { ...r, amount: e.target.value } : r))
+                    )
+                  }
+                  placeholder="0.00"
+                />
+              </label>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setSplits((rows) => rows.filter((r) => r.key !== s.key))}
+                aria-label={t('tx.removeSplit')}
               >
-                <option value="">—</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {categoryName(t, c)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="label">
-              {t('tx.splitAmount')}
-              <input
-                className="input"
-                inputMode="decimal"
-                value={s.amount}
-                onChange={(e) =>
-                  setSplits((rows) =>
-                    rows.map((r) => (r.key === s.key ? { ...r, amount: e.target.value } : r))
-                  )
-                }
-                placeholder="0.00"
-              />
-            </label>
+                ×
+              </button>
+            </div>
+          ))}
+          {splits.length > 0 ? (
+            <p className="hint">
+              {t('tx.splitTotal')}: {splitTotal.toFixed(2)}
+            </p>
+          ) : null}
+          <button type="button" className="btn btn-secondary self-start" onClick={onAddSplit}>
+            {t('tx.addSplit')}
+          </button>
+        </div>
+      </details>
+
+      <details className="advanced">
+        <summary>{t('tx.tags')}</summary>
+        <div className="advanced-body">
+          <div className="flex flex-wrap gap-2">
+            {tags.map((tag) => {
+              const on = tagIds.includes(tag.id);
+              return (
+                <button
+                  key={tag.id}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() =>
+                    setTagIds((ids) => (on ? ids.filter((x) => x !== tag.id) : [...ids, tag.id]))
+                  }
+                  className={`btn ${on ? 'btn-primary' : 'btn-secondary'}`}
+                >
+                  {tag.name}
+                </button>
+              );
+            })}
+          </div>
+          <div className="grid grid-cols-[1fr_auto] gap-2">
+            <input
+              className="input"
+              value={newTag}
+              onChange={(e) => setNewTag(e.target.value)}
+              placeholder={t('tx.newTag')}
+              maxLength={40}
+              aria-label={t('tx.newTag')}
+            />
             <button
               type="button"
               className="btn btn-secondary"
-              onClick={() => setSplits((rows) => rows.filter((r) => r.key !== s.key))}
-              aria-label={t('tx.removeSplit')}
+              onClick={onAddTag}
+              aria-label={t('tx.newTag')}
             >
-              ×
+              +
             </button>
           </div>
-        ))}
-        {splits.length > 0 ? (
-          <p className="hint">
-            {t('tx.splitTotal')}: {splitTotal.toFixed(2)}
-          </p>
-        ) : null}
-        <button type="button" className="btn btn-secondary self-start" onClick={onAddSplit}>
-          {t('tx.addSplit')}
-        </button>
-      </fieldset>
-
-      <fieldset className="card flex flex-col gap-3">
-        <legend className="px-1 font-semibold">{t('tx.tags')}</legend>
-        <div className="flex flex-wrap gap-2">
-          {tags.map((tag) => {
-            const on = tagIds.includes(tag.id);
-            return (
-              <button
-                key={tag.id}
-                type="button"
-                aria-pressed={on}
-                onClick={() =>
-                  setTagIds((ids) => (on ? ids.filter((x) => x !== tag.id) : [...ids, tag.id]))
-                }
-                className={`btn ${on ? 'btn-primary' : 'btn-secondary'}`}
-              >
-                {tag.name}
-              </button>
-            );
-          })}
         </div>
-        <div className="grid grid-cols-[1fr_auto] gap-2">
-          <input
-            className="input"
-            value={newTag}
-            onChange={(e) => setNewTag(e.target.value)}
-            placeholder={t('tx.newTag')}
-            maxLength={40}
-            aria-label={t('tx.newTag')}
-          />
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={onAddTag}
-            aria-label={t('tx.newTag')}
-          >
-            +
-          </button>
-        </div>
-      </fieldset>
+      </details>
 
       {error ? (
         <p className="error-text" role="alert">
@@ -387,14 +383,27 @@ function TransactionFormInner({
         </p>
       ) : null}
 
-      <div className="flex gap-2">
-        <button type="submit" disabled={saving} className="btn btn-primary flex-1">
-          {saving ? t('common.saving') : t('common.save')}
-        </button>
-        <Link to="/transactions" className="btn btn-secondary">
-          {t('common.cancel')}
-        </Link>
+      <div className="form-cta">
+        <div className="mx-auto flex w-full max-w-xl items-center gap-3">
+          <div className="min-w-0">
+            <p className="hint">{t('tx.amount')}</p>
+            <p
+              className="amount truncate text-2xl"
+              style={{ color: kind === 'expense' ? 'var(--danger)' : 'var(--success)' }}
+            >
+              {kind === 'expense' ? '−' : '+'}
+              {formatMoney(locale, preview, currency)}
+            </p>
+          </div>
+          <button type="submit" disabled={saving} className="btn btn-primary flex-1">
+            {saving ? t('common.saving') : t('common.save')}
+          </button>
+        </div>
       </div>
+
+      <Link to="/transactions" className="btn btn-secondary self-center">
+        {t('common.cancel')}
+      </Link>
     </form>
   );
 }

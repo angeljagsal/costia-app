@@ -11,7 +11,7 @@ const AVATAR_COLORS = [
   '#b34700',
   '#8a1c40',
   '#5e6b7a',
-  '#7a5c00'
+  '#7a5c00',
 ];
 
 function avatarColor(seed: string): string {
@@ -30,7 +30,7 @@ export function CategoryGrid({
   categories,
   value,
   onChange,
-  label
+  label,
 }: {
   categories: Category[];
   value: string;
