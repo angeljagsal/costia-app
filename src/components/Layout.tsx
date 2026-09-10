@@ -2,7 +2,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router';
 import { useAuth } from '../auth/useAuth';
 import { useI18n } from '../i18n/useI18n';
 import { useSync } from '../sync/useSync';
-import { ActivityIcon, BudgetIcon, HomeIcon, LogoutIcon, MoreIcon } from './icons';
+import { ActivityIcon, BudgetIcon, HomeIcon, MoreIcon } from './icons';
 
 const NAV = [
   { to: '/', key: 'nav.dashboard', end: true, icon: HomeIcon },
@@ -89,7 +89,6 @@ export function Layout() {
 
   const signOutButton = session ? (
     <button type="button" onClick={onSignOut} className="btn btn-secondary w-full">
-      <LogoutIcon size={18} />
       {t('header.logout')}
     </button>
   ) : null;
