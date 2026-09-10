@@ -35,7 +35,9 @@ export function AccountPicker({
               onClick={() => onChange(a.id)}
               className="radio-row"
             >
-              <span aria-hidden="true" className="radio-dot" />
+              <span aria-hidden="true" className="radio-dot">
+                <span aria-hidden="true" className="radio-dot-fill" />
+              </span>
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-semibold">{a.name}</span>
                 <span className="hint block">{accountTypeLabel(t, a.type)}</span>

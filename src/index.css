@@ -464,7 +464,7 @@ select.input {
   cursor: pointer;
 }
 
-.radio-row[aria-pressed='true'] {
+.radio-row[aria-checked='true'] {
   border: 2px solid var(--accent);
   padding: calc(0.625rem - 1px) calc(0.75rem - 1px);
   background: var(--accent-soft);
@@ -481,19 +481,19 @@ select.input {
   justify-content: center;
 }
 
-.radio-row[aria-pressed='true'] .radio-dot {
+.radio-row[aria-checked='true'] .radio-dot {
   border-color: var(--accent);
 }
 
-.radio-dot::after {
-  content: '';
+.radio-dot-fill {
+  display: block;
   width: 12px;
   height: 12px;
   border-radius: 50%;
   background: transparent;
 }
 
-.radio-row[aria-pressed='true'] .radio-dot::after {
+.radio-row[aria-checked='true'] .radio-dot-fill {
   background: var(--accent);
 }
 
