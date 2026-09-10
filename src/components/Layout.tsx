@@ -2,18 +2,19 @@ import { NavLink, Outlet, useNavigate } from 'react-router';
 import { useAuth } from '../auth/useAuth';
 import { useI18n } from '../i18n/useI18n';
 import { useSync } from '../sync/useSync';
+import { ActivityIcon, BudgetIcon, HomeIcon, LogoutIcon, MoreIcon } from './icons';
 
 const NAV = [
-  { to: '/', key: 'nav.dashboard', end: true },
-  { to: '/transactions', key: 'nav.transactions', end: false },
-  { to: '/budgets', key: 'nav.budgets', end: false },
-  { to: '/more', key: 'nav.more', end: false },
+  { to: '/', key: 'nav.dashboard', end: true, icon: HomeIcon },
+  { to: '/transactions', key: 'nav.transactions', end: false, icon: ActivityIcon },
+  { to: '/budgets', key: 'nav.budgets', end: false, icon: BudgetIcon },
+  { to: '/more', key: 'nav.more', end: false, icon: MoreIcon }
 ] as const;
 
 /** GitLab-style light sidebar link: blue pill when active. */
 function sidebarLinkClass({ isActive }: { isActive: boolean }) {
   const base =
-    'flex min-h-[44px] items-center rounded-md px-3 py-2.5 text-[0.9375rem] whitespace-nowrap transition-colors';
+    'flex min-h-[44px] items-center gap-2.5 rounded-md px-3 py-2.5 text-[0.9375rem] whitespace-nowrap transition-colors';
   return isActive
     ? `${base} bg-[var(--accent-soft)] font-semibold text-[var(--accent-strong)]`
     : `${base} font-medium text-[var(--sidebar-muted)] hover:bg-[var(--surface-2)] hover:text-[var(--sidebar-text)]`;
@@ -21,7 +22,7 @@ function sidebarLinkClass({ isActive }: { isActive: boolean }) {
 
 function topLinkClass({ isActive }: { isActive: boolean }) {
   const base =
-    'flex min-h-[48px] flex-1 items-center justify-center rounded-md px-2 py-3 text-[0.9375rem] font-medium whitespace-nowrap transition-colors';
+    'flex min-h-[56px] flex-1 flex-col items-center justify-center gap-1 rounded-md px-1 py-1.5 text-xs font-medium whitespace-nowrap transition-colors';
   return isActive
     ? `${base} bg-[var(--accent-soft)] font-semibold text-[var(--accent-strong)]`
     : `${base} text-[var(--text-muted)] hover:bg-[var(--surface)] hover:text-[var(--text)]`;
@@ -88,6 +89,7 @@ export function Layout() {
 
   const signOutButton = session ? (
     <button type="button" onClick={onSignOut} className="btn btn-secondary w-full">
+      <LogoutIcon size={18} />
       {t('header.logout')}
     </button>
   ) : null;
@@ -106,11 +108,15 @@ export function Layout() {
           </div>
         </div>
         <nav aria-label="primary" className="flex flex-col gap-0.5 px-3 py-3">
-          {NAV.map((item) => (
-            <NavLink key={item.to} to={item.to} end={item.end} className={sidebarLinkClass}>
-              {t(item.key)}
-            </NavLink>
-          ))}
+          {NAV.map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink key={item.to} to={item.to} end={item.end} className={sidebarLinkClass}>
+                <Icon size={20} />
+                {t(item.key)}
+              </NavLink>
+            );
+          })}
         </nav>
         <div className="mt-auto flex flex-col items-start gap-3 border-t border-[var(--sidebar-border)] p-4">
           {statusPill}
@@ -156,11 +162,15 @@ export function Layout() {
         className="bottom-nav fixed inset-x-0 bottom-0 z-10 border-t border-[var(--border)] bg-[var(--surface)] md:hidden"
       >
         <div className="flex gap-1 px-2 py-2">
-          {NAV.map((item) => (
-            <NavLink key={item.to} to={item.to} end={item.end} className={topLinkClass}>
-              {t(item.key)}
-            </NavLink>
-          ))}
+          {NAV.map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink key={item.to} to={item.to} end={item.end} className={topLinkClass}>
+                <Icon size={22} />
+                {t(item.key)}
+              </NavLink>
+            );
+          })}
         </div>
       </nav>
     </div>

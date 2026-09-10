@@ -539,6 +539,24 @@ details.advanced .advanced-body {
   padding-top: 1rem;
 }
 
+/* Search field with a leading icon. */
+.search-wrap {
+  position: relative;
+}
+
+.search-wrap > svg {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.search-wrap > input {
+  padding-left: 2.5rem;
+}
+
 /* Sticky save bar: above the mobile bottom nav, flush on desktop. */
 .form-cta {
   position: sticky;
