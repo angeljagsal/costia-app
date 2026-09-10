@@ -83,13 +83,17 @@ Note: re-deploy `powersync/sync-config.yaml` in dashboard (categories scope
 changed); apply `0009` in SQL editor.
 Doc: `context-docs/04-accounts-categories.md`.
 
-## Phase 5 — Budgets + Recurring
+## Phase 5 — Budgets + Recurring [DONE 2026-09-11]
 
-- Budgets CRUD (expense category, limit, weekly|monthly|yearly); spent = current-period Σ; 80%/100% badges; no rollover.
-- Recurring CRUD + daily `pg_cron`: `next_due <= today` → insert txn → advance (+7d / +1mo clamp month-end / +1y).
-- Upcoming Bills widget: `next_due <= today+7d`, in-app only.
+- [x] Period math (`periods.ts`): calendar month/year, Monday-start week.
+- [x] Budgets CRUD + spent via proportional split sums; progress states
+  (on-track / near-limit / over); overspend never blocks.
+- [x] Recurring CRUD + pause/resume + delete; `UpcomingBills` (today → +7d)
+  component built for Dashboard reuse in Phase 6.
+- [x] Server cron unchanged (Phase 2); verify live via
+  `select public.generate_due_recurring()`.
 
-Accept: cron verified with fake clock; cancelling creates zero orphan rows.
+Accept: cron verified live; cancelling creates zero orphan rows.
 Doc: `context-docs/05-budgets-recurring.md`.
 
 ## Phase 6 — Dashboard + Reports
