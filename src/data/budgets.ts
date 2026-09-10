@@ -15,6 +15,22 @@ export interface BudgetView extends BudgetRow {
   category_label: string | null;
 }
 
+export type BudgetState = 'onTrack' | 'nearLimit' | 'overLimit';
+
+export function budgetStateFor(spent: number, limit: number): BudgetState {
+  if (!(limit > 0)) return 'onTrack';
+  const ratio = spent / limit;
+  if (ratio >= 1) return 'overLimit';
+  if (ratio >= 0.8) return 'nearLimit';
+  return 'onTrack';
+}
+
+export function budgetBarColor(state: BudgetState): string {
+  if (state === 'overLimit') return 'var(--danger)';
+  if (state === 'nearLimit') return '#e8930c';
+  return 'var(--success)';
+}
+
 export function useBudgets(householdId: string | null): BudgetView[] {
   const { data } = useQuery<BudgetView>(
     `SELECT b.*, c.key AS category_key, c.label AS category_label

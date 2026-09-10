@@ -2,7 +2,8 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { usePowerSync } from '@powersync/react';
 import { Page } from '../components/Page';
-import { BudgetBar, budgetBarColor, budgetStateFor } from '../components/BudgetBar';
+import { BudgetBar } from '../components/BudgetBar';
+import { budgetBarColor, budgetStateFor } from '../data/budgets';
 import {
   createBudget,
   deleteBudget,
