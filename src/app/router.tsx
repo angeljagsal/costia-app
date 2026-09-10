@@ -1,10 +1,10 @@
-import { createBrowserRouter } from 'react-router';
+import { Navigate, createBrowserRouter } from 'react-router';
 import { Layout } from '../components/Layout';
 import { RequireAuth } from '../components/RequireAuth';
 import { Dashboard } from '../pages/Dashboard';
 import { Login } from '../pages/Login';
 import { NotFound } from '../pages/NotFound';
-import { Reports } from '../pages/Reports';
+import { More } from '../pages/More';
 import { Budgets } from '../pages/Budgets';
 import { Recurring } from '../pages/Recurring';
 import { Accounts } from '../pages/Accounts';
@@ -31,7 +31,8 @@ export const router = createBrowserRouter([
       { path: 'categories', element: <Categories /> },
       { path: 'budgets', element: <Budgets /> },
       { path: 'recurring', element: <Recurring /> },
-      { path: 'reports', element: <Reports /> },
+      { path: 'reports', element: <Navigate to="/" replace /> },
+      { path: 'more', element: <More /> },
       { path: 'settings', element: <Settings /> },
     ],
   },

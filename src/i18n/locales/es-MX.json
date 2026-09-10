@@ -4,14 +4,14 @@
     "tagline": "Control de gastos sin conexión"
   },
   "nav": {
-    "dashboard": "Panel",
+    "dashboard": "Inicio",
     "transactions": "Movimientos",
     "accounts": "Cuentas",
     "categories": "Categorías",
     "budgets": "Presupuestos",
     "recurring": "Recurrentes",
-    "reports": "Reportes",
-    "settings": "Ajustes"
+    "settings": "Ajustes",
+    "more": "Más"
   },
   "categories": {
     "food_dining": "Comida y restaurantes",
@@ -88,15 +88,28 @@
     "backendMissing": "Supabase no configurado"
   },
   "dashboard": {
-    "title": "Panel",
+    "title": "Inicio",
     "welcome": "Tu dinero de un vistazo.",
+    "totalBalance": "Saldo total",
+    "newExpense": "Nuevo gasto",
+    "newIncome": "Nuevo ingreso",
+    "thisMonth": "Este mes",
     "budgetOverview": "Presupuestos",
     "recentTx": "Movimientos recientes",
     "viewAll": "Ver todos",
     "categoryBreakdown": "Gasto por categoría",
     "trend": "Ingresos vs gastos",
     "balances": "Saldos",
+    "balanceHistory": "Historial de saldo",
     "noData": "Aún no hay datos — agrega tus primeros movimientos."
+  },
+  "more": {
+    "title": "Más",
+    "subtitle": "Administra cuentas, categorías, reglas y ajustes.",
+    "accountsBody": "Banco, efectivo, crédito y billeteras.",
+    "categoriesBody": "Categorías de gasto e ingreso.",
+    "recurringBody": "Reglas automáticas y próximos cobros.",
+    "settingsBody": "Idioma, tema, moneda y backend."
   },
   "reports": {
     "title": "Reportes",

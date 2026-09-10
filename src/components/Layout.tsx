@@ -6,12 +6,8 @@ import { useSync } from '../sync/useSync';
 const NAV = [
   { to: '/', key: 'nav.dashboard', end: true },
   { to: '/transactions', key: 'nav.transactions', end: false },
-  { to: '/accounts', key: 'nav.accounts', end: false },
-  { to: '/categories', key: 'nav.categories', end: false },
   { to: '/budgets', key: 'nav.budgets', end: false },
-  { to: '/recurring', key: 'nav.recurring', end: false },
-  { to: '/reports', key: 'nav.reports', end: false },
-  { to: '/settings', key: 'nav.settings', end: false },
+  { to: '/more', key: 'nav.more', end: false }
 ] as const;
 
 function sidebarLinkClass({ isActive }: { isActive: boolean }) {

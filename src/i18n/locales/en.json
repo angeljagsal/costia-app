@@ -4,14 +4,14 @@
     "tagline": "Offline-first expense tracker"
   },
   "nav": {
-    "dashboard": "Dashboard",
-    "transactions": "Transactions",
+    "dashboard": "Home",
+    "transactions": "Activity",
     "accounts": "Accounts",
     "categories": "Categories",
     "budgets": "Budgets",
     "recurring": "Recurring",
-    "reports": "Reports",
-    "settings": "Settings"
+    "settings": "Settings",
+    "more": "More"
   },
   "categories": {
     "food_dining": "Food & Dining",
@@ -88,15 +88,28 @@
     "backendMissing": "Supabase not configured"
   },
   "dashboard": {
-    "title": "Dashboard",
+    "title": "Home",
     "welcome": "Your money at a glance.",
+    "totalBalance": "Total balance",
+    "newExpense": "New expense",
+    "newIncome": "New income",
+    "thisMonth": "This month",
     "budgetOverview": "Budget overview",
     "recentTx": "Recent transactions",
     "viewAll": "View all",
     "categoryBreakdown": "Spending by category",
     "trend": "Income vs expenses",
     "balances": "Balances",
+    "balanceHistory": "Balance history",
     "noData": "Not enough data yet — add your first transactions."
+  },
+  "more": {
+    "title": "More",
+    "subtitle": "Manage your accounts, categories, rules, and settings.",
+    "accountsBody": "Bank, cash, credit, wallets and investments.",
+    "categoriesBody": "Expense and income categories.",
+    "recurringBody": "Automatic rules and upcoming bills.",
+    "settingsBody": "Language, theme, currency, and backend."
   },
   "reports": {
     "title": "Reports",
