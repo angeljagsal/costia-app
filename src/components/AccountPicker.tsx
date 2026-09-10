@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { accountTypeLabel } from '../data/accounts';
 import type { Account } from '../data/types';
 import { useI18n } from '../i18n/useI18n';
 import { formatMoney } from '../lib/format';
 
-/** Account list with live balances, single-select radio rows. */
+/** Account list with live balances, single-select radio rows.
+ *  Long lists collapse to the first few with a show-all expander. */
 export function AccountPicker({
   accounts,
   balanceOf,
@@ -11,6 +13,7 @@ export function AccountPicker({
   value,
   onChange,
   label,
+  initialVisible = 4,
 }: {
   accounts: Account[];
   balanceOf: (id: string) => number;
@@ -18,13 +21,18 @@ export function AccountPicker({
   value: string;
   onChange: (id: string) => void;
   label: string;
+  initialVisible?: number;
 }) {
   const { t, locale } = useI18n();
+  const [expanded, setExpanded] = useState(false);
+  const visible = expanded
+    ? accounts
+    : accounts.filter((a, i) => i < initialVisible || a.id === value);
   return (
     <div role="radiogroup" aria-label={label} className="flex flex-col gap-2">
       <p className="form-section-title">{label}</p>
-      <div className="flex flex-col gap-2">
-        {accounts.map((a) => {
+      <div className={`flex flex-col gap-2 ${expanded ? 'max-h-72 overflow-y-auto pr-1' : ''}`}>
+        {visible.map((a) => {
           const selected = value === a.id;
           return (
             <button
@@ -49,6 +57,16 @@ export function AccountPicker({
           );
         })}
       </div>
+      {accounts.length > initialVisible ? (
+        <button
+          type="button"
+          className="btn btn-secondary self-start"
+          onClick={() => setExpanded((e) => !e)}
+          aria-expanded={expanded}
+        >
+          {expanded ? t('common.showLess') : `${t('common.showAll')} (${accounts.length})`}
+        </button>
+      ) : null}
     </div>
   );
 }

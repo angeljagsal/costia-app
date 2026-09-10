@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { categoryName } from '../data/categories';
 import type { Category } from '../data/types';
 import { useI18n } from '../i18n/useI18n';
@@ -25,24 +26,32 @@ function initialOf(name: string): string {
   return clean ? clean[0]!.toUpperCase() : '?';
 }
 
-/** Visual category grid: big tap targets with letter avatars, single-select. */
+/** Visual category grid: big tap targets with letter avatars, single-select.
+ *  Long lists collapse to the first few with a show-all expander. */
 export function CategoryGrid({
   categories,
   value,
   onChange,
   label,
+  initialVisible = 6,
 }: {
   categories: Category[];
   value: string;
   onChange: (id: string) => void;
   label: string;
+  initialVisible?: number;
 }) {
   const { t } = useI18n();
+  const [expanded, setExpanded] = useState(false);
+  // Always keep the selected item visible, even when collapsed.
+  const visible = expanded
+    ? categories
+    : categories.filter((c, i) => i < initialVisible || c.id === value);
   return (
     <div role="group" aria-label={label} className="flex flex-col gap-2">
       <p className="form-section-title">{label}</p>
-      <div className="option-grid">
-        {categories.map((c) => {
+      <div className={`option-grid ${expanded ? 'max-h-72 overflow-y-auto pr-1' : ''}`}>
+        {visible.map((c) => {
           const name = categoryName(t, c);
           const selected = value === c.id;
           return (
@@ -70,6 +79,16 @@ export function CategoryGrid({
           );
         })}
       </div>
+      {categories.length > initialVisible ? (
+        <button
+          type="button"
+          className="btn btn-secondary self-start"
+          onClick={() => setExpanded((e) => !e)}
+          aria-expanded={expanded}
+        >
+          {expanded ? t('common.showLess') : `${t('common.showAll')} (${categories.length})`}
+        </button>
+      ) : null}
     </div>
   );
 }

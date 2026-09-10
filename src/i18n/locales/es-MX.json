@@ -201,7 +201,9 @@
     "loadMore": "Cargar más",
     "search": "Buscar",
     "clear": "Limpiar",
-    "all": "Todos"
+    "all": "Todos",
+    "showAll": "Ver todo",
+    "showLess": "Ver menos"
   },
   "tx": {
     "title": "Movimientos",

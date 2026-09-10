@@ -201,7 +201,9 @@
     "loadMore": "Load more",
     "search": "Search",
     "clear": "Clear",
-    "all": "All"
+    "all": "All",
+    "showAll": "Show all",
+    "showLess": "Show less"
   },
   "tx": {
     "title": "Transactions",
