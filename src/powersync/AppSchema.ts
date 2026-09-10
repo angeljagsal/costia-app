@@ -32,11 +32,16 @@ const accounts = new Table(
   { indexes: { household: ['household_id'] } }
 );
 
-const categories = new Table({
-  key: column.text,
-  kind: column.text,
-  sort: column.integer,
-});
+const categories = new Table(
+  {
+    key: column.text,
+    kind: column.text,
+    sort: column.integer,
+    household_id: column.text,
+    label: column.text
+  },
+  { indexes: { household: ['household_id'] } }
+);
 
 const transactions = new Table(
   {

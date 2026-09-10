@@ -13,9 +13,13 @@ export interface Account {
 
 export interface Category {
   id: string;
-  key: string;
+  /** Catalog key (global rows) — resolves via `categories.<key>` dict. */
+  key: string | null;
   kind: Kind;
   sort: number;
+  household_id: string | null;
+  /** Free-text name (custom household rows). */
+  label: string | null;
 }
 
 export interface Tag {
@@ -49,7 +53,8 @@ export interface SplitRow {
 /** Transaction joined with display names for lists. */
 export interface TransactionView extends TransactionRow {
   account_name: string;
-  category_key: string;
+  category_key: string | null;
+  category_label: string | null;
 }
 
 export interface SplitInput {

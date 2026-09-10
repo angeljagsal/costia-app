@@ -51,7 +51,7 @@ export function Transactions() {
   const visible = rows.slice(0, limit);
   const hasMore = rows.length > limit;
 
-  const categories = useCategories();
+  const categories = useCategories(undefined, householdId);
   const accounts = useAccounts(householdId);
   const tags = useTags(householdId);
   const baseCurrency = loadBaseCurrency();
@@ -87,7 +87,7 @@ export function Transactions() {
               <option value="">{t('common.all')}</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {categoryName(t, c.key)}
+                  {categoryName(t, c)}
                 </option>
               ))}
             </select>
@@ -164,7 +164,7 @@ export function Transactions() {
               <li key={row.id} className="card flex items-center gap-3">
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold">
-                    {categoryName(t, row.category_key)}
+                    {categoryName(t, { key: row.category_key, label: row.category_label })}
                     <span className="hint font-normal"> · {row.account_name}</span>
                   </p>
                   <p className="hint">
@@ -192,7 +192,7 @@ export function Transactions() {
                     type="button"
                     className="btn btn-danger"
                     onClick={() => onDelete(row.id)}
-                    aria-label={`${t('common.delete')}: ${categoryName(t, row.category_key)}`}
+                    aria-label={`${t('common.delete')}: ${categoryName(t, { key: row.category_key, label: row.category_label })}`}
                   >
                     {t('common.delete')}
                   </button>

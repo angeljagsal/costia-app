@@ -21,5 +21,5 @@ streams:
   catalog_data:
     auto_subscribe: true
     queries:
-      - SELECT * FROM categories
+      - SELECT * FROM categories WHERE household_id IS NULL OR household_id IN (SELECT household_id FROM users WHERE id = auth.user_id())
       - SELECT * FROM exchange_rates

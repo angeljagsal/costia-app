@@ -112,7 +112,7 @@ function TransactionFormInner({
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const categories = useCategories(kind);
+  const categories = useCategories(kind, householdId);
   const accounts = useAccounts(householdId);
   const tags = useTags(householdId);
 
@@ -236,7 +236,7 @@ function TransactionFormInner({
             <option value="">{t('tx.category')}</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
-                {categoryName(t, c.key)}
+                {categoryName(t, c)}
               </option>
             ))}
           </select>
@@ -299,7 +299,7 @@ function TransactionFormInner({
                 <option value="">—</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {categoryName(t, c.key)}
+                    {categoryName(t, c)}
                   </option>
                 ))}
               </select>

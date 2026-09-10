@@ -185,7 +185,7 @@ export function useTransactions(
     clauses.push('t.txn_date <= ?');
     params.push(f.to);
   }
-  const sql = `SELECT t.*, a.name AS account_name, c.key AS category_key
+  const sql = `SELECT t.*, a.name AS account_name, c.key AS category_key, c.label AS category_label
     FROM transactions t
     JOIN accounts a ON a.id = t.account_id
     JOIN categories c ON c.id = t.category_id
