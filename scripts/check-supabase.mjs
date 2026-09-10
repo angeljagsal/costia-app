@@ -8,16 +8,27 @@ import { readFileSync } from 'node:fs';
 function loadEnv(path) {
   const out = {};
   for (const rawLine of readFileSync(path, 'utf8').split('\n')) {
-    let line = rawLine.trim().replace(/^\uFEFF/, '');
+    const line = rawLine.trim().replace(/^\uFEFF/, '');
     if (!line || line.startsWith('#') || !line.includes('=')) continue;
-    if (line.toLowerCase().startsWith('export ')) line = line.slice(7).trim();
-    // Tolerate the whole line wrapped in quotes.
-    if (line.length >= 2 && line.startsWith('"') && line.endsWith('"')) {
-      line = line.slice(1, -1);
+    // NOTE: no tolerance for `export ` prefixes or duplicated KEY= prefixes here.
+    // Vite/dotenv does not understand them, so silently accepting them would
+    // report OK while the browser receives garbage. Fail loudly instead.
+    if (/^export\s+/i.test(line)) {
+      console.error(
+        `FAIL: .env line uses an 'export ' prefix, which Vite does not support:\n` +
+          `  ${line.slice(0, 60)}\n` +
+          `  Fix: remove 'export ', leaving just KEY=value.`
+      );
+      process.exit(2);
     }
-    const idx = line.indexOf('=');
-    const key = line.slice(0, idx).trim();
-    let value = line.slice(idx + 1).trim();
+    // Tolerate the whole line wrapped in quotes.
+    let clean = line;
+    if (clean.length >= 2 && clean.startsWith('"') && clean.endsWith('"')) {
+      clean = clean.slice(1, -1);
+    }
+    const idx = clean.indexOf('=');
+    const key = clean.slice(0, idx).trim();
+    let value = clean.slice(idx + 1).trim();
     if (
       value.length >= 2 &&
       ((value.startsWith('"') && value.endsWith('"')) ||
@@ -25,8 +36,15 @@ function loadEnv(path) {
     ) {
       value = value.slice(1, -1).trim();
     }
-    // Tolerate a duplicated KEY= prefix: KEY=KEY=value.
-    if (value.startsWith(`${key}=`)) value = value.slice(key.length + 1);
+    if (value.startsWith(`${key}=`)) {
+      console.error(
+        `FAIL: ${key} has the key name duplicated inside its own value.\n` +
+          `  The line should read exactly: ${key}=<value> with nothing repeated.\n` +
+          `  (Vite keeps everything after the first '=' literally, so the app\n` +
+          `  receives "${key}=..." as the value and rejects it.)`
+      );
+      process.exit(2);
+    }
     out[key] = value;
   }
   return out;
