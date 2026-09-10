@@ -12,11 +12,10 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { BudgetBar } from '../components/BudgetBar';
+import { BudgetProgressRow } from '../components/BudgetProgress';
 import { UpcomingBills } from '../components/UpcomingBills';
 import { accountTypeLabel, useAccountBalances, useAccounts } from '../data/accounts';
-import { useBudgetSpent, useBudgets } from '../data/budgets';
-import type { BudgetView } from '../data/budgets';
+import { useBudgets } from '../data/budgets';
 import { categoryName } from '../data/categories';
 import { useHouseholdId } from '../data/household';
 import {
@@ -55,26 +54,6 @@ const tooltipStyle = {
   color: 'var(--text)',
 };
 
-function MiniBudgetRow({ budget }: { budget: BudgetView }) {
-  const { t, locale } = useI18n();
-  const householdId = useHouseholdId();
-  const baseCurrency = loadBaseCurrency();
-  const range = getPeriodRange(budget.period, todayLocal());
-  const spent = useBudgetSpent(householdId, budget.category_id, range.from, range.to);
-  return (
-    <div className="flex flex-col gap-1">
-      <div className="flex items-baseline justify-between gap-2 text-sm">
-        <span className="truncate font-medium">{categoryName(t, budget)}</span>
-        <span className="hint shrink-0">
-          {formatMoney(locale, spent, baseCurrency)} /{' '}
-          {formatMoney(locale, budget.limit_amount, baseCurrency)}
-        </span>
-      </div>
-      <BudgetBar spent={spent} limit={budget.limit_amount} label={categoryName(t, budget)} />
-    </div>
-  );
-}
-
 function BudgetOverview() {
   const { t } = useI18n();
   const householdId = useHouseholdId();
@@ -93,7 +72,7 @@ function BudgetOverview() {
       {budgets.length === 0 ? (
         <p className="hint">{t('budgets.empty')}</p>
       ) : (
-        budgets.map((b) => <MiniBudgetRow key={b.id} budget={b} />)
+        budgets.map((b) => <BudgetProgressRow key={b.id} budget={b} />)
       )}
     </section>
   );

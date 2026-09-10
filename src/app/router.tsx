@@ -4,7 +4,7 @@ import { RequireAuth } from '../components/RequireAuth';
 import { Dashboard } from '../pages/Dashboard';
 import { Login } from '../pages/Login';
 import { NotFound } from '../pages/NotFound';
-import { Reports } from '../pages/Sections';
+import { Reports } from '../pages/Reports';
 import { Budgets } from '../pages/Budgets';
 import { Recurring } from '../pages/Recurring';
 import { Accounts } from '../pages/Accounts';
