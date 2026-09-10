@@ -6,7 +6,7 @@ const LINKS = [
   { to: '/accounts', key: 'nav.accounts', body: 'more.accountsBody' },
   { to: '/categories', key: 'nav.categories', body: 'more.categoriesBody' },
   { to: '/recurring', key: 'nav.recurring', body: 'more.recurringBody' },
-  { to: '/settings', key: 'nav.settings', body: 'more.settingsBody' }
+  { to: '/settings', key: 'nav.settings', body: 'more.settingsBody' },
 ] as const;
 
 /** Second-level sections live here so the main nav stays at four items. */

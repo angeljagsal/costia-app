@@ -7,7 +7,7 @@ const NAV = [
   { to: '/', key: 'nav.dashboard', end: true },
   { to: '/transactions', key: 'nav.transactions', end: false },
   { to: '/budgets', key: 'nav.budgets', end: false },
-  { to: '/more', key: 'nav.more', end: false }
+  { to: '/more', key: 'nav.more', end: false },
 ] as const;
 
 function sidebarLinkClass({ isActive }: { isActive: boolean }) {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { Link, useNavigate, useParams } from 'react-router';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import { usePowerSync } from '@powersync/react';
 import { useAccounts } from '../data/accounts';
 import { categoryName, useCategories } from '../data/categories';
@@ -56,6 +56,7 @@ function toRow(categoryId: string, amount: number): SplitRow {
 export function TransactionForm({ mode }: { mode: 'new' | 'edit' }) {
   const { t } = useI18n();
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const existing = useTransaction(mode === 'edit' ? id : undefined);
 
   if (mode === 'edit' && !existing.tx) {
@@ -71,8 +72,10 @@ export function TransactionForm({ mode }: { mode: 'new' | 'edit' }) {
   }
 
   const tx = existing.tx;
+  // Dashboard quick actions link here with ?kind=income to pre-select it.
+  const kindParam = searchParams.get('kind') === 'income' ? 'income' : 'expense';
   const initial: Initial = {
-    kind: (tx?.kind as Kind | undefined) ?? 'expense',
+    kind: (tx?.kind as Kind | undefined) ?? kindParam,
     amount: tx ? String(tx.amount) : '',
     currency: (tx?.currency as Currency | undefined) ?? 'MXN',
     categoryId: tx?.category_id ?? '',
