@@ -8,9 +8,11 @@ Offline-first personal finance app (Windows + Android). See `context-docs/` for 
 
 ## Status
 
-Phase 1 done: installable PWA shell with routing, magic-link auth wiring,
-en/es-MX, system+manual theme (`lint`, `typecheck`, `build` green, preview smoke-tested).
-Next: Phase 2 data layer — needs Supabase project (see `context-docs/01-shell-auth-i18n.md`).
+Phase 2 done: offline-first data layer — Supabase schema + RLS + cron,
+PowerSync Sync Streams deployed, live connector + local SQLite in the app
+(`lint`, `typecheck`, `build` green).
+Next: Phase 3 transactions core — or your live sync test first
+(see `context-docs/02-data-sync.md`).
 
 ## Quickstart
 

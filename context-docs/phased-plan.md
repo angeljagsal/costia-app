@@ -35,17 +35,21 @@ Accept: installs on Windows + Pixel 9 Pro XL, no cutoff, Lighthouse PWA basic pa
 Note 2026-09-10: shell + build verified locally; device install + Lighthouse + live login need Supabase project + Pages deploy (your steps in `01-shell-auth-i18n.md`).
 Doc: `context-docs/01-shell-auth-i18n.md`.
 
-## Phase 2 — Data layer + offline sync
+## Phase 2 — Data layer + offline sync [DONE 2026-09-10, live test pending]
 
 Goal: offline-first persistence working.
 
-- Postgres migrations for all tables in `architecture.md` §3 + RLS by `household_id`.
-- PowerSync sync rules + local SQLite schema mirror.
-- Repository pattern per entity: read local, write local + outbox, background sync, last-write-wins.
-- Seed default categories bilingual (9 expense + 3 income) on first run.
-- `exchange_rates` table + daily Frankfurter fetch via `pg_cron`.
+- [x] Postgres migrations 0001–0008 (schema, seeds, trigger, RLS, cron jobs, API grants, sync ids).
+- [x] PowerSync Sync Streams + local SQLite schema mirror (`src/powersync/`).
+- [x] Connector: download via instance, upload via Data API (fatal vs retryable split).
+- [x] Live SyncProvider (`online/engine/connected/hasSynced/syncError`) + header pill.
+- [x] Category seeds (12, keyed) + bilingual dicts; `exchange_rates` + daily Frankfurter job.
+- [x] FX freeze helper (`toBaseAmount`); repositories land with Phase 3 forms.
+- [ ] Live test: sign in with `VITE_POWERSYNC_URL` set → pill Synced → 12 categories in IndexedDB.
 
 Accept: airplane-mode CRUD, reconnect syncs, `base_amount` never recomputed on read (unit-tested).
+Note 2026-09-10: code verified (lint/typecheck/build green); end-to-end download
+check needs your live test in `02-data-sync.md`. Full CRUD workout in Phase 3.
 Doc: `context-docs/02-data-sync.md` + `supabase/migrations/*`.
 
 ## Phase 3 — Transactions core
