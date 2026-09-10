@@ -8,7 +8,7 @@ const NAV = [
   { to: '/', key: 'nav.dashboard', end: true, icon: HomeIcon },
   { to: '/transactions', key: 'nav.transactions', end: false, icon: ActivityIcon },
   { to: '/budgets', key: 'nav.budgets', end: false, icon: BudgetIcon },
-  { to: '/more', key: 'nav.more', end: false, icon: MoreIcon }
+  { to: '/more', key: 'nav.more', end: false, icon: MoreIcon },
 ] as const;
 
 /** GitLab-style light sidebar link: blue pill when active. */
