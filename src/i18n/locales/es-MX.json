@@ -89,7 +89,34 @@
   },
   "dashboard": {
     "title": "Panel",
-    "welcome": "Tu dinero de un vistazo. Los widgets (presupuestos, gráficas, recurrentes, saldos) llegan en la Fase 6."
+    "welcome": "Tu dinero de un vistazo.",
+    "budgetOverview": "Presupuestos",
+    "recentTx": "Movimientos recientes",
+    "viewAll": "Ver todos",
+    "categoryBreakdown": "Gasto por categoría",
+    "trend": "Ingresos vs gastos",
+    "balances": "Saldos",
+    "noData": "Aún no hay datos — agrega tus primeros movimientos."
+  },
+  "reports": {
+    "title": "Reportes",
+    "subtitle": "Explora tu dinero en cualquier periodo.",
+    "presetMonth": "Este mes",
+    "presetQuarter": "Últimos 3 meses",
+    "presetHalf": "Últimos 6 meses",
+    "presetYear": "Este año",
+    "custom": "Personalizado",
+    "from": "Desde",
+    "to": "Hasta",
+    "totals": "Totales",
+    "income": "Ingresos",
+    "expenses": "Gastos",
+    "net": "Neto",
+    "byCategory": "Por categoría",
+    "trend": "Tendencia mensual",
+    "balanceHistory": "Historial de saldo",
+    "budgetVsActual": "Presupuestos vs real",
+    "empty": "Sin movimientos en este periodo."
   },
   "pages": {
     "transactions": {

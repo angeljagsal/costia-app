@@ -89,7 +89,34 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "welcome": "Your money at a glance. Widgets (budgets, charts, bills, balances) land in Phase 6."
+    "welcome": "Your money at a glance.",
+    "budgetOverview": "Budget overview",
+    "recentTx": "Recent transactions",
+    "viewAll": "View all",
+    "categoryBreakdown": "Spending by category",
+    "trend": "Income vs expenses",
+    "balances": "Balances",
+    "noData": "Not enough data yet — add your first transactions."
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Explore your money across any period.",
+    "presetMonth": "This month",
+    "presetQuarter": "Last 3 months",
+    "presetHalf": "Last 6 months",
+    "presetYear": "This year",
+    "custom": "Custom",
+    "from": "From",
+    "to": "To",
+    "totals": "Totals",
+    "income": "Income",
+    "expenses": "Expenses",
+    "net": "Net",
+    "byCategory": "By category",
+    "trend": "Monthly trend",
+    "balanceHistory": "Balance history",
+    "budgetVsActual": "Budgets vs actual",
+    "empty": "No transactions in this period."
   },
   "pages": {
     "transactions": {
