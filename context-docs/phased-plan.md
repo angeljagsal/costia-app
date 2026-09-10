@@ -96,13 +96,16 @@ Doc: `context-docs/04-accounts-categories.md`.
 Accept: cron verified live; cancelling creates zero orphan rows.
 Doc: `context-docs/05-budgets-recurring.md`.
 
-## Phase 6 — Dashboard + Reports
+## Phase 6 — Dashboard + Reports [DONE 2026-09-11]
 
-- Dashboard: budget overview (month), recent 10, category pie, income-vs-expense trend, upcoming bills, balances by type.
-- Reports: monthly totals/trends, category breakdown, budget vs actual, balance history, custom range. All from local SQLite, base currency.
-- Charts: Recharts, responsive + tooltips, empty states.
+- [x] Dashboard: budget overview, recent 10, category pie (month), 6-month
+  income-vs-expense bars, upcoming bills reuse, balances by type + total.
+- [x] Reports: presets + custom range, totals, category bars, monthly trend,
+  cumulative balance history, budgets vs actual. All local SQLite, base currency.
+- [x] Recharts with theme-aware tooltips/ticks; shared `format.ts` + `BudgetProgress`.
 
 Accept: all widgets + 5 report views render offline with seeded data.
+Note: main bundle grew +450 KB with recharts (gzip +130 KB) — code-split in Phase 7.
 Doc: `context-docs/06-dashboard-reports.md`.
 
 ## Phase 7 — PWA polish + a11y + perf

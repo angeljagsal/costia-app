@@ -8,10 +8,10 @@ Offline-first personal finance app (Windows + Android). See `context-docs/` for 
 
 ## Status
 
-Phase 5 done: budgets with progress tracking and recurring rules with
-upcoming bills, on Monday-start period math (`lint`, `typecheck`, `build` green).
-Next: Phase 6 dashboard & reports (see `context-docs/05-budgets-recurring.md`
-for the one cron observation test).
+Phase 6 done: dashboard (6 widgets) and reports (ranges, breakdowns, trends,
+balance history) on Recharts (`lint`, `typecheck`, `build` green).
+Next: Phase 7 PWA polish, accessibility, and performance (see
+`context-docs/06-dashboard-reports.md` for data checks + the code-splitting note).
 
 ## Quickstart
 
