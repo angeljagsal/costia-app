@@ -42,8 +42,21 @@ try {
 
 const url = env.VITE_SUPABASE_URL;
 const key = env.VITE_SUPABASE_ANON_KEY;
+const powersyncUrl = env.VITE_POWERSYNC_URL;
+const bypass = env.VITE_DEV_AUTH_BYPASS;
+
+// Preflight: names and shapes only — values are never printed.
+console.log('--- .env preflight (names/shapes only, no secrets) ---');
+for (const name of ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY', 'VITE_POWERSYNC_URL']) {
+  const v = env[name];
+  console.log(`${v ? 'present' : 'MISSING'}: ${name}${v ? ` (${v.length} chars)` : ''}`);
+}
+console.log(`VITE_DEV_AUTH_BYPASS=${bypass ?? '(unset)'}`);
 if (!url || !key) {
-  console.error('FAIL: VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY missing in .env.');
+  console.error(
+    'FAIL: VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY missing in .env.\n' +
+      '  If the file exists, check for typos in the variable names.'
+  );
   process.exit(2);
 }
 
@@ -88,4 +101,18 @@ if (!health.ok) {
   process.exit(1);
 }
 console.log('OK: reachable, Auth responding. (No session is expected — sign in via the UI.)');
+if (powersyncUrl) {
+  try {
+    const psu = new URL(powersyncUrl);
+    if (psu.protocol !== 'https:' || (psu.pathname !== '/' && psu.pathname !== '')) {
+      console.error('WARN: VITE_POWERSYNC_URL looks malformed — sync will stay local-only.');
+    } else {
+      console.log(`sync endpoint: ${psu.host}`);
+    }
+  } catch {
+    console.error('WARN: VITE_POWERSYNC_URL is not a valid URL — sync will stay local-only.');
+  }
+} else {
+  console.log('NOTE: VITE_POWERSYNC_URL unset — sync stays local-only until you add it.');
+}
 process.exit(0);
