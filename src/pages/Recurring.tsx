@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { usePowerSync } from '@powersync/react';
 import { Page } from '../components/Page';
+import { CheckIcon, PencilIcon, PlusIcon, TrashIcon } from '../components/icons';
 import { UpcomingBills } from '../components/UpcomingBills';
 import { useAccounts } from '../data/accounts';
 import { categoryName, useCategories } from '../data/categories';
@@ -226,7 +227,19 @@ export function Recurring() {
             ) : null}
             <div className="flex gap-2">
               <button type="submit" disabled={saving} className="btn btn-primary">
-                {saving ? t('common.saving') : editingId ? t('common.save') : t('recurring.create')}
+                {saving ? (
+                  t('common.saving')
+                ) : editingId ? (
+                  <>
+                    <CheckIcon size={16} />
+                    {t('common.save')}
+                  </>
+                ) : (
+                  <>
+                    <PlusIcon size={18} />
+                    {t('recurring.create')}
+                  </>
+                )}
               </button>
               {editingId ? (
                 <button
@@ -274,6 +287,7 @@ export function Recurring() {
                       {r.is_active ? t('recurring.pause') : t('recurring.resume')}
                     </button>
                     <button type="button" className="btn btn-secondary" onClick={() => onEdit(r)}>
+                      <PencilIcon size={16} />
                       {t('tx.edit')}
                     </button>
                     <button
@@ -282,6 +296,7 @@ export function Recurring() {
                       onClick={() => onDelete(r.id)}
                       aria-label={`${t('common.delete')}: ${categoryName(t, r)}`}
                     >
+                      <TrashIcon size={16} />
                       {t('common.delete')}
                     </button>
                   </div>

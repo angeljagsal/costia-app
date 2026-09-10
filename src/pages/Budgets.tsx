@@ -3,6 +3,7 @@ import type { FormEvent } from 'react';
 import { usePowerSync } from '@powersync/react';
 import { Page } from '../components/Page';
 import { BudgetBar } from '../components/BudgetBar';
+import { PencilIcon, PlusIcon, TrashIcon } from '../components/icons';
 import { budgetBarColor, budgetStateFor } from '../data/budgets';
 import {
   createBudget,
@@ -114,6 +115,7 @@ function BudgetCard({ budget }: { budget: BudgetView }) {
       ) : (
         <div className="flex gap-2">
           <button type="button" className="btn btn-secondary" onClick={() => setEditing(true)}>
+            <PencilIcon size={16} />
             {t('budgets.limit')}
           </button>
           <button
@@ -122,6 +124,7 @@ function BudgetCard({ budget }: { budget: BudgetView }) {
             onClick={onDelete}
             aria-label={`${t('common.delete')}: ${categoryName(t, budget)}`}
           >
+            <TrashIcon size={16} />
             {t('common.delete')}
           </button>
         </div>
@@ -225,7 +228,14 @@ export function Budgets() {
               </p>
             ) : null}
             <button type="submit" disabled={saving} className="btn btn-primary self-start">
-              {saving ? t('common.saving') : t('budgets.create')}
+              {saving ? (
+                t('common.saving')
+              ) : (
+                <>
+                  <PlusIcon size={18} />
+                  {t('budgets.create')}
+                </>
+              )}
             </button>
           </form>
 
