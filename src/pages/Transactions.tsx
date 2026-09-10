@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import { usePowerSync } from '@powersync/react';
 import { Page } from '../components/Page';
+import { PencilIcon, PlusIcon, SearchIcon, TrashIcon } from '../components/icons';
 import { useAccounts } from '../data/accounts';
 import { categoryName, useCategories } from '../data/categories';
 import { useHouseholdId } from '../data/household';
@@ -64,18 +65,22 @@ export function Transactions() {
   return (
     <Page title={t('tx.title')} body={t('tx.subtitle')} placeholder={false}>
       <Link to="/transactions/new" className="btn btn-primary self-start">
+        <PlusIcon size={18} />
         {t('tx.new')}
       </Link>
 
       <div className="card flex flex-col gap-3">
-        <input
-          className="input"
-          value={filters.search}
-          onChange={(e) => patch({ search: e.target.value })}
-          placeholder={t('tx.searchPlaceholder')}
-          aria-label={t('common.search')}
-          type="search"
-        />
+        <div className="search-wrap">
+          <SearchIcon size={18} />
+          <input
+            className="input"
+            value={filters.search}
+            onChange={(e) => patch({ search: e.target.value })}
+            placeholder={t('tx.searchPlaceholder')}
+            aria-label={t('common.search')}
+            type="search"
+          />
+        </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label className="label">
             {t('tx.filterCategory')}
@@ -186,6 +191,7 @@ export function Transactions() {
                     className="btn btn-secondary"
                     aria-label={t('tx.edit')}
                   >
+                    <PencilIcon size={16} />
                     {t('tx.edit')}
                   </Link>
                   <button
@@ -194,6 +200,7 @@ export function Transactions() {
                     onClick={() => onDelete(row.id)}
                     aria-label={`${t('common.delete')}: ${categoryName(t, { key: row.category_key, label: row.category_label })}`}
                   >
+                    <TrashIcon size={16} />
                     {t('common.delete')}
                   </button>
                 </div>
