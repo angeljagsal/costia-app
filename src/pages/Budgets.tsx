@@ -2,7 +2,13 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { usePowerSync } from '@powersync/react';
 import { Page } from '../components/Page';
-import { createBudget, deleteBudget, updateBudgetLimit, useBudgetSpent, useBudgets } from '../data/budgets';
+import {
+  createBudget,
+  deleteBudget,
+  updateBudgetLimit,
+  useBudgetSpent,
+  useBudgets,
+} from '../data/budgets';
 import type { BudgetView } from '../data/budgets';
 import { categoryName, useCategories } from '../data/categories';
 import { useHouseholdId } from '../data/household';
@@ -37,7 +43,8 @@ function BudgetCard({ budget }: { budget: BudgetView }) {
   const ratio = budget.limit_amount > 0 ? spent / budget.limit_amount : 0;
   const pct = Math.min(100, Math.round(ratio * 100));
   const state = ratio >= 1 ? 'overLimit' : ratio >= 0.8 ? 'nearLimit' : 'onTrack';
-  const barColor = state === 'overLimit' ? 'var(--danger)' : state === 'nearLimit' ? '#e8930c' : 'var(--success)';
+  const barColor =
+    state === 'overLimit' ? 'var(--danger)' : state === 'nearLimit' ? '#e8930c' : 'var(--success)';
 
   const showError = (e: unknown) => {
     const msg = e instanceof Error ? e.message : String(e);
@@ -65,7 +72,8 @@ function BudgetCard({ budget }: { budget: BudgetView }) {
         <div className="min-w-0 flex-1">
           <p className="font-semibold">{categoryName(t, budget)}</p>
           <p className="hint">
-            {t(`budgets.${budget.period}`)} · {t('budgets.spent')} {money(locale, spent, baseCurrency)} /{' '}
+            {t(`budgets.${budget.period}`)} · {t('budgets.spent')}{' '}
+            {money(locale, spent, baseCurrency)} /{' '}
             {money(locale, budget.limit_amount, baseCurrency)}
           </p>
         </div>
@@ -73,7 +81,7 @@ function BudgetCard({ budget }: { budget: BudgetView }) {
           className="shrink-0 rounded-full px-3 py-1 text-sm font-semibold"
           style={{
             background: state === 'onTrack' ? 'var(--surface-2)' : undefined,
-            color: state === 'onTrack' ? 'var(--text-muted)' : barColor
+            color: state === 'onTrack' ? 'var(--text-muted)' : barColor,
           }}
         >
           {t(`budgets.${state}`)}
@@ -182,7 +190,11 @@ export function Budgets() {
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <label className="label">
                 {t('budgets.category')}
-                <select className="input" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+                <select
+                  className="input"
+                  value={categoryId}
+                  onChange={(e) => setCategoryId(e.target.value)}
+                >
                   <option value="">{t('budgets.category')}</option>
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -203,7 +215,11 @@ export function Budgets() {
               </label>
               <label className="label">
                 {t('budgets.period')}
-                <select className="input" value={period} onChange={(e) => setPeriod(e.target.value as BudgetPeriod)}>
+                <select
+                  className="input"
+                  value={period}
+                  onChange={(e) => setPeriod(e.target.value as BudgetPeriod)}
+                >
                   {PERIODS.map((p) => (
                     <option key={p} value={p}>
                       {t(`budgets.${p}`)}
