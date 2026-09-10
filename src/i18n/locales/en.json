@@ -101,6 +101,13 @@
       "body": "Monthly totals, category breakdowns and trends. Reporting lands in Phase 6."
     }
   },
+  "accounts": {
+    "errName": "Give the account a name.",
+    "errHasTransactions": "This account has transactions and cannot be deleted."
+  },
+  "tags": {
+    "duplicate": "That tag already exists."
+  },
   "common": {
     "comingSoon": "This screen is a placeholder — functionality arrives in its phase.",
     "backToDashboard": "Back to dashboard",

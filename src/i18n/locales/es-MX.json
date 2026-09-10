@@ -101,6 +101,13 @@
       "body": "Totales mensuales, desglose por categoría y tendencias. Los reportes llegan en la Fase 6."
     }
   },
+  "accounts": {
+    "errName": "Ponle un nombre a la cuenta.",
+    "errHasTransactions": "Esta cuenta tiene movimientos y no se puede eliminar."
+  },
+  "tags": {
+    "duplicate": "Esa etiqueta ya existe."
+  },
   "common": {
     "comingSoon": "Esta pantalla es provisional — su funcionalidad llega en su fase.",
     "backToDashboard": "Volver al panel",
