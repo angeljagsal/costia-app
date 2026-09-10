@@ -181,20 +181,25 @@ export function Recurring() {
                   <option value="USD">USD — US$</option>
                 </select>
               </label>
-              <label className="label">
-                {t('recurring.cadence')}
-                <select
-                  className="input"
-                  value={form.cadence}
-                  onChange={(e) => set({ cadence: e.target.value as BudgetPeriod })}
+              <div className="flex flex-col gap-2">
+                <p className="form-section-title">{t('recurring.cadence')}</p>
+                <div
+                  className="segmented segmented-3"
+                  role="group"
+                  aria-label={t('recurring.cadence')}
                 >
                   {CADENCES.map((c) => (
-                    <option key={c} value={c}>
+                    <button
+                      key={c}
+                      type="button"
+                      aria-pressed={form.cadence === c}
+                      onClick={() => set({ cadence: c })}
+                    >
                       {t(`recurring.${c}`)}
-                    </option>
+                    </button>
                   ))}
-                </select>
-              </label>
+                </div>
+              </div>
               <label className="label">
                 {t('recurring.nextDue')}
                 <input

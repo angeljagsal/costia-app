@@ -312,6 +312,10 @@ select.input {
   padding: 0.25rem;
 }
 
+.segmented-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
 .segmented button {
   min-height: 48px;
   border-radius: 9px;

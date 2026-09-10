@@ -106,7 +106,7 @@ export function Login() {
 
       {configured ? (
         <>
-          <div className="mt-4 grid grid-cols-2 gap-2" role="tablist" aria-label={t('auth.title')}>
+          <div className="segmented mt-4" role="tablist" aria-label={t('auth.title')}>
             <button
               type="button"
               role="tab"
@@ -115,7 +115,6 @@ export function Login() {
                 setTab('password');
                 setStatus('idle');
               }}
-              className={`btn ${tab === 'password' ? 'btn-primary' : 'btn-secondary'}`}
             >
               {t('auth.tabPassword')}
             </button>
@@ -127,7 +126,6 @@ export function Login() {
                 setTab('magic');
                 setStatus('idle');
               }}
-              className={`btn ${tab === 'magic' ? 'btn-primary' : 'btn-secondary'}`}
             >
               {t('auth.tabMagicLink')}
             </button>
