@@ -5,6 +5,8 @@ import {
   CartesianGrid,
   Cell,
   Legend,
+  Line,
+  LineChart,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -26,7 +28,7 @@ import {
   shiftMonth,
   todayLocal,
 } from '../data/periods';
-import { useCategoryTotals, useMonthlyFlow } from '../data/reports';
+import { useBalanceHistory, useCategoryTotals, useMonthlyFlow } from '../data/reports';
 import { useTransactions } from '../data/transactions';
 import { EMPTY_FILTERS } from '../data/types';
 import type { AccountType } from '../data/types';
@@ -46,6 +48,7 @@ const PIE_COLORS = [
 ];
 const INCOME_COLOR = '#108548';
 const EXPENSE_COLOR = '#1f75cb';
+const BALANCE_COLOR = '#6e49cb';
 
 const tooltipStyle = {
   backgroundColor: 'var(--surface)',
@@ -53,6 +56,42 @@ const tooltipStyle = {
   borderRadius: 8,
   color: 'var(--text)',
 };
+
+function Hero() {
+  const { t, locale } = useI18n();
+  const householdId = useHouseholdId();
+  const baseCurrency = loadBaseCurrency();
+  const balances = useAccountBalances(householdId);
+  const total = balances.reduce((sum, b) => sum + (b.balance ?? 0), 0);
+
+  const today = todayLocal();
+  const month = today.slice(0, 7);
+  const flow = useMonthlyFlow(householdId, monthStart(month), monthEnd(month));
+  const monthIncome = flow.reduce((s, f) => s + (f.income ?? 0), 0);
+  const monthExpenses = flow.reduce((s, f) => s + (f.expenses ?? 0), 0);
+
+  return (
+    <section className="hero flex flex-col gap-4" aria-label={t('dashboard.totalBalance')}>
+      <div>
+        <p className="hint">{t('dashboard.totalBalance')}</p>
+        <p className="amount text-4xl">{formatMoney(locale, total, baseCurrency)}</p>
+        <p className="hint">
+          {t('dashboard.thisMonth')}:{' '}
+          <span className="amount">+{formatMoney(locale, monthIncome, baseCurrency)}</span> ·{' '}
+          <span className="amount">−{formatMoney(locale, monthExpenses, baseCurrency)}</span>
+        </p>
+      </div>
+      <div className="flex gap-2">
+        <Link to="/transactions/new?kind=expense" className="hero-action hero-action-primary">
+          − {t('dashboard.newExpense')}
+        </Link>
+        <Link to="/transactions/new?kind=income" className="hero-action hero-action-secondary">
+          + {t('dashboard.newIncome')}
+        </Link>
+      </div>
+    </section>
+  );
+}
 
 function BudgetOverview() {
   const { t } = useI18n();
@@ -103,7 +142,7 @@ function RecentTransactions() {
                   <p className="hint">{formatDay(locale, r.txn_date)}</p>
                 </div>
                 <p
-                  className="shrink-0 font-bold"
+                  className="amount shrink-0"
                   style={{ color: expense ? 'var(--danger)' : 'var(--success)' }}
                 >
                   {expense ? '−' : '+'}
@@ -165,7 +204,7 @@ function CategoryBreakdown() {
                   style={{ background: d.fill }}
                 />
                 <span className="flex-1 truncate">{d.name}</span>
-                <span className="font-semibold">{formatMoney(locale, d.value, baseCurrency)}</span>
+                <span className="amount">{formatMoney(locale, d.value, baseCurrency)}</span>
               </li>
             ))}
           </ul>
@@ -216,6 +255,52 @@ function IncomeVsExpenses() {
   );
 }
 
+function BalanceHistory() {
+  const { t, locale } = useI18n();
+  const householdId = useHouseholdId();
+  const baseCurrency = loadBaseCurrency();
+  const endMonth = todayLocal().slice(0, 7);
+  const startMonth = shiftMonth(endMonth, -5);
+  const history = useBalanceHistory(householdId, startMonth, endMonth);
+  const data = history.map((p) => ({
+    month: formatMonthLabel(locale, p.month),
+    [t('dashboard.balanceHistory')]: Math.round(p.balance * 100) / 100,
+  }));
+  return (
+    <section
+      className="card flex min-w-0 flex-col gap-2"
+      aria-label={t('dashboard.balanceHistory')}
+    >
+      <h2 className="text-lg font-semibold">{t('dashboard.balanceHistory')}</h2>
+      {data.length === 0 ? (
+        <p className="hint">{t('dashboard.noData')}</p>
+      ) : (
+        <div className="h-52 text-[var(--text-muted)]">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#999" strokeOpacity={0.4} />
+              <XAxis dataKey="month" tick={{ fill: 'currentColor', fontSize: 12 }} />
+              <YAxis tick={{ fill: 'currentColor', fontSize: 12 }} width={48} />
+              <Tooltip
+                contentStyle={tooltipStyle}
+                formatter={(value) => formatMoney(locale, Number(value ?? 0), baseCurrency)}
+              />
+              <Legend wrapperStyle={{ fontSize: 12 }} />
+              <Line
+                type="monotone"
+                dataKey={t('dashboard.balanceHistory')}
+                stroke={BALANCE_COLOR}
+                strokeWidth={2}
+                dot={false}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </section>
+  );
+}
+
 const ACCOUNT_TYPE_ORDER: AccountType[] = [
   'bank',
   'cash',
@@ -251,7 +336,7 @@ function Balances() {
                 {group.map((a) => (
                   <p key={a.id} className="flex justify-between gap-2 text-sm">
                     <span className="truncate">{a.name}</span>
-                    <span className="font-semibold">
+                    <span className="amount">
                       {formatMoney(locale, balanceOf(a.id), baseCurrency)}
                     </span>
                   </p>
@@ -261,7 +346,7 @@ function Balances() {
           })}
           <p className="flex justify-between border-t border-[var(--border)] pt-2 font-bold">
             <span>{t('accounts.totalBalance')}</span>
-            <span>{formatMoney(locale, total, baseCurrency)}</span>
+            <span className="amount">{formatMoney(locale, total, baseCurrency)}</span>
           </p>
         </>
       )}
@@ -277,12 +362,14 @@ export function Dashboard() {
         <h1 className="page-title">{t('dashboard.title')}</h1>
         <p className="page-sub">{t('dashboard.welcome')}</p>
       </div>
+      <Hero />
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         <BudgetOverview />
+        <UpcomingBills />
         <RecentTransactions />
         <CategoryBreakdown />
         <IncomeVsExpenses />
-        <UpcomingBills />
+        <BalanceHistory />
         <Balances />
       </div>
     </div>
