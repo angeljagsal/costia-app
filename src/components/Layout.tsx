@@ -23,7 +23,7 @@ function linkClass({ isActive }: { isActive: boolean }) {
 
 export function Layout() {
   const { t } = useI18n();
-  const { online } = useSync();
+  const { online, engine, connected, hasSynced, syncError } = useSync();
   const { session, bypassed, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -31,6 +31,41 @@ export function Layout() {
     await signOut();
     navigate('/login');
   };
+
+  const syncState = (() => {
+    if (engine === 'local-only') return online ? 'online' : 'offline';
+    if (!online) return 'offline';
+    if (syncError) return 'error';
+    if (connected && hasSynced) return 'synced';
+    return 'syncing';
+  })();
+
+  const syncLabel = (() => {
+    switch (syncState) {
+      case 'online':
+        return t('header.online');
+      case 'offline':
+        return t('header.offline');
+      case 'error':
+        return t('header.syncError');
+      case 'synced':
+        return t('header.synced');
+      case 'syncing':
+        return t('header.syncing');
+    }
+  })();
+
+  const dotClass = (() => {
+    switch (syncState) {
+      case 'synced':
+      case 'online':
+        return 'bg-green-500';
+      case 'error':
+        return 'bg-red-500';
+      default:
+        return 'bg-amber-500';
+    }
+  })();
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-[var(--bg)] text-[var(--text)] md:flex-row">
@@ -46,13 +81,13 @@ export function Layout() {
           <div className="flex shrink-0 items-center gap-2">
             <span
               className="rounded-full bg-[var(--surface)] px-2.5 py-1 text-xs font-medium text-[var(--text-muted)]"
-              title={t('header.localOnly')}
+              title={syncError ?? t('header.localOnly')}
             >
               <span
                 aria-hidden="true"
-                className={`mr-1.5 inline-block h-2 w-2 rounded-full ${online ? 'bg-green-500' : 'bg-amber-500'}`}
+                className={`mr-1.5 inline-block h-2 w-2 rounded-full ${dotClass}`}
               />
-              {online ? t('header.online') : t('header.offline')}
+              {syncLabel}
             </span>
             {bypassed ? (
               <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-800 dark:bg-amber-900 dark:text-amber-100">
