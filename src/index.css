@@ -25,7 +25,12 @@
   --sidebar-text: #ffffff;
   --sidebar-muted: #c4c4e0;
   --sidebar-active: #3f3f8f;
-  --radius: 8px;
+  --radius: 12px;
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.1);
+  --hero-from: #1f75cb;
+  --hero-to: #292961;
+  --hero-text: #ffffff;
+  --hero-muted: #d6e4f5;
   color-scheme: light;
 }
 
@@ -47,6 +52,11 @@
   --sidebar-text: #ffffff;
   --sidebar-muted: #c4c4e0;
   --sidebar-active: #34347a;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.4);
+  --hero-from: #1c5d9e;
+  --hero-to: #23235f;
+  --hero-text: #ffffff;
+  --hero-muted: #c9d8ec;
   color-scheme: dark;
 }
 
@@ -180,6 +190,52 @@ textarea.input {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1rem;
+  box-shadow: var(--shadow);
+}
+
+/* Bank-style hero: balance first, actions second. */
+.hero {
+  background: linear-gradient(135deg, var(--hero-from), var(--hero-to));
+  color: var(--hero-text);
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: var(--shadow);
+}
+
+.hero .hint {
+  color: var(--hero-muted);
+}
+
+.hero-action {
+  flex: 1;
+  min-height: 52px;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.hero-action-primary {
+  background: var(--hero-text);
+  color: var(--hero-to);
+}
+
+.hero-action-secondary {
+  background: transparent;
+  color: var(--hero-text);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* Tabular numbers so amounts line up like a bank statement. */
+.amount {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
 }
 
 .hint {
