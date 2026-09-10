@@ -1,0 +1,91 @@
+{
+  "app": {
+    "name": "Costia",
+    "tagline": "Offline-first expense tracker"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "transactions": "Transactions",
+    "accounts": "Accounts",
+    "categories": "Categories",
+    "budgets": "Budgets",
+    "recurring": "Recurring",
+    "reports": "Reports",
+    "settings": "Settings"
+  },
+  "header": {
+    "logout": "Sign out",
+    "offline": "Offline",
+    "online": "Online",
+    "localOnly": "Local only",
+    "devNoBackend": "Backend not configured — auth bypassed for dev"
+  },
+  "auth": {
+    "title": "Sign in",
+    "subtitle": "We'll email you a magic link. No password needed.",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "you@example.com",
+    "sendLink": "Send magic link",
+    "sending": "Sending…",
+    "checkEmail": "Check your email for the sign-in link.",
+    "error": "Something went wrong. Please try again.",
+    "invalidEmail": "Enter a valid email address.",
+    "notConfigured": "Supabase is not configured yet. Copy .env.example to .env, add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY, then restart the dev server.",
+    "loading": "Loading…"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "baseCurrency": "Base currency",
+    "baseCurrencyHint": "Reports convert every transaction into this currency. Stored locally until Phase 2.",
+    "backend": "Backend",
+    "backendConfigured": "Supabase configured",
+    "backendMissing": "Supabase not configured"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Your money at a glance. Widgets (budgets, charts, bills, balances) land in Phase 6."
+  },
+  "pages": {
+    "transactions": {
+      "title": "Transactions",
+      "body": "Add, edit, delete and filter expenses and income. Full CRUD lands in Phase 3."
+    },
+    "transactionNew": {
+      "title": "New transaction",
+      "body": "The transaction form lands in Phase 3."
+    },
+    "transactionEdit": {
+      "title": "Edit transaction",
+      "body": "The transaction form lands in Phase 3."
+    },
+    "accounts": {
+      "title": "Accounts",
+      "body": "Bank, cash, credit, digital wallets and investments. Management lands in Phase 4."
+    },
+    "categories": {
+      "title": "Categories",
+      "body": "Expense and income categories with bilingual seeds. Management lands in Phase 4."
+    },
+    "budgets": {
+      "title": "Budgets",
+      "body": "Spending limits per category per period. Tracking lands in Phase 5."
+    },
+    "recurring": {
+      "title": "Recurring",
+      "body": "Rules that auto-generate transactions on schedule. Management lands in Phase 5."
+    },
+    "reports": {
+      "title": "Reports",
+      "body": "Monthly totals, category breakdowns and trends. Reporting lands in Phase 6."
+    }
+  },
+  "common": {
+    "comingSoon": "This screen is a placeholder — functionality arrives in its phase.",
+    "backToDashboard": "Back to dashboard"
+  }
+}

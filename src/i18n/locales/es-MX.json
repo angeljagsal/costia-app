@@ -1,0 +1,91 @@
+{
+  "app": {
+    "name": "Costia",
+    "tagline": "Control de gastos sin conexión"
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "transactions": "Movimientos",
+    "accounts": "Cuentas",
+    "categories": "Categorías",
+    "budgets": "Presupuestos",
+    "recurring": "Recurrentes",
+    "reports": "Reportes",
+    "settings": "Ajustes"
+  },
+  "header": {
+    "logout": "Cerrar sesión",
+    "offline": "Sin conexión",
+    "online": "En línea",
+    "localOnly": "Solo local",
+    "devNoBackend": "Backend no configurado — autenticación omitida (dev)"
+  },
+  "auth": {
+    "title": "Iniciar sesión",
+    "subtitle": "Te enviaremos un enlace mágico por correo. Sin contraseña.",
+    "emailLabel": "Correo electrónico",
+    "emailPlaceholder": "tu@ejemplo.com",
+    "sendLink": "Enviar enlace",
+    "sending": "Enviando…",
+    "checkEmail": "Revisa tu correo para el enlace de acceso.",
+    "error": "Algo salió mal. Inténtalo de nuevo.",
+    "invalidEmail": "Escribe un correo válido.",
+    "notConfigured": "Supabase aún no está configurado. Copia .env.example a .env, agrega VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY y reinicia el servidor.",
+    "loading": "Cargando…"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "language": "Idioma",
+    "theme": "Tema",
+    "themeSystem": "Sistema",
+    "themeLight": "Claro",
+    "themeDark": "Oscuro",
+    "baseCurrency": "Moneda base",
+    "baseCurrencyHint": "Los reportes convierten todo a esta moneda. Se guarda localmente hasta la Fase 2.",
+    "backend": "Backend",
+    "backendConfigured": "Supabase configurado",
+    "backendMissing": "Supabase no configurado"
+  },
+  "dashboard": {
+    "title": "Panel",
+    "welcome": "Tu dinero de un vistazo. Los widgets (presupuestos, gráficas, recurrentes, saldos) llegan en la Fase 6."
+  },
+  "pages": {
+    "transactions": {
+      "title": "Movimientos",
+      "body": "Agrega, edita, elimina y filtra gastos e ingresos. El CRUD completo llega en la Fase 3."
+    },
+    "transactionNew": {
+      "title": "Nuevo movimiento",
+      "body": "El formulario de movimientos llega en la Fase 3."
+    },
+    "transactionEdit": {
+      "title": "Editar movimiento",
+      "body": "El formulario de movimientos llega en la Fase 3."
+    },
+    "accounts": {
+      "title": "Cuentas",
+      "body": "Banco, efectivo, crédito, billeteras digitales e inversiones. La gestión llega en la Fase 4."
+    },
+    "categories": {
+      "title": "Categorías",
+      "body": "Categorías de gasto e ingreso con valores bilingües. La gestión llega en la Fase 4."
+    },
+    "budgets": {
+      "title": "Presupuestos",
+      "body": "Límites de gasto por categoría y periodo. El seguimiento llega en la Fase 5."
+    },
+    "recurring": {
+      "title": "Recurrentes",
+      "body": "Reglas que generan movimientos automáticamente. La gestión llega en la Fase 5."
+    },
+    "reports": {
+      "title": "Reportes",
+      "body": "Totales mensuales, desglose por categoría y tendencias. Los reportes llegan en la Fase 6."
+    }
+  },
+  "common": {
+    "comingSoon": "Esta pantalla es provisional — su funcionalidad llega en su fase.",
+    "backToDashboard": "Volver al panel"
+  }
+}

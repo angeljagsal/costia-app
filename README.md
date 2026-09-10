@@ -8,8 +8,9 @@ Offline-first personal finance app (Windows + Android). See `context-docs/` for 
 
 ## Status
 
-Phase 0 done: repo + Vite React TS scaffold verified (`lint`, `typecheck`, `build` green on Node 24 LTS).
-Next: Phase 1 PWA shell + routing + auth + i18n + theme.
+Phase 1 done: installable PWA shell with routing, magic-link auth wiring,
+en/es-MX, system+manual theme (`lint`, `typecheck`, `build` green, preview smoke-tested).
+Next: Phase 2 data layer — needs Supabase project (see `context-docs/01-shell-auth-i18n.md`).
 
 ## Quickstart
 

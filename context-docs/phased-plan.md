@@ -19,18 +19,20 @@ Goal: versioning ready before code.
 Accept: `npm run lint && npm run typecheck && npm run build` green on CI.
 Doc: `context-docs/00-repo-setup.md` (written at close of phase).
 
-## Phase 1 — PWA shell + routing + auth + i18n + theme
+## Phase 1 — PWA shell + routing + auth + i18n + theme [DONE 2026-09-10]
 
 Goal: installable shell with login, no data yet.
 
-- Routes: `/, /transactions, /transactions/new, /transactions/:id/edit, /accounts, /categories, /budgets, /recurring, /reports, /settings, /login`.
-- Layout: sidebar (desktop) / bottom-nav (mobile), `viewport-fit=cover`, `100dvh`, safe-area padding.
-- `vite-plugin-pwa` manifest (maskable 192/512, standalone, theme/bg) + Workbox SW.
-- Theme: system default + manual override persisted.
-- i18n: `en` + `es-MX` dictionaries, locale switcher in Settings.
-- Supabase Auth magic-link: request link → session restore → guarded routes → logout. Offline: cached session.
+- [x] Routes: `/, /transactions, /transactions/new, /transactions/:id/edit, /accounts, /categories, /budgets, /recurring, /reports, /settings, /login` (+ 404, guarded by RequireAuth).
+- [x] Layout: sidebar (desktop) / bottom-nav (mobile), `viewport-fit=cover`, `100dvh`, safe-area padding.
+- [x] `vite-plugin-pwa` manifest (maskable 192/512 placeholder icons, standalone, theme/bg) + Workbox SW.
+- [x] Theme: system default + manual override persisted.
+- [x] i18n: `en` + `es-MX` dictionaries, locale switcher in Settings.
+- [x] Supabase Auth magic-link: request link → session restore → guarded routes → logout. Offline: cached session. (Code complete; live login round-trip needs Supabase project — your step.)
+- [x] Settings: locale/theme/base-currency controls + backend status. Preview smoke test green (all routes + manifest + SW HTTP 200).
 
 Accept: installs on Windows + Pixel 9 Pro XL, no cutoff, Lighthouse PWA basic pass, login round-trip works.
+Note 2026-09-10: shell + build verified locally; device install + Lighthouse + live login need Supabase project + Pages deploy (your steps in `01-shell-auth-i18n.md`).
 Doc: `context-docs/01-shell-auth-i18n.md`.
 
 ## Phase 2 — Data layer + offline sync

@@ -1,0 +1,4 @@
+# Prose docs keep hand formatting; build output is generated.
+context-docs/
+dist/
+package-lock.json
