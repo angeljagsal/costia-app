@@ -4,7 +4,6 @@
  * Usage: node scripts/check-supabase.mjs
  */
 import { readFileSync } from 'node:fs';
-import { createClient } from '@supabase/supabase-js';
 
 function loadEnv(path) {
   const out = {};
@@ -40,19 +39,31 @@ if (!url || !key) {
   process.exit(2);
 }
 
-const host = new URL(url).host;
+// The URL must be the bare project URL. A common mistake is pasting the Data
+// API URL (with /rest/v1), which breaks Auth and every client call.
+const parsed = new URL(url);
+if (parsed.pathname !== '/' && parsed.pathname !== '') {
+  console.error(
+    `FAIL: VITE_SUPABASE_URL must be the bare project URL with no path.\n` +
+      `  Got path: ${parsed.pathname}\n` +
+      `  Fix: strip the path so it ends at .supabase.co (e.g. remove /rest/v1).`
+  );
+  process.exit(2);
+}
+
 const kind = key.startsWith('sb_publishable_')
   ? 'publishable (current)'
   : key.startsWith('eyJ')
     ? 'legacy anon JWT (works, but migrate to publishable)'
     : 'unrecognized format';
-console.log(`project: ${host}`);
+console.log(`project: ${parsed.host}`);
 console.log(`key: ${kind}, ${key.length} chars`);
 
-const sb = createClient(url, key);
-const { error } = await sb.auth.getSession();
-if (error) {
-  console.error(`FAIL: auth.getSession: ${error.message}`);
+// getSession() alone never touches the network when no session is stored,
+// so probe the Auth health endpoint for a real round-trip instead.
+const health = await fetch(`${url}/auth/v1/health`);
+if (!health.ok) {
+  console.error(`FAIL: Auth health check returned HTTP ${health.status}.`);
   process.exit(1);
 }
-console.log('OK: reachable, key accepted. (No session is expected — sign in via the UI.)');
+console.log('OK: reachable, Auth responding. (No session is expected — sign in via the UI.)');
