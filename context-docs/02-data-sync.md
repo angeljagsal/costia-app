@@ -2,6 +2,10 @@
 
 Date: 2026-09-10.
 
+> Follow-ups landed after this note: migration `0009` (custom categories),
+> streams `IN`-subquery fix, client schema gains. See `architecture.md` §3
+> and `04-accounts-categories.md` for current state.
+
 ## Server side (Supabase)
 
 Migrations `supabase/migrations/0001`–`0008`, applied in order via Dashboard SQL editor:

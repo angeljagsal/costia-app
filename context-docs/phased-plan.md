@@ -1,7 +1,7 @@
 # Phased Plan — Personal Expense Tracker PWA
 
 Conventions: all docs live in `context-docs/`. Status tracked here phase by phase.
-Stack: React + Vite + TS + Tailwind, PowerSync SQLite WASM, Supabase Postgres + Auth (magic link),
+Stack: React + Vite + TS + Tailwind, PowerSync SQLite WASM, Supabase Postgres + Auth (password-first),
 `pg_cron`, Frankfurter, Cloudflare Pages. Locales: en + es-MX day one.
 
 ## Phase 0 — Repo + tooling + docs skeleton [DONE 2026-09-10]
@@ -108,6 +108,10 @@ Doc: `context-docs/05-budgets-recurring.md`.
 
 Accept: all widgets + 5 report views render offline with seeded data.
 Note: main bundle grew +450 KB with recharts (gzip +130 KB) — code-split in Phase 7.
+Post-revision UI passes (same day): deluxe GitLab light sidebar (sticky),
+bank form system (amount hero, grids, radio rows, sticky CTA), stroke icon set
+(nav/links only), picker show-all compaction, equal color-coded Save/Cancel.
+Full reference: `context-docs/06b-unified-home.md` + `context-docs/07-ui-system.md`.
 Doc: `context-docs/06-dashboard-reports.md`.
 
 ## Phase 7 — PWA polish + a11y + perf
@@ -128,5 +132,6 @@ Accept: prod install + cross-device sync demo.
 Doc: `context-docs/08-release.md`.
 
 ---
-Estimate: ~40–55 days solo. One phase at a time; each phase closes with its `context-docs/NN-*.md` note + commit.
-Next: finish Phase 0 (needs Node LTS installed).
+Status 2026-09-11: Phases 0–6 built, verified, and pushed. Open threads:
+your live checks (sync pill, round-trips, cron observation), then Phase 7.
+`context-docs/` is kept current so a fresh session can continue from here.

@@ -2,6 +2,11 @@
 
 Date: 2026-09-10.
 
+> Superseded in parts: auth is now password-first with magic-link fallback
+> (ADR-007 revised, see `04-accounts-categories.md`); nav is now Home /
+> Activity / Budgets / More (see `06b-unified-home.md`). This note preserves
+> the history — prefer `architecture.md` + `07-ui-system.md` for current state.
+
 ## What was built
 
 - **Routing** (`src/app/router.tsx`): 11 routes — `/`, `/transactions`,

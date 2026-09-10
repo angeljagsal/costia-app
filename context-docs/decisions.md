@@ -13,8 +13,12 @@
 - ADR-008: Notifications = in-app Upcoming Bills only, no push v1 (decided 2026-09-10).
 - ADR-009: UI locales en + es-MX from day one, user-choosable (decided 2026-09-10).
 - ADR-010: `base_amount` frozen forever, even on base-currency switch (decided 2026-09-10).
-- ADR-011: single home screen + 4-item nav (Home, Activity, Budgets, More).
-  Separate Reports removed (`/reports` redirects to `/`); its content
+- ADR-011: single home screen + 4-item nav (Home, Activity, Budgets, More).  Separate Reports removed (`/reports` redirects to `/`); its content
   (totals, trend, balance history) lives on Home. Second-level sections
   (Accounts, Categories, Recurring, Settings) live under More. Bank-style
   hero with total balance + New expense/income quick actions (decided 2026-09-11).
+- ADR-012: email strategy — Confirm email OFF (password signup needs zero
+  emails; sign-in is unlimited and email-free). Built-in Supabase SMTP caps at
+  ~2 signup emails/hour, which blocked testing. Custom SMTP (e.g. Gmail app
+  password) deferred until magic links or reset emails must be reliable.
+  UI names rate-limit states explicitly (decided 2026-09-11).
