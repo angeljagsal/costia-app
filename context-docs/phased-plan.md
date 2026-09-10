@@ -96,13 +96,15 @@ Doc: `context-docs/04-accounts-categories.md`.
 Accept: cron verified live; cancelling creates zero orphan rows.
 Doc: `context-docs/05-budgets-recurring.md`.
 
-## Phase 6 — Dashboard + Reports [DONE 2026-09-11]
+## Phase 6 — Dashboard + Reports [DONE 2026-09-11, revised: unified home]
 
-- [x] Dashboard: budget overview, recent 10, category pie (month), 6-month
-  income-vs-expense bars, upcoming bills reuse, balances by type + total.
-- [x] Reports: presets + custom range, totals, category bars, monthly trend,
-  cumulative balance history, budgets vs actual. All local SQLite, base currency.
-- [x] Recharts with theme-aware tooltips/ticks; shared `format.ts` + `BudgetProgress`.
+- [x] Single bank-style home: hero (total balance + month in/out + New
+  expense/income quick actions with `?kind=` form preset), budget overview,
+  upcoming bills, recent 10, category pie, 6-month trend, balance history,
+  balances by type.
+- [x] Standalone Reports removed (`/reports` → `/`); its sections merged in.
+- [x] Nav simplified to Home / Activity / Budgets / More (accounts, categories,
+  recurring, settings live under More). Recharts with theme-aware styling.
 
 Accept: all widgets + 5 report views render offline with seeded data.
 Note: main bundle grew +450 KB with recharts (gzip +130 KB) — code-split in Phase 7.

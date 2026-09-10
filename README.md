@@ -8,10 +8,9 @@ Offline-first personal finance app (Windows + Android). See `context-docs/` for 
 
 ## Status
 
-Phase 6 done: dashboard (6 widgets) and reports (ranges, breakdowns, trends,
-balance history) on Recharts (`lint`, `typecheck`, `build` green).
-Next: Phase 7 PWA polish, accessibility, and performance (see
-`context-docs/06-dashboard-reports.md` for data checks + the code-splitting note).
+Phase 6 revised: single bank-style home (balance hero, quick actions, budgets,
+activity, charts) with 4-item nav (see `context-docs/06b-unified-home.md`).
+Next: Phase 7 PWA polish, accessibility, and performance.
 
 ## Quickstart
 
