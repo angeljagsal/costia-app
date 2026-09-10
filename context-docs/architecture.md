@@ -2,8 +2,8 @@
 
 Source of truth for scope: `expense-app-context.md`.
 Decisions locked: en + es-MX from day one (i18n), Cloudflare Pages hosting,
-Supabase Auth email magic link, in-app Upcoming Bills (no push v1),
-`base_amount` frozen forever.
+Supabase Auth password-first with magic-link fallback (ADR-007 revised),
+in-app Upcoming Bills (no push v1), `base_amount` frozen forever.
 
 ## 1. System architecture
 
@@ -12,7 +12,7 @@ flowchart TB
     PWA["PWA Client<br/>React + Vite + Tailwind<br/>Service Worker + SQLite WASM"] -->|instant read/write| LocalDB["Local SQLite<br/>via PowerSync SDK"]
     LocalDB -->|background bidirectional sync| PS["PowerSync Cloud<br/>sync engine"]
     PS -->|logical replication| PG["Supabase Postgres<br/>source of truth + RLS"]
-    PG --> AUTH["Supabase Auth<br/>email magic link"]
+    PG --> AUTH["Supabase Auth<br/>password-first, magic-link fallback"]
     PG --> CRON["pg_cron inside Postgres<br/>1. FX refresh daily<br/>2. recurring due check daily"]
     CRON --> FX["Frankfurter API<br/>ECB rates, free, no key"]
     PWA -->|static build, no SSR| CF["Cloudflare Pages<br/>preview + prod"]
@@ -55,18 +55,24 @@ erDiagram
     RECURRING_RULES ||--o{ TRANSACTIONS : spawns
 ```
 
-Tables (Postgres = source of truth, SQLite mirrors subset):
+Tables (Postgres = source of truth, SQLite mirrors subset).
+Migrations live in `supabase/migrations/0001`–`0009`:
 
 - `households(id uuid pk, name text)` — everything hangs off this, even single-user v1.
 - `users(id uuid pk -> auth.users, email, base_currency MXN|USD, household_id fk, locale en|es-MX)`.
 - `accounts(id, household_id fk, name, type: bank|cash|credit|digital_wallet|investment)`.
-- `categories(id, name, kind: expense|income)` — seeded bilingual (see §6).
-- `transactions(id, account_id fk, category_id fk, amount numeric, currency MXN|USD, base_amount numeric FROZEN, txn_date date, kind, note nullable, recurring_rule_id nullable fk, created_at)`.
-- `transaction_splits(id, transaction_id fk, category_id fk, amount)` — sum(splits) == amount.
-- `tags(id, household_id fk, name)` + `transaction_tags(transaction_id, tag_id)`.
-- `budgets(id, category_id fk expense-only, limit_amount, period: weekly|monthly|yearly)` — reset each period, no rollover.
-- `recurring_rules(id, account_id fk, category_id fk, amount, currency, cadence: weekly|monthly|yearly, next_due date, note nullable)` — never pre-creates future rows.
-- `exchange_rates(base_currency, target_currency, rate, fetched_at)` — daily Frankfurter cache.
+- `categories(id, key nullable unique, kind, sort, household_id nullable fk, label nullable)` —
+  global catalog rows (`household_id NULL` + `key`, localized client-side via
+  `categories.<key>`); custom rows (household + `label`, `key NULL`). Seed: 12 keys (0002).
+- `transactions(id, household_id fk, account_id fk, category_id fk, amount numeric, currency MXN|USD, base_amount numeric FROZEN, txn_date date, kind, note nullable, recurring_rule_id nullable fk, created_at)`.
+- `transaction_splits(id, transaction_id fk, category_id fk, amount)` — sum(splits) == amount, always persisted (single whole-amount row when not split).
+- `tags(id, household_id fk, name)` + `transaction_tags(id uuid pk, transaction_id fk, tag_id fk, unique pair)` — surrogate `id` required by PowerSync (0008).
+- `budgets(id, household_id fk, category_id fk, limit_amount, period, unique(household, category, period))` — reset each period, no rollover.
+- `recurring_rules(id, household_id fk, account_id fk, category_id fk, amount, currency, cadence, next_due, note nullable, is_active)` — never pre-creates future rows.
+- `exchange_rates(id uuid pk, base_currency, target_currency, rate, rate_date, unique triple)` — daily Frankfurter cache, both directions; never updated historically (0008 changed serial id to uuid for sync).
+
+Sync Streams (`powersync/sync-config.yaml`, household scope + global catalogs):
+streams must use `IN (SELECT …)` — the validator rejects scalar `= (SELECT …)`.
 
 Invariants:
 
@@ -81,30 +87,47 @@ flowchart TB
     App --> AuthProvider --> ThemeProvider --> I18nProvider --> SyncProvider --> Router
     Router --> Dashboard
     Router --> Transactions
-    Router --> Accounts
-    Router --> Categories
     Router --> Budgets
-    Router --> Recurring
-    Router --> Reports
-    Router --> Settings
+    Router --> More
+    Router --> Login
+    Dashboard --> Hero
     Dashboard --> BudgetOverview
+    Dashboard --> UpcomingBills
     Dashboard --> RecentTx
     Dashboard --> CategoryPie
     Dashboard --> IncomeVsExp
-    Dashboard --> UpcomingBills
+    Dashboard --> BalanceHistory
     Dashboard --> Balances
+    More --> Accounts
+    More --> Categories
+    More --> Recurring
+    More --> Settings
 ```
+
+Routes: `/` (home), `/transactions`, `/transactions/new`, `/transactions/:id/edit`,
+`/accounts`, `/categories`, `/budgets`, `/recurring`, `/more`, `/settings`,
+`/login` (+ 404). `/reports` redirects to `/`.
 
 Folders:
 
 ```text
 src/
-  components/  # design-system primitives + layout (Sidebar/BottomNav, Header)
-  pages/       # one per route
-  features/    # transactions, accounts, categories, budgets, recurring, reports
-  hooks/ contexts/ services/ # repositories, sync, fx, i18n, theme
-  types/ utils/
-  assets/ locales/ # en.json, es-MX.json
+  app/         # router
+  auth/        # AuthProvider + useAuth (session, magic link, password)
+  components/  # Layout, Page, icons, pickers, BudgetBar/Progress, UpcomingBills
+  data/        # reactive hooks + mutations per entity (accounts, budgets,
+               # categories, household, periods, recurring, reports, tags,
+               # transactions) + types
+  i18n/        # I18nProvider + useI18n + locales/en.json, es-MX.json
+  lib/         # supabase client, prefs, fx (frozen conversion), format
+  pages/       # Dashboard, Transactions, TransactionForm, Accounts, Categories,
+               # Budgets, Recurring, More, Settings, Login, NotFound
+  powersync/   # AppSchema, db singleton, SupabaseConnector
+  sync/        # SyncProvider + useSync (online/engine/connected/hasSynced/syncError)
+  theme/       # ThemeProvider + useTheme (system/light/dark)
+supabase/migrations/  # 0001-0009, numeric apply order
+powersync/            # sync-config.yaml (Streams, mirrors RLS)
+scripts/              # check-supabase.mjs, gen-pwa-icons.mjs
 ```
 
 ## 5. PWA requirements (must-pass per release)
