@@ -14,8 +14,17 @@ const NAV = [
   { to: '/settings', key: 'nav.settings', end: false },
 ] as const;
 
-function linkClass({ isActive }: { isActive: boolean }) {
-  const base = 'rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors';
+function sidebarLinkClass({ isActive }: { isActive: boolean }) {
+  const base =
+    'flex min-h-[44px] items-center rounded-md px-3 py-2.5 text-[0.9375rem] font-medium whitespace-nowrap transition-colors';
+  return isActive
+    ? `${base} bg-[var(--sidebar-active)] text-[var(--sidebar-text)]`
+    : `${base} text-[var(--sidebar-muted)] hover:bg-white/10 hover:text-[var(--sidebar-text)]`;
+}
+
+function topLinkClass({ isActive }: { isActive: boolean }) {
+  const base =
+    'flex min-h-[48px] items-center rounded-md px-4 py-3 text-[0.9375rem] font-medium whitespace-nowrap transition-colors';
   return isActive
     ? `${base} bg-[var(--surface-2)] text-[var(--text)]`
     : `${base} text-[var(--text-muted)] hover:bg-[var(--surface)] hover:text-[var(--text)]`;
@@ -67,75 +76,81 @@ export function Layout() {
     }
   })();
 
+  const statusPill = (
+    <span
+      className="inline-flex items-center rounded-full bg-[var(--surface-2)] px-3 py-1.5 text-sm font-medium text-[var(--text-muted)]"
+      title={syncError ?? t('header.localOnly')}
+    >
+      <span
+        aria-hidden="true"
+        className={`mr-2 inline-block h-2.5 w-2.5 rounded-full ${dotClass}`}
+      />
+      {syncLabel}
+    </span>
+  );
+
+  const signOutButton = session ? (
+    <button type="button" onClick={onSignOut} className="btn btn-secondary">
+      {t('header.logout')}
+    </button>
+  ) : null;
+
   return (
     <div className="flex min-h-[100dvh] flex-col bg-[var(--bg)] text-[var(--text)] md:flex-row">
-      {/* Top header */}
-      <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--bg)]">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-2 px-4 py-3">
-          <div className="min-w-0">
-            <p className="truncate text-base font-bold leading-tight">{t('app.name')}</p>
-            <p className="hidden truncate text-xs text-[var(--text-muted)] sm:block">
-              {t('app.tagline')}
-            </p>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <span
-              className="rounded-full bg-[var(--surface)] px-2.5 py-1 text-xs font-medium text-[var(--text-muted)]"
-              title={syncError ?? t('header.localOnly')}
-            >
-              <span
-                aria-hidden="true"
-                className={`mr-1.5 inline-block h-2 w-2 rounded-full ${dotClass}`}
-              />
-              {syncLabel}
-            </span>
-            {bypassed ? (
-              <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-800 dark:bg-amber-900 dark:text-amber-100">
-                dev
-              </span>
-            ) : null}
-            {session ? (
-              <button
-                type="button"
-                onClick={onSignOut}
-                className="rounded-lg border border-[var(--border)] px-2.5 py-1.5 text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text)]"
-              >
-                {t('header.logout')}
-              </button>
-            ) : null}
-          </div>
+      {/* Sidebar (desktop): dark, GitLab-style */}
+      <aside className="hidden w-60 shrink-0 flex-col bg-[var(--sidebar-bg)] text-[var(--sidebar-text)] md:flex">
+        <div className="px-4 pb-2 pt-6">
+          <p className="truncate text-lg font-bold leading-tight">{t('app.name')}</p>
+          <p className="truncate text-sm text-[var(--sidebar-muted)]">{t('app.tagline')}</p>
         </div>
-        {bypassed ? (
-          <p className="border-t border-[var(--border)] bg-amber-50 px-4 py-1.5 text-center text-xs text-amber-800 dark:bg-amber-950 dark:text-amber-200">
-            {t('header.devNoBackend')}
-          </p>
-        ) : null}
-      </header>
-
-      <div className="mx-auto flex w-full max-w-5xl flex-1 gap-6 px-4">
-        {/* Sidebar (desktop) */}
-        <nav aria-label="primary" className="hidden w-52 shrink-0 flex-col gap-1 py-6 md:flex">
+        <nav aria-label="primary" className="flex flex-col gap-1 px-3 py-4">
           {NAV.map((item) => (
-            <NavLink key={item.to} to={item.to} end={item.end} className={linkClass}>
+            <NavLink key={item.to} to={item.to} end={item.end} className={sidebarLinkClass}>
               {t(item.key)}
             </NavLink>
           ))}
         </nav>
+        <div className="mt-auto flex flex-col gap-3 p-4">
+          {statusPill}
+          {signOutButton}
+        </div>
+      </aside>
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* Top header (mobile): name + status */}
+        <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--surface)] md:hidden">
+          <div className="flex items-center justify-between gap-2 px-4 py-3">
+            <p className="truncate text-lg font-bold leading-tight">{t('app.name')}</p>
+            <div className="flex shrink-0 items-center gap-2">{statusPill}</div>
+          </div>
+          {bypassed ? (
+            <p className="border-t border-[var(--border)] bg-[var(--warning-bg)] px-4 py-2 text-center text-sm text-[var(--warning-text)]">
+              {t('header.devNoBackend')}
+            </p>
+          ) : null}
+        </header>
+
+        {/* Dev banner (desktop) */}
+        {bypassed ? (
+          <p className="hidden border-b border-[var(--border)] bg-[var(--warning-bg)] px-4 py-2 text-center text-sm text-[var(--warning-text)] md:block">
+            {t('header.devNoBackend')}
+          </p>
+        ) : null}
 
         {/* Content */}
-        <main className="app-main min-w-0 flex-1 px-0">
+        <main className="app-main min-w-0 flex-1">
           <Outlet />
         </main>
       </div>
 
-      {/* Bottom nav (mobile), horizontally scrollable so every section is one tap away */}
+      {/* Bottom nav (mobile): every section one tap away */}
       <nav
         aria-label="primary"
-        className="bottom-nav fixed inset-x-0 bottom-0 z-10 border-t border-[var(--border)] bg-[var(--bg)] md:hidden"
+        className="bottom-nav fixed inset-x-0 bottom-0 z-10 border-t border-[var(--border)] bg-[var(--surface)] md:hidden"
       >
         <div className="flex gap-1 overflow-x-auto px-2 py-2">
           {NAV.map((item) => (
-            <NavLink key={item.to} to={item.to} end={item.end} className={linkClass}>
+            <NavLink key={item.to} to={item.to} end={item.end} className={topLinkClass}>
               {t(item.key)}
             </NavLink>
           ))}
