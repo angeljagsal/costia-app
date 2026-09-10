@@ -40,7 +40,8 @@ Date: 2026-09-10.
 
 ## Your steps (need dashboard logins, can't do from here)
 
-1. **Supabase**: create project → copy URL + anon key into `.env`
+1. **Supabase**: create project → copy Data API URL + a publishable key
+   (`sb_publishable_...`, Settings → API Keys) into `.env`
    (see `.env.example`) → restart dev server → test magic-link login.
    Enable `pg_cron` later in Phase 2/5 (needs project first).
 2. **Cloudflare Pages**: connect repo, build `npm run build`, output `dist`.
