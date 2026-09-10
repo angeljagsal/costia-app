@@ -8,13 +8,14 @@ Offline-first personal finance app (Windows + Android). See `context-docs/` for 
 
 ## Status
 
-Phase 0 in progress: repo + tooling. Requires Node.js LTS (not yet installed on this machine).
+Phase 0 done: repo + Vite React TS scaffold verified (`lint`, `typecheck`, `build` green on Node 24 LTS).
+Next: Phase 1 PWA shell + routing + auth + i18n + theme.
 
-## Quickstart (once Node LTS installed)
+## Quickstart
 
 ```powershell
 node --version; npm --version
-npm create vite@latest . -- --template react-ts
 npm install
-npm run dev
+npm run dev      # frontend only, no backend yet
+npm run lint; npm run typecheck; npm run build
 ```

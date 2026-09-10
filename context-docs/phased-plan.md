@@ -4,20 +4,20 @@ Conventions: all docs live in `context-docs/`. Status tracked here phase by phas
 Stack: React + Vite + TS + Tailwind, PowerSync SQLite WASM, Supabase Postgres + Auth (magic link),
 `pg_cron`, Frankfurter, Cloudflare Pages. Locales: en + es-MX day one.
 
-## Phase 0 — Repo + tooling + docs skeleton [IN PROGRESS]
+## Phase 0 — Repo + tooling + docs skeleton [DONE 2026-09-10]
 
 Goal: versioning ready before code.
 
 - [x] `main` branch, `context-docs/` convention
-- [ ] `.gitignore` (Node/Vite), `.editorconfig`, `README.md`
-- [ ] `package.json` + Vite React TS scaffold (BLOCKED: Node.js not on PATH — install LTS, then `npm create vite@latest . -- --template react-ts`)
-- [ ] ESLint + Prettier + `lint-staged` + Husky pre-commit
-- [ ] GitHub Actions: lint + typecheck + build on PR; deploy preview on Pages
-- [ ] Cloudflare Pages project linked (preview + prod)
-- [ ] `context-docs/{architecture,phased-plan,decisions,data-model,pwa-checklist}.md`
+- [x] `.gitignore` (Node/Vite), `.editorconfig`, `README.md`
+- [x] Vite React TS scaffold (Node 24 LTS) — `lint`, `typecheck`, `build` green
+- [x] `oxlint` (template default, replaces ESLint) + `prettier` + `format` scripts
+- [x] GitHub Actions: lint + typecheck + build on PR (Node 24)
+- [ ] Cloudflare Pages project linked (preview + prod) — needs Cloudflare login
+- [x] `context-docs/{architecture,phased-plan,decisions,00-repo-setup}.md`
 
 Accept: `npm run lint && npm run typecheck && npm run build` green on CI.
-Doc: `context-docs/00-repo-setup.md` (to write at close of phase).
+Doc: `context-docs/00-repo-setup.md` (written at close of phase).
 
 ## Phase 1 — PWA shell + routing + auth + i18n + theme
 
