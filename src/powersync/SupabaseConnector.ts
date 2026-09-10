@@ -3,7 +3,7 @@ import {
   type CommonPowerSyncDatabase,
   type CrudEntry,
   type PowerSyncBackendConnector,
-  type PowerSyncCredentials
+  type PowerSyncCredentials,
 } from '@powersync/web';
 import { getSupabase } from '../lib/supabase';
 
@@ -16,7 +16,7 @@ export const isSyncConfigured = Boolean(powersyncUrl);
 const FATAL_RESPONSE_CODES = [
   new RegExp('^22...$'), // data exception, e.g. type mismatch
   new RegExp('^23...$'), // integrity violation, e.g. FK / unique
-  new RegExp('^42501$') // RLS / privilege violation
+  new RegExp('^42501$'), // RLS / privilege violation
 ];
 
 /**
@@ -30,7 +30,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
     if (!sb || !powersyncUrl) return null;
     const {
       data: { session },
-      error
+      error,
     } = await sb.auth.getSession();
     if (!session || error || !session.access_token) return null;
     return { endpoint: powersyncUrl, token: session.access_token };
