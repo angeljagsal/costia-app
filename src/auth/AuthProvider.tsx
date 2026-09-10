@@ -35,7 +35,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       options: { emailRedirectTo: window.location.origin },
     });
-    return error ? { ok: false, message: 'error' } : { ok: true, message: 'checkEmail' };
+    if (!error) return { ok: true, message: 'checkEmail' };
+    // 429 = Supabase OTP rate limit (easy to hit while testing). Name it so
+    // the UI can tell the user to wait instead of showing a generic error.
+    return { ok: false, message: error.status === 429 ? 'rateLimited' : 'error' };
   }, []);
 
   const signOut = useCallback(async () => {

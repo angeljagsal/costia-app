@@ -46,6 +46,7 @@
     "sending": "Enviando…",
     "checkEmail": "Revisa tu correo para el enlace de acceso.",
     "error": "Algo salió mal. Inténtalo de nuevo.",
+    "rateLimited": "Se enviaron demasiados correos. Espera una hora e inténtalo una sola vez.",
     "invalidEmail": "Escribe un correo válido.",
     "notConfigured": "Supabase aún no está configurado. Copia .env.example a .env, agrega VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY y reinicia el servidor.",
     "loading": "Cargando…"

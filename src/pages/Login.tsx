@@ -9,7 +9,9 @@ export function Login() {
   const { configured, bypassed, session, sendMagicLink } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error' | 'invalid'>('idle');
+  const [status, setStatus] = useState<
+    'idle' | 'sending' | 'sent' | 'error' | 'invalid' | 'rateLimited'
+  >('idle');
 
   if (session) {
     navigate('/', { replace: true });
@@ -25,7 +27,9 @@ export function Login() {
     }
     setStatus('sending');
     const res = await sendMagicLink(value);
-    setStatus(res.ok ? 'sent' : 'error');
+    if (res.ok) setStatus('sent');
+    else if (res.message === 'rateLimited') setStatus('rateLimited');
+    else setStatus('error');
   };
 
   return (
@@ -57,6 +61,7 @@ export function Login() {
           </button>
           {status === 'sent' ? <p>{t('auth.checkEmail')}</p> : null}
           {status === 'error' ? <p className="error-text">{t('auth.error')}</p> : null}
+          {status === 'rateLimited' ? <p className="error-text">{t('auth.rateLimited')}</p> : null}
           {status === 'invalid' ? <p className="error-text">{t('auth.invalidEmail')}</p> : null}
         </form>
       ) : null}
