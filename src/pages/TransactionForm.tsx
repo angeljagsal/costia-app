@@ -187,89 +187,99 @@ function TransactionFormInner({
       <h1 className="page-title">{t(mode === 'new' ? 'tx.new' : 'tx.edit')}</h1>
       <p className="hint">{t('common.requiredNote')}</p>
 
-      <div className="segmented" role="group" aria-label={t('tx.kindExpense')}>
-        {(['expense', 'income'] as Kind[]).map((k) => (
-          <button
-            key={k}
-            type="button"
-            aria-pressed={kind === k}
-            onClick={() => {
-              setKind(k);
-              setCategoryId('');
-            }}
-          >
-            {k === 'expense' ? `− ${t('tx.kindExpense')}` : `+ ${t('tx.kindIncome')}`}
-          </button>
-        ))}
-      </div>
-
-      <div className="amount-hero">
-        <input
-          inputMode="decimal"
-          autoComplete="off"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder="0.00"
-          aria-label={t('tx.amount')}
-        />
-        <div className="currency-chips" role="group" aria-label={t('tx.currency')}>
-          {(['MXN', 'USD'] as Currency[]).map((c) => (
+      <section className="card flex flex-col gap-4" aria-label={t('tx.sectionType')}>
+        <h2 className="text-lg font-semibold">{t('tx.sectionType')}</h2>
+        <div className="segmented" role="group" aria-label={t('tx.kindExpense')}>
+          {(['expense', 'income'] as Kind[]).map((k) => (
             <button
-              key={c}
+              key={k}
               type="button"
-              aria-pressed={currency === c}
-              onClick={() => setCurrency(c)}
+              aria-pressed={kind === k}
+              onClick={() => {
+                setKind(k);
+                setCategoryId('');
+              }}
             >
-              {c === 'MXN' ? 'MX$' : 'US$'}
+              {k === 'expense' ? `− ${t('tx.kindExpense')}` : `+ ${t('tx.kindIncome')}`}
             </button>
           ))}
         </div>
-      </div>
 
-      <CategoryGrid
-        categories={categories}
-        value={categoryId}
-        onChange={setCategoryId}
-        label={t('tx.category')}
-      />
+        <div className="amount-hero">
+          <input
+            inputMode="decimal"
+            autoComplete="off"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="0.00"
+            aria-label={t('tx.amount')}
+          />
+          <div className="currency-chips" role="group" aria-label={t('tx.currency')}>
+            {(['MXN', 'USD'] as Currency[]).map((c) => (
+              <button
+                key={c}
+                type="button"
+                aria-pressed={currency === c}
+                onClick={() => setCurrency(c)}
+              >
+                {c === 'MXN' ? 'MX$' : 'US$'}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="card" aria-label={t('tx.category')}>
+        <CategoryGrid
+          categories={categories}
+          value={categoryId}
+          onChange={setCategoryId}
+          label={t('tx.category')}
+        />
+      </section>
 
       {accounts.length === 0 ? (
         <p className="hint">{t('tx.errNoAccount')}</p>
       ) : (
-        <AccountPicker
-          accounts={accounts}
-          balanceOf={balanceOf}
-          baseCurrency={baseCurrency}
-          value={accountId}
-          onChange={setAccountId}
-          label={t('tx.account')}
-        />
+        <section className="card" aria-label={t('tx.account')}>
+          <AccountPicker
+            accounts={accounts}
+            balanceOf={balanceOf}
+            baseCurrency={baseCurrency}
+            value={accountId}
+            onChange={setAccountId}
+            label={t('tx.account')}
+          />
+        </section>
       )}
 
-      <div className="grid grid-cols-2 gap-3">
-        <label className="label">
-          {t('tx.date')}
-          <span className="date-wrap">
-            <CalendarIcon size={18} />
+      <section className="card flex flex-col gap-3" aria-label={t('tx.sectionDetails')}>
+        <h2 className="text-lg font-semibold">{t('tx.sectionDetails')}</h2>
+        <div className="grid grid-cols-2 gap-3">
+          <label className="label">
+            {t('tx.date')}
+            <span className="date-wrap">
+              <CalendarIcon size={18} />
+              <input
+                type="date"
+                className="input"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
+            </span>
+          </label>
+          <label className="label">
+            {t('tx.note')}
             <input
-              type="date"
               className="input"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder={t('tx.notePlaceholder')}
+              maxLength={280}
             />
-          </span>
-        </label>
-        <label className="label">
-          {t('tx.note')}
-          <input
-            className="input"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder={t('tx.notePlaceholder')}
-            maxLength={280}
-          />
-        </label>
-      </div>
+          </label>
+        </div>
+      </section>
 
       <details className="advanced">
         <summary>{t('tx.splits')}</summary>
