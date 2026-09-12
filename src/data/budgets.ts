@@ -1,6 +1,6 @@
 import { useQuery } from '@powersync/react';
 import type { AppDatabase } from '../powersync/db';
-import { txnDisplayParams, txnDisplaySQL } from './display';
+import { txnDisplaySQL } from './display';
 import type { BudgetPeriod } from './types';
 
 export interface BudgetRow {
@@ -47,6 +47,28 @@ export function useBudgets(householdId: string | null): BudgetView[] {
  * Sums split rows converted proportionally (split × txn display / txn amount),
  * so split and single-category transactions count uniformly.
  */
+export interface BuiltQuery {
+  sql: string;
+  params: (string | number | null)[];
+}
+
+export function buildBudgetSpentQuery(
+  householdId: string | null,
+  categoryId: string,
+  from: string,
+  to: string,
+  displayBase: string
+): BuiltQuery {
+  return {
+    sql: `SELECT COALESCE(SUM(s.amount * (${txnDisplaySQL('t', displayBase)}) / t.amount), 0) AS spent
+     FROM transaction_splits s
+     JOIN transactions t ON t.id = s.transaction_id
+     WHERE t.household_id = ? AND s.category_id = ?
+       AND t.kind = 'expense' AND t.txn_date >= ? AND t.txn_date <= ?`,
+    params: [householdId ?? '', categoryId, from, to],
+  };
+}
+
 export function useBudgetSpent(
   householdId: string | null,
   categoryId: string,
@@ -54,14 +76,8 @@ export function useBudgetSpent(
   to: string,
   displayBase: string
 ): number {
-  const { data } = useQuery<{ spent: number }>(
-    `SELECT COALESCE(SUM(s.amount * (${txnDisplaySQL('t')}) / t.amount), 0) AS spent
-     FROM transaction_splits s
-     JOIN transactions t ON t.id = s.transaction_id
-     WHERE t.household_id = ? AND s.category_id = ?
-       AND t.kind = 'expense' AND t.txn_date >= ? AND t.txn_date <= ?`,
-    [householdId ?? '', categoryId, from, to, ...txnDisplayParams(displayBase)]
-  );
+  const { sql, params } = buildBudgetSpentQuery(householdId, categoryId, from, to, displayBase);
+  const { data } = useQuery<{ spent: number }>(sql, params);
   return data[0]?.spent ?? 0;
 }
 

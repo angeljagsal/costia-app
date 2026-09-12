@@ -1,11 +1,11 @@
 import { useQuery } from '@powersync/react';
-import {
-  openingDisplayParams,
-  openingDisplaySQL,
-  txnDisplayParams,
-  txnDisplaySQL,
-} from './display';
+import { openingDisplaySQL, txnDisplaySQL } from './display';
 import type { Kind } from './types';
+
+export interface BuiltQuery {
+  sql: string;
+  params: (string | number | null)[];
+}
 
 export interface CategoryTotal {
   category_id: string;
@@ -15,6 +15,25 @@ export interface CategoryTotal {
 }
 
 /** Display-base totals per category over a date range (split-proportional). */
+export function buildCategoryTotalsQuery(
+  householdId: string | null,
+  kind: Kind,
+  from: string,
+  to: string,
+  displayBase: string
+): BuiltQuery {
+  return {
+    sql: `SELECT c.id AS category_id, c.key AS key, c.label AS label,
+       COALESCE(SUM(s.amount * (${txnDisplaySQL('t', displayBase)}) / t.amount), 0) AS total
+     FROM transaction_splits s
+     JOIN transactions t ON t.id = s.transaction_id
+     JOIN categories c ON c.id = s.category_id
+     WHERE t.household_id = ? AND c.kind = ? AND t.txn_date >= ? AND t.txn_date <= ?
+     GROUP BY c.id ORDER BY total DESC`,
+    params: [householdId ?? '', kind, from, to],
+  };
+}
+
 export function useCategoryTotals(
   householdId: string | null,
   kind: Kind,
@@ -22,17 +41,8 @@ export function useCategoryTotals(
   to: string,
   displayBase: string
 ): CategoryTotal[] {
-  const d = txnDisplaySQL('t');
-  const { data } = useQuery<CategoryTotal>(
-    `SELECT c.id AS category_id, c.key AS key, c.label AS label,
-       COALESCE(SUM(s.amount * (${d}) / t.amount), 0) AS total
-     FROM transaction_splits s
-     JOIN transactions t ON t.id = s.transaction_id
-     JOIN categories c ON c.id = s.category_id
-     WHERE t.household_id = ? AND c.kind = ? AND t.txn_date >= ? AND t.txn_date <= ?
-     GROUP BY c.id ORDER BY total DESC`,
-    [householdId ?? '', kind, from, to, ...txnDisplayParams(displayBase)]
-  );
+  const { sql, params } = buildCategoryTotalsQuery(householdId, kind, from, to, displayBase);
+  const { data } = useQuery<CategoryTotal>(sql, params);
   return data;
 }
 
@@ -44,28 +54,31 @@ export interface MonthFlow {
 }
 
 /** Per-month display-base income vs expenses inside a range. */
+export function buildMonthlyFlowQuery(
+  householdId: string | null,
+  from: string,
+  to: string,
+  displayBase: string
+): BuiltQuery {
+  return {
+    sql: `SELECT substr(t.txn_date, 1, 7) AS month,
+       SUM(CASE WHEN t.kind = 'income' THEN (${txnDisplaySQL('t', displayBase)}) ELSE 0 END) AS income,
+       SUM(CASE WHEN t.kind = 'expense' THEN (${txnDisplaySQL('t', displayBase)}) ELSE 0 END) AS expenses
+     FROM transactions t
+     WHERE t.household_id = ? AND t.txn_date >= ? AND t.txn_date <= ?
+     GROUP BY month ORDER BY month`,
+    params: [householdId ?? '', from, to],
+  };
+}
+
 export function useMonthlyFlow(
   householdId: string | null,
   from: string,
   to: string,
   displayBase: string
 ): MonthFlow[] {
-  const d = txnDisplaySQL('t');
-  const { data } = useQuery<MonthFlow>(
-    `SELECT substr(t.txn_date, 1, 7) AS month,
-       SUM(CASE WHEN t.kind = 'income' THEN (${d}) ELSE 0 END) AS income,
-       SUM(CASE WHEN t.kind = 'expense' THEN (${txnDisplaySQL('t')}) ELSE 0 END) AS expenses
-     FROM transactions t
-     WHERE t.household_id = ? AND t.txn_date >= ? AND t.txn_date <= ?
-     GROUP BY month ORDER BY month`,
-    [
-      householdId ?? '',
-      from,
-      to,
-      ...txnDisplayParams(displayBase),
-      ...txnDisplayParams(displayBase),
-    ]
-  );
+  const { sql, params } = buildMonthlyFlowQuery(householdId, from, to, displayBase);
+  const { data } = useQuery<MonthFlow>(sql, params);
   return data;
 }
 
@@ -78,47 +91,44 @@ export interface AccountNet {
  * Signed display-base flow per account inside a date range (income +,
  * expense −, transfer in +, transfer out −). Openings excluded (flow only).
  */
+export function buildAccountPeriodNetQuery(
+  householdId: string | null,
+  from: string,
+  to: string,
+  displayBase: string
+): BuiltQuery {
+  const d = txnDisplaySQL('t', displayBase);
+  return {
+    sql: `SELECT account_id, SUM(net) AS net FROM (
+       SELECT account_id,
+         CASE WHEN kind = 'income' THEN (${d})
+              ELSE -(${d}) END AS net
+       FROM transactions t
+       WHERE household_id = ? AND kind IN ('income', 'expense')
+         AND t.txn_date >= ? AND t.txn_date <= ?
+       UNION ALL
+       SELECT to_account_id AS account_id, (${d}) AS net
+       FROM transactions t
+       WHERE household_id = ? AND kind = 'transfer'
+         AND t.txn_date >= ? AND t.txn_date <= ?
+       UNION ALL
+       SELECT account_id, -(${d}) AS net
+       FROM transactions t
+       WHERE household_id = ? AND kind = 'transfer'
+         AND t.txn_date >= ? AND t.txn_date <= ?
+     ) GROUP BY account_id`,
+    params: [householdId ?? '', from, to, householdId ?? '', from, to, householdId ?? '', from, to],
+  };
+}
+
 export function useAccountPeriodNet(
   householdId: string | null,
   from: string,
   to: string,
   displayBase: string
 ): AccountNet[] {
-  const { data } = useQuery<AccountNet>(
-    `SELECT account_id, SUM(net) AS net FROM (
-       SELECT account_id,
-         CASE WHEN kind = 'income' THEN (${txnDisplaySQL('t')})
-              ELSE -(${txnDisplaySQL('t')}) END AS net
-       FROM transactions t
-       WHERE household_id = ? AND kind IN ('income', 'expense')
-         AND t.txn_date >= ? AND t.txn_date <= ?
-       UNION ALL
-       SELECT to_account_id AS account_id, (${txnDisplaySQL('t')}) AS net
-       FROM transactions t
-       WHERE household_id = ? AND kind = 'transfer'
-         AND t.txn_date >= ? AND t.txn_date <= ?
-       UNION ALL
-       SELECT account_id, -(${txnDisplaySQL('t')}) AS net
-       FROM transactions t
-       WHERE household_id = ? AND kind = 'transfer'
-         AND t.txn_date >= ? AND t.txn_date <= ?
-     ) GROUP BY account_id`,
-    [
-      householdId ?? '',
-      from,
-      to,
-      ...txnDisplayParams(displayBase),
-      ...txnDisplayParams(displayBase),
-      householdId ?? '',
-      from,
-      to,
-      ...txnDisplayParams(displayBase),
-      householdId ?? '',
-      from,
-      to,
-      ...txnDisplayParams(displayBase),
-    ]
-  );
+  const { sql, params } = buildAccountPeriodNetQuery(householdId, from, to, displayBase);
+  const { data } = useQuery<AccountNet>(sql, params);
   return data;
 }
 
@@ -126,6 +136,38 @@ export interface BalancePoint {
   /** YYYY-MM */
   month: string;
   balance: number;
+}
+
+export function buildBalanceHistoryQuery(
+  householdId: string | null,
+  toMonth: string,
+  displayBase: string
+): BuiltQuery {
+  const d = txnDisplaySQL('t', displayBase);
+  return {
+    sql: `SELECT substr(t.txn_date, 1, 7) AS month,
+       SUM(CASE WHEN t.kind = 'income' THEN (${d})
+                WHEN t.kind = 'expense' THEN -(${d})
+                ELSE 0 END) AS net
+     FROM transactions t
+     WHERE t.household_id = ? AND substr(t.txn_date, 1, 7) <= ?
+     GROUP BY month ORDER BY month`,
+    params: [householdId ?? '', toMonth],
+  };
+}
+
+export function buildBalanceSeedQuery(
+  householdId: string | null,
+  toMonth: string,
+  displayBase: string
+): BuiltQuery {
+  return {
+    sql: `SELECT COALESCE(SUM(${openingDisplaySQL('a', displayBase)}), 0) AS seed
+     FROM accounts a
+     WHERE a.household_id = ?
+       AND (a.opening_date IS NULL OR substr(a.opening_date, 1, 7) <= ?)`,
+    params: [householdId ?? '', toMonth],
+  };
 }
 
 /**
@@ -138,24 +180,10 @@ export function useBalanceHistory(
   toMonth: string,
   displayBase: string
 ): BalancePoint[] {
-  const d = txnDisplaySQL('t');
-  const { data } = useQuery<{ month: string; net: number }>(
-    `SELECT substr(t.txn_date, 1, 7) AS month,
-       SUM(CASE WHEN t.kind = 'income' THEN (${d})
-                WHEN t.kind = 'expense' THEN -(${txnDisplaySQL('t')})
-                ELSE 0 END) AS net
-     FROM transactions t
-     WHERE t.household_id = ? AND substr(t.txn_date, 1, 7) <= ?
-     GROUP BY month ORDER BY month`,
-    [householdId ?? '', toMonth, ...txnDisplayParams(displayBase), ...txnDisplayParams(displayBase)]
-  );
-  const { data: seedRows } = useQuery<{ seed: number }>(
-    `SELECT COALESCE(SUM(${openingDisplaySQL('a')}), 0) AS seed
-     FROM accounts a
-     WHERE a.household_id = ?
-       AND (a.opening_date IS NULL OR substr(a.opening_date, 1, 7) <= ?)`,
-    [householdId ?? '', toMonth, ...openingDisplayParams(displayBase)]
-  );
+  const flow = buildBalanceHistoryQuery(householdId, toMonth, displayBase);
+  const seed = buildBalanceSeedQuery(householdId, toMonth, displayBase);
+  const { data } = useQuery<{ month: string; net: number }>(flow.sql, flow.params);
+  const { data: seedRows } = useQuery<{ seed: number }>(seed.sql, seed.params);
   let running = seedRows[0]?.seed ?? 0;
   const points: BalancePoint[] = [];
   for (const row of data) {

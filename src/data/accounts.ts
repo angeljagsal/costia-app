@@ -1,12 +1,7 @@
 import { useQuery } from '@powersync/react';
 import { toBaseAmount } from '../lib/fx';
 import type { AppDatabase } from '../powersync/db';
-import {
-  openingDisplayParams,
-  openingDisplaySQL,
-  txnDisplayParams,
-  txnDisplaySQL,
-} from './display';
+import { openingDisplaySQL, txnDisplaySQL } from './display';
 import type { Account, AccountType, Currency } from './types';
 
 export function useAccounts(householdId: string | null): Account[] {
@@ -33,14 +28,19 @@ export interface AccountBalance {
  * source and credit the destination. Transfers never touch income/expense
  * totals — balances only. Every account is listed, even with zero transactions.
  */
-export function useAccountBalances(
+export interface BuiltQuery {
+  sql: string;
+  params: (string | number | null)[];
+}
+
+export function buildAccountBalancesQuery(
   householdId: string | null,
   displayBase: string
-): AccountBalance[] {
-  const txnD = txnDisplaySQL('t');
-  const openD = openingDisplaySQL('a');
-  const { data } = useQuery<AccountBalance>(
-    `SELECT a.id AS account_id, (${openD}) + COALESCE(t.net, 0) AS balance
+): BuiltQuery {
+  const txnD = txnDisplaySQL('t', displayBase);
+  const openD = openingDisplaySQL('a', displayBase);
+  return {
+    sql: `SELECT a.id AS account_id, (${openD}) + COALESCE(t.net, 0) AS balance
      FROM accounts a
      LEFT JOIN (
        SELECT account_id, SUM(balance) AS net FROM (
@@ -48,26 +48,24 @@ export function useAccountBalances(
            CASE WHEN kind = 'expense' THEN -(${txnD}) ELSE (${txnD}) END AS balance
          FROM transactions t WHERE household_id = ? AND kind IN ('expense', 'income')
          UNION ALL
-         SELECT to_account_id AS account_id, (${txnDisplaySQL('t')}) AS balance
+         SELECT to_account_id AS account_id, (${txnDisplaySQL('t', displayBase)}) AS balance
          FROM transactions t WHERE household_id = ? AND kind = 'transfer'
          UNION ALL
-         SELECT account_id, -(${txnDisplaySQL('t')}) AS balance
+         SELECT account_id, -(${txnDisplaySQL('t', displayBase)}) AS balance
          FROM transactions t WHERE household_id = ? AND kind = 'transfer'
        ) GROUP BY account_id
      ) t ON t.account_id = a.id
      WHERE a.household_id = ?`,
-    [
-      ...openingDisplayParams(displayBase),
-      householdId ?? '',
-      ...txnDisplayParams(displayBase),
-      ...txnDisplayParams(displayBase), // CASE references the expression twice
-      householdId ?? '',
-      ...txnDisplayParams(displayBase),
-      householdId ?? '',
-      ...txnDisplayParams(displayBase),
-      householdId ?? '',
-    ]
-  );
+    params: [householdId ?? '', householdId ?? '', householdId ?? '', householdId ?? ''],
+  };
+}
+
+export function useAccountBalances(
+  householdId: string | null,
+  displayBase: string
+): AccountBalance[] {
+  const { sql, params } = buildAccountBalancesQuery(householdId, displayBase);
+  const { data } = useQuery<AccountBalance>(sql, params);
   return data;
 }
 

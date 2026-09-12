@@ -1,6 +1,6 @@
 import { useQuery } from '@powersync/react';
 import { toBaseAmount } from '../lib/fx';
-import { txnDisplayParams, txnDisplaySQL } from './display';
+import { txnDisplaySQL } from './display';
 import type { AppDatabase } from '../powersync/db';
 import type {
   SplitRow,
@@ -189,13 +189,22 @@ export function useTransaction(id: string | undefined): {
   return { tx: rows[0] ?? null, splits, tagIds: links.map((l) => l.tag_id) };
 }
 
-export function useTransactions(
+export interface BuiltQuery {
+  sql: string;
+  params: (string | number | null)[];
+}
+
+/**
+ * Query builder behind useTransactions (exported so the exact SQL + params
+ * can run against a real SQLite in tests — placeholder mismatches throw).
+ */
+export function buildTransactionsQuery(
   householdId: string | null,
   f: TransactionFilters,
   limit: number,
   offset: number,
   displayBase: string
-): TransactionView[] {
+): BuiltQuery {
   const clauses = ['t.household_id = ?'];
   const params: (string | number)[] = [householdId ?? ''];
   const search = f.search.trim();
@@ -237,18 +246,24 @@ export function useTransactions(
         : 'ORDER BY t.txn_date DESC, t.created_at DESC';
   const sql = `SELECT t.*, a.name AS account_name, d.name AS to_account_name,
       c.key AS category_key, c.label AS category_label,
-      ${txnDisplaySQL('t')} AS display_amount
+      ${txnDisplaySQL('t', displayBase)} AS display_amount
     FROM transactions t
     JOIN accounts a ON a.id = t.account_id
     LEFT JOIN accounts d ON d.id = t.to_account_id
     LEFT JOIN categories c ON c.id = t.category_id
     WHERE ${clauses.join(' AND ')}
     ${orderBy} LIMIT ? OFFSET ?`;
-  const { data } = useQuery<TransactionView>(sql, [
-    ...params,
-    ...txnDisplayParams(displayBase),
-    limit,
-    offset,
-  ]);
+  return { sql, params: [...params, limit, offset] };
+}
+
+export function useTransactions(
+  householdId: string | null,
+  f: TransactionFilters,
+  limit: number,
+  offset: number,
+  displayBase: string
+): TransactionView[] {
+  const { sql, params } = buildTransactionsQuery(householdId, f, limit, offset, displayBase);
+  const { data } = useQuery<TransactionView>(sql, params);
   return data;
 }
