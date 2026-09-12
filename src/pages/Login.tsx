@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useAuth } from '../auth/useAuth';
 import type { OAuthProvider } from '../auth/useAuth';
-import { GoogleIcon, MicrosoftIcon } from '../components/icons';
-import { BankIcon, BudgetIcon, RepeatIcon } from '../components/icons';
+import { BankIcon, BudgetIcon, GoogleIcon, RepeatIcon } from '../components/icons';
 import { useI18n } from '../i18n/useI18n';
 
 type Status =
@@ -26,7 +25,6 @@ const POINTS = [
 
 const OAUTH_BUTTONS: { provider: OAuthProvider; label: string; icon: typeof GoogleIcon }[] = [
   { provider: 'google', label: 'auth.continueWithGoogle', icon: GoogleIcon },
-  { provider: 'azure', label: 'auth.continueWithMicrosoft', icon: MicrosoftIcon },
 ];
 
 export function Login() {

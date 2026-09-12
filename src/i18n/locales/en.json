@@ -55,7 +55,6 @@
     "title": "Sign in",
     "subtitle": "Use your Google or Microsoft account, or your password.",
     "continueWithGoogle": "Continue with Google",
-    "continueWithMicrosoft": "Continue with Microsoft",
     "orEmail": "or use email",
     "passwordLabel": "Password",
     "signIn": "Sign in",

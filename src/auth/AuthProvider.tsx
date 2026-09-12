@@ -33,13 +33,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!sb) return { ok: false, message: 'notConfigured' as const };
     // Browser redirect flow: Supabase returns the provider URL, the browser
     // leaves, and the session restores via onAuthStateChange on return.
-    // Azure requires the email scope; harmless for Google.
     const { error } = await sb.auth.signInWithOAuth({
       provider,
-      options: {
-        redirectTo: window.location.origin,
-        scopes: provider === 'azure' ? 'email' : undefined,
-      },
+      options: { redirectTo: window.location.origin },
     });
     if (!error) return { ok: true, message: 'redirecting' };
     return { ok: false, message: 'error' };

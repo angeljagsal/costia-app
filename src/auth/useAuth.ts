@@ -7,7 +7,7 @@ export interface AuthResult {
   message: string;
 }
 
-export type OAuthProvider = 'google' | 'azure';
+export type OAuthProvider = 'google';
 
 export interface AuthCtx {
   configured: boolean;
