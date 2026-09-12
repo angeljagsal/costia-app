@@ -102,7 +102,13 @@
     "trend": "Income vs expenses",
     "balances": "Balances",
     "balanceHistory": "Balance history",
-    "noData": "Not enough data yet — add your first transactions."
+    "noData": "Not enough data yet — add your first transactions.",
+    "tabOverview": "Overview",
+    "tabTrends": "Trends",
+    "tabBalances": "Balances",
+    "period": "Period",
+    "export": "Export CSV",
+    "periodNet": "Net in period"
   },
   "more": {
     "title": "More",

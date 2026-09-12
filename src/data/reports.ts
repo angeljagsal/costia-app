@@ -69,6 +69,59 @@ export function useMonthlyFlow(
   return data;
 }
 
+export interface AccountNet {
+  account_id: string;
+  net: number;
+}
+
+/**
+ * Signed display-base flow per account inside a date range (income +,
+ * expense −, transfer in +, transfer out −). Openings excluded (flow only).
+ */
+export function useAccountPeriodNet(
+  householdId: string | null,
+  from: string,
+  to: string,
+  displayBase: string
+): AccountNet[] {
+  const { data } = useQuery<AccountNet>(
+    `SELECT account_id, SUM(net) AS net FROM (
+       SELECT account_id,
+         CASE WHEN kind = 'income' THEN (${txnDisplaySQL('t')})
+              ELSE -(${txnDisplaySQL('t')}) END AS net
+       FROM transactions t
+       WHERE household_id = ? AND kind IN ('income', 'expense')
+         AND t.txn_date >= ? AND t.txn_date <= ?
+       UNION ALL
+       SELECT to_account_id AS account_id, (${txnDisplaySQL('t')}) AS net
+       FROM transactions t
+       WHERE household_id = ? AND kind = 'transfer'
+         AND t.txn_date >= ? AND t.txn_date <= ?
+       UNION ALL
+       SELECT account_id, -(${txnDisplaySQL('t')}) AS net
+       FROM transactions t
+       WHERE household_id = ? AND kind = 'transfer'
+         AND t.txn_date >= ? AND t.txn_date <= ?
+     ) GROUP BY account_id`,
+    [
+      householdId ?? '',
+      from,
+      to,
+      ...txnDisplayParams(displayBase),
+      ...txnDisplayParams(displayBase),
+      householdId ?? '',
+      from,
+      to,
+      ...txnDisplayParams(displayBase),
+      householdId ?? '',
+      from,
+      to,
+      ...txnDisplayParams(displayBase),
+    ]
+  );
+  return data;
+}
+
 export interface BalancePoint {
   /** YYYY-MM */
   month: string;

@@ -102,7 +102,13 @@
     "trend": "Ingresos vs gastos",
     "balances": "Saldos",
     "balanceHistory": "Historial de saldo",
-    "noData": "Aún no hay datos — agrega tus primeros movimientos."
+    "noData": "Aún no hay datos — agrega tus primeros movimientos.",
+    "tabOverview": "Resumen",
+    "tabTrends": "Tendencias",
+    "tabBalances": "Saldos",
+    "period": "Periodo",
+    "export": "Exportar CSV",
+    "periodNet": "Neto del periodo"
   },
   "more": {
     "title": "Más",
