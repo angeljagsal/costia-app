@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import { usePowerSync } from '@powersync/react';
 import { AccountPicker } from '../components/AccountPicker';
 import { CategoryGrid } from '../components/CategoryGrid';
+import { CalendarIcon } from '../components/icons';
 import { useAccountBalances, useAccounts } from '../data/accounts';
 import { categoryName, useCategories } from '../data/categories';
 import { useHouseholdId } from '../data/household';
@@ -248,12 +249,15 @@ function TransactionFormInner({
       <div className="grid grid-cols-2 gap-3">
         <label className="label">
           {t('tx.date')}
-          <input
-            type="date"
-            className="input"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
+          <span className="date-wrap">
+            <CalendarIcon size={18} />
+            <input
+              type="date"
+              className="input"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          </span>
         </label>
         <label className="label">
           {t('tx.note')}

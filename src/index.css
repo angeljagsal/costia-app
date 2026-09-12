@@ -165,7 +165,45 @@ textarea.input {
 }
 
 select.input {
-  appearance: auto;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+
+/* Date field with a custom calendar mark. The native picker indicator is
+ * kept invisible-but-clickable on top so behavior stays 100% native. */
+.date-wrap {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.date-wrap > svg {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.date-wrap > input {
+  padding-right: 2.5rem;
+  width: 100%;
+}
+
+.date-wrap > input::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 2.5rem;
+  height: 100%;
+  cursor: pointer;
 }
 
 .btn {

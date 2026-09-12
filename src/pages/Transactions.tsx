@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import { usePowerSync } from '@powersync/react';
 import { Page } from '../components/Page';
-import { PencilIcon, PlusIcon, SearchIcon } from '../components/icons';
+import { CalendarIcon, PencilIcon, PlusIcon, SearchIcon } from '../components/icons';
 import { useAccounts } from '../data/accounts';
 import { categoryName, useCategories } from '../data/categories';
 import { useHouseholdId } from '../data/household';
@@ -130,21 +130,27 @@ export function Transactions() {
           <div className="grid grid-cols-2 gap-2">
             <label className="label">
               {t('tx.filterFrom')}
-              <input
-                type="date"
-                className="input"
-                value={filters.from}
-                onChange={(e) => patch({ from: e.target.value })}
-              />
+              <span className="date-wrap">
+                <CalendarIcon size={18} />
+                <input
+                  type="date"
+                  className="input"
+                  value={filters.from}
+                  onChange={(e) => patch({ from: e.target.value })}
+                />
+              </span>
             </label>
             <label className="label">
               {t('tx.filterTo')}
-              <input
-                type="date"
-                className="input"
-                value={filters.to}
-                onChange={(e) => patch({ to: e.target.value })}
-              />
+              <span className="date-wrap">
+                <CalendarIcon size={18} />
+                <input
+                  type="date"
+                  className="input"
+                  value={filters.to}
+                  onChange={(e) => patch({ to: e.target.value })}
+                />
+              </span>
             </label>
           </div>
         </div>
