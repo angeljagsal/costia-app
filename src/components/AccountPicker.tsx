@@ -13,7 +13,7 @@ export function AccountPicker({
   value,
   onChange,
   label,
-  initialVisible = 4,
+  initialVisible = 2,
 }: {
   accounts: Account[];
   balanceOf: (id: string) => number;

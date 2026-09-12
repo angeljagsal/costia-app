@@ -214,6 +214,7 @@ function TransactionFormInner({
             placeholder="0.00"
             aria-label={t('tx.amount')}
           />
+          <span aria-hidden="true" className="hero-divider" />
           <div className="currency-chips" role="group" aria-label={t('tx.currency')}>
             {(['MXN', 'USD'] as Currency[]).map((c) => (
               <button

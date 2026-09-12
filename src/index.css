@@ -402,7 +402,7 @@ select.input {
 .amount-hero {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1.25rem;
   background: var(--surface);
   border: 1px solid var(--input-border);
   border-radius: 16px;
@@ -436,6 +436,14 @@ select.input {
 .amount-hero input::placeholder {
   color: var(--text-muted);
   opacity: 0.6;
+}
+
+.hero-divider {
+  width: 1px;
+  align-self: stretch;
+  min-height: 3.5rem;
+  background: var(--border);
+  flex-shrink: 0;
 }
 
 .currency-chips {
@@ -496,7 +504,7 @@ select.input {
   background: var(--accent-soft);
 }
 
-.option-card .avatar {
+.avatar {
   width: 34px;
   height: 34px;
   flex-shrink: 0;

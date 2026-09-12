@@ -1,52 +1,47 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { categoryName } from '../data/categories';
 import type { Category } from '../data/types';
 import { useI18n } from '../i18n/useI18n';
+import { avatarColor, initialOf } from '../lib/avatar';
 
-/** Flat, solid avatar colors (no gradients). */
-const AVATAR_COLORS = [
-  '#1f75cb',
-  '#108548',
-  '#6e49cb',
-  '#0098a1',
-  '#b34700',
-  '#8a1c40',
-  '#5e6b7a',
-  '#7a5c00',
-];
-
-function avatarColor(seed: string): string {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
-  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
-}
-
-function initialOf(name: string): string {
-  const clean = name.trim();
-  return clean ? clean[0]!.toUpperCase() : '?';
+/** One grid row on any screen: 2 columns on mobile, 3 on desktop. */
+function useRowSize(): number {
+  const [wide, setWide] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)');
+    const onChange = (e: MediaQueryListEvent) => setWide(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  return wide ? 3 : 2;
 }
 
 /** Visual category grid: big tap targets with letter avatars, single-select.
- *  Long lists collapse to the first few with a show-all expander. */
+ *  Shows one row, collapsing the rest behind show-all. */
 export function CategoryGrid({
   categories,
   value,
   onChange,
   label,
-  initialVisible = 6,
+  initialVisible,
 }: {
   categories: Category[];
   value: string;
   onChange: (id: string) => void;
   label: string;
+  /** Defaults to one grid row (2 mobile, 3 desktop). */
   initialVisible?: number;
 }) {
   const { t } = useI18n();
   const [expanded, setExpanded] = useState(false);
+  const rowSize = useRowSize();
+  const visibleCount = initialVisible ?? rowSize;
   // Always keep the selected item visible, even when collapsed.
   const visible = expanded
     ? categories
-    : categories.filter((c, i) => i < initialVisible || c.id === value);
+    : categories.filter((c, i) => i < visibleCount || c.id === value);
   return (
     <div role="group" aria-label={label} className="flex flex-col gap-2">
       <p className="form-section-title">{label}</p>
@@ -79,7 +74,7 @@ export function CategoryGrid({
           );
         })}
       </div>
-      {categories.length > initialVisible ? (
+      {categories.length > visibleCount ? (
         <button
           type="button"
           className="btn btn-secondary self-start"

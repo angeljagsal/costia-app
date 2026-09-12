@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import { usePowerSync } from '@powersync/react';
 import { Page } from '../components/Page';
 import { CalendarIcon, PencilIcon, PlusIcon, SearchIcon } from '../components/icons';
+import { avatarColor, initialOf } from '../lib/avatar';
 import { useAccounts } from '../data/accounts';
 import { categoryName, useCategories } from '../data/categories';
 import { useHouseholdId } from '../data/household';
+import { addDaysISO, todayLocal } from '../data/periods';
 import { useTags } from '../data/tags';
 import { deleteTransaction, useTransactions } from '../data/transactions';
 import { EMPTY_FILTERS } from '../data/types';
-import type { TransactionFilters } from '../data/types';
+import type { TransactionFilters, TransactionView } from '../data/types';
 import { useI18n } from '../i18n/useI18n';
 import { loadBaseCurrency } from '../lib/prefs';
 
@@ -61,6 +63,22 @@ export function Transactions() {
     if (!window.confirm(t('common.confirmDelete'))) return;
     await deleteTransaction(db, id);
   };
+
+  // Bank-statement grouping, newest day first (rows already arrive sorted).
+  const groups = useMemo(() => {
+    const byDay = new Map<string, TransactionView[]>();
+    for (const row of visible) {
+      const list = byDay.get(row.txn_date);
+      if (list) list.push(row);
+      else byDay.set(row.txn_date, [row]);
+    }
+    return [...byDay.entries()];
+  }, [visible]);
+
+  const today = todayLocal();
+  const yesterday = addDaysISO(today, -1);
+  const groupLabel = (iso: string) =>
+    iso === today ? t('tx.today') : iso === yesterday ? t('tx.yesterday') : day(locale, iso);
 
   return (
     <Page title={t('tx.title')} body={t('tx.subtitle')}>
@@ -169,51 +187,74 @@ export function Transactions() {
       ) : visible.length === 0 ? (
         <p className="hint">{t('common.empty')}</p>
       ) : (
-        <ul className="flex flex-col gap-2">
-          {visible.map((row) => {
-            const expense = row.kind === 'expense';
-            return (
-              <li key={row.id} className="card flex items-center gap-3">
-                <div className="min-w-0 flex-1">
-                  <p className="font-semibold">
-                    {categoryName(t, { key: row.category_key, label: row.category_label })}
-                    <span className="hint font-normal"> · {row.account_name}</span>
-                  </p>
-                  <p className="hint">
-                    {day(locale, row.txn_date)}
-                    {row.note ? ` · ${row.note}` : ''}
-                  </p>
-                  <p className="hint">≈ {money(locale, row.base_amount, baseCurrency)}</p>
-                </div>
-                <p
-                  className="shrink-0 text-lg font-bold"
-                  style={{ color: expense ? 'var(--danger)' : 'var(--success)' }}
-                >
-                  {expense ? '−' : '+'}
-                  {money(locale, row.amount, row.currency)}
-                </p>
-                <div className="flex shrink-0 flex-col gap-1">
-                  <Link
-                    to={`/transactions/${row.id}/edit`}
-                    className="btn btn-secondary"
-                    aria-label={t('tx.edit')}
-                  >
-                    <PencilIcon size={16} />
-                    {t('tx.edit')}
-                  </Link>
-                  <button
-                    type="button"
-                    className="btn btn-danger"
-                    onClick={() => onDelete(row.id)}
-                    aria-label={`${t('common.delete')}: ${categoryName(t, { key: row.category_key, label: row.category_label })}`}
-                  >
-                    {t('common.delete')}
-                  </button>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+        <div className="flex flex-col gap-4">
+          {groups.map(([date, items]) => (
+            <section key={date} aria-label={groupLabel(date)} className="flex flex-col gap-2">
+              <p className="form-section-title">{groupLabel(date)}</p>
+              <ul className="flex flex-col gap-2">
+                {items.map((row) => {
+                  const expense = row.kind === 'expense';
+                  const name = categoryName(t, {
+                    key: row.category_key,
+                    label: row.category_label,
+                  });
+                  return (
+                    <li key={row.id} className="card flex flex-col gap-2">
+                      <div className="flex items-center gap-3">
+                        <span
+                          aria-hidden="true"
+                          className="avatar"
+                          style={{
+                            background: avatarColor(
+                              row.category_key ?? row.category_label ?? row.id
+                            ),
+                          }}
+                        >
+                          {initialOf(name)}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-semibold">{name}</p>
+                          <p className="hint truncate">
+                            {row.account_name}
+                            {row.note ? ` · ${row.note}` : ''}
+                          </p>
+                        </div>
+                        <div className="shrink-0 text-right">
+                          <p
+                            className="amount text-lg"
+                            style={{ color: expense ? 'var(--danger)' : 'var(--success)' }}
+                          >
+                            {expense ? '−' : '+'}
+                            {money(locale, row.amount, row.currency)}
+                          </p>
+                          <p className="hint">≈ {money(locale, row.base_amount, baseCurrency)}</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Link
+                          to={`/transactions/${row.id}/edit`}
+                          className="btn btn-secondary"
+                          aria-label={t('tx.edit')}
+                        >
+                          <PencilIcon size={16} />
+                          {t('tx.edit')}
+                        </Link>
+                        <button
+                          type="button"
+                          className="btn btn-danger"
+                          onClick={() => onDelete(row.id)}
+                          aria-label={`${t('common.delete')}: ${name}`}
+                        >
+                          {t('common.delete')}
+                        </button>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
+        </div>
       )}
 
       {hasMore ? (
