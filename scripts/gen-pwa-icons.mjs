@@ -1,14 +1,15 @@
 /**
- * Generates placeholder PWA icons (solid brand green + white center mark).
- * No dependencies — minimal RGBA PNG writer on node:zlib.
- * Real artwork + maskable.app verification land in Phase 7.
+ * Generates PWA icons: flat brand navy, full bleed, centered white rounded
+ * square (inside the inner 60% so Android mask cropping never clips it).
+ * No gradients, no artwork dependencies — minimal RGBA PNG writer on node:zlib.
+ * Verify with scripts/check-pwa.mjs; eyeball once in maskable.app.
  */
 import { deflateSync } from 'node:zlib';
 import { writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const GREEN = [22, 163, 74, 255];
+const NAVY = [41, 41, 97, 255];
 const WHITE = [255, 255, 255, 255];
 
 const CRC_TABLE = (() => {
@@ -36,16 +37,25 @@ function chunk(type, data) {
   return Buffer.concat([len, body, sum]);
 }
 
-function png(size, insetRatio) {
-  const inset = Math.floor(size * insetRatio);
+function inRoundedRect(x, y, x0, y0, x1, y1, r) {
+  const nx = Math.max(x0 + r, Math.min(x, x1 - r));
+  const ny = Math.max(y0 + r, Math.min(y, y1 - r));
+  return (x - nx) ** 2 + (y - ny) ** 2 <= r * r;
+}
+
+function png(size) {
+  // White mark: centered, 56% of the canvas, 22%-of-side corner radius.
+  const side = size * 0.56;
+  const x0 = (size - side) / 2;
+  const y0 = (size - side) / 2;
+  const r = side * 0.22;
   const stride = size * 4 + 1;
   const raw = Buffer.alloc(stride * size);
   for (let y = 0; y < size; y++) {
     const row = y * stride;
     raw[row] = 0; // no filter
     for (let x = 0; x < size; x++) {
-      const inside = x >= inset && x < size - inset && y >= inset && y < size - inset;
-      const c = inside ? WHITE : GREEN;
+      const c = inRoundedRect(x, y, x0, y0, x0 + side, y0 + side, r) ? WHITE : NAVY;
       const o = row + 1 + x * 4;
       raw[o] = c[0];
       raw[o + 1] = c[1];
@@ -58,24 +68,22 @@ function png(size, insetRatio) {
   ihdr.writeUInt32BE(size, 4);
   ihdr[8] = 8; // bit depth
   ihdr[9] = 6; // RGBA
-  const out = Buffer.concat([
+  return Buffer.concat([
     Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
     chunk('IHDR', ihdr),
     chunk('IDAT', deflateSync(raw)),
-    chunk('IEND', Buffer.alloc(0)),
+    chunk('IEND', Buffer.alloc(0))
   ]);
-  return out;
 }
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', 'public');
-const jobs = [
-  ['pwa-192x192.png', 192, 0.3],
-  ['pwa-512x512.png', 512, 0.3],
-  ['pwa-maskable-192x192.png', 192, 0.2],
-  ['pwa-maskable-512x512.png', 512, 0.2],
-  ['apple-touch-icon.png', 180, 0.3],
-];
-for (const [name, size, inset] of jobs) {
-  writeFileSync(join(root, name), png(size, inset));
+for (const [name, size] of [
+  ['pwa-192x192.png', 192],
+  ['pwa-512x512.png', 512],
+  ['pwa-maskable-192x192.png', 192],
+  ['pwa-maskable-512x512.png', 512],
+  ['apple-touch-icon.png', 180]
+]) {
+  writeFileSync(join(root, name), png(size));
   console.log(`wrote public/${name}`);
 }

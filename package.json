@@ -10,6 +10,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc -b --noEmit",
+    "check:pwa": "node scripts/check-pwa.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

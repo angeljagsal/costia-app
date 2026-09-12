@@ -15,4 +15,5 @@ jobs:
       - run: npm ci
       - run: npm run lint --if-present
       - run: npm run typecheck --if-present
+      - run: npm run check:pwa --if-present
       - run: npm run build
