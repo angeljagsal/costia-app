@@ -13,6 +13,9 @@
   Revised again 2026-09-11: Google + Microsoft OAuth added via
   `signInWithOAuth` (no new deps/env/schema; Supabase dashboard provider
   setup by owner); magic-link tab removed, password stays as fallback.
+  Same day: Microsoft dropped before setup (owner only needs Google);
+  login keeps Google + password. OAuth brand marks use exact artwork
+  (Google G paths from Wikimedia Commons).
 - ADR-008: Notifications = in-app Upcoming Bills only, no push v1 (decided 2026-09-10).
 - ADR-009: UI locales en + es-MX from day one, user-choosable (decided 2026-09-10).
 - ADR-010: `base_amount` frozen forever, even on base-currency switch (decided 2026-09-10).
