@@ -66,7 +66,6 @@ then reverted out of the working tree. Never committed.
 - Streams Validate clean in dashboard.
 
 ## Live test (your steps, needs `npm run dev` + sign-in)
-
 1. Add `VITE_POWERSYNC_URL=https://6aa21da202481fb31b954009.powersync.journeyapps.com`
    to `.env` and restart the dev server.
 2. Sign in → header pill should go Syncing… → Synced (green).
@@ -80,3 +79,22 @@ then reverted out of the working tree. Never committed.
 
 Form (amount/currency/kind/category/account/date/note/splits/tags), list with
 search + filters, FX freeze via `toBaseAmount`, all reads/writes against `db`.
+
+## Troubleshooting: green Synced pill, stuck "waiting for first sync"
+
+The pill reports the *connection*; the hint means the local `users` table has
+no row for the signed-in id. After a completed sync, that means the row is
+missing server-side (PowerSync replicates with a read-all role, so RLS can't
+be the cause). Usual reason: the account signed up before
+`0003_auth_trigger.sql` was applied. Diagnose:
+
+```sql
+select id, email, household_id from public.users;
+select * from pg_trigger where tgname = 'on_auth_user_created';
+```
+
+Fix: run `supabase/backfill-household.sql` with the sign-in email (idempotent),
+then sign out/in on the device. If the trigger itself is missing, re-run
+`0003_auth_trigger.sql` first. Note: two different sign-in methods
+(password vs Google) create two separate auth users and households by design —
+pick one account per person until multi-user households land.
