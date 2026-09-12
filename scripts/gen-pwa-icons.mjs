@@ -72,7 +72,7 @@ function png(size) {
     Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
     chunk('IHDR', ihdr),
     chunk('IDAT', deflateSync(raw)),
-    chunk('IEND', Buffer.alloc(0))
+    chunk('IEND', Buffer.alloc(0)),
   ]);
 }
 
@@ -82,7 +82,7 @@ for (const [name, size] of [
   ['pwa-512x512.png', 512],
   ['pwa-maskable-192x192.png', 192],
   ['pwa-maskable-512x512.png', 512],
-  ['apple-touch-icon.png', 180]
+  ['apple-touch-icon.png', 180],
 ]) {
   writeFileSync(join(root, name), png(size));
   console.log(`wrote public/${name}`);

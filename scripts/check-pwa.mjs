@@ -63,7 +63,7 @@ for (const [name, size] of [
   ['pwa-512x512.png', 512],
   ['pwa-maskable-192x192.png', 192],
   ['pwa-maskable-512x512.png', 512],
-  ['apple-touch-icon.png', 180]
+  ['apple-touch-icon.png', 180],
 ]) {
   try {
     const img = decodePng(join(root, name));
@@ -71,7 +71,7 @@ for (const [name, size] of [
     const checks = [
       ['dimensions', img.width === size && img.height === size],
       ['full-bleed corners', same(img.px(0, 0), NAVY) && same(img.px(size - 1, size - 1), NAVY)],
-      ['centered mark', same(img.px(mid, mid), WHITE)]
+      ['centered mark', same(img.px(mid, mid), WHITE)],
     ];
     for (const [label, ok] of checks) {
       console.log(`${ok ? 'ok  ' : 'FAIL'}  ${name} — ${label}`);

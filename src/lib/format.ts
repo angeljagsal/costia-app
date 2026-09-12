@@ -24,7 +24,8 @@ export function formatDay(locale: string, iso: string): string {
   }
 }
 
-export function formatMonthLabel(locale: string, yyyyMM: string): string {  const [y, m] = yyyyMM.split('-').map(Number);
+export function formatMonthLabel(locale: string, yyyyMM: string): string {
+  const [y, m] = yyyyMM.split('-').map(Number);
   try {
     return new Intl.DateTimeFormat(localeTag(locale), { month: 'short', year: '2-digit' }).format(
       new Date(y, m - 1, 1)

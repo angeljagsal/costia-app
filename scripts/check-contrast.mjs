@@ -43,7 +43,7 @@ const PAIRS = [
   ['dark success amounts', '#3ecf8e', '#2b2b2b', 4.5],
   ['dark warning banner', '#f2c14e', '#3a2c10', 4.5],
   ['dark hero balance', '#ffffff', '#23235f', 3.0],
-  ['dark hero hint', '#c9d8ec', '#23235f', 3.0]
+  ['dark hero hint', '#c9d8ec', '#23235f', 3.0],
 ];
 
 let failed = 0;
