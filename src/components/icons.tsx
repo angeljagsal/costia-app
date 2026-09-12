@@ -202,3 +202,27 @@ export function SearchIcon(props: IconProps) {
     </Svg>
   );
 }
+
+/**
+ * OAuth provider brand marks — the single exception to text-only buttons
+ * (user-requested; every login screen does this). Flat solid colors only.
+ */
+export function GoogleIcon(props: IconProps) {
+  return (
+    <Svg {...props} stroke="#4285F4" strokeWidth={2.4}>
+      <path d="M20.5 12.3a8.5 8.5 0 1 1-2.5-6" />
+      <path d="M12 12h8.5" />
+    </Svg>
+  );
+}
+
+export function MicrosoftIcon(props: IconProps) {
+  return (
+    <Svg {...props} stroke="none">
+      <rect x="3" y="3" width="8.5" height="8.5" rx="1.5" fill="#F25022" />
+      <rect x="12.5" y="3" width="8.5" height="8.5" rx="1.5" fill="#7FBA00" />
+      <rect x="3" y="12.5" width="8.5" height="8.5" rx="1.5" fill="#00A4EF" />
+      <rect x="12.5" y="12.5" width="8.5" height="8.5" rx="1.5" fill="#FFB900" />
+    </Svg>
+  );
+}

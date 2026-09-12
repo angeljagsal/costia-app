@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useAuth } from '../auth/useAuth';
 import type { OAuthProvider } from '../auth/useAuth';
+import { GoogleIcon, MicrosoftIcon } from '../components/icons';
 import { BankIcon, BudgetIcon, RepeatIcon } from '../components/icons';
 import { useI18n } from '../i18n/useI18n';
 
@@ -23,9 +24,9 @@ const POINTS = [
   { icon: RepeatIcon, title: 'auth.point3Title', body: 'auth.point3Body' },
 ] as const;
 
-const OAUTH_BUTTONS: { provider: OAuthProvider; label: string }[] = [
-  { provider: 'google', label: 'auth.continueWithGoogle' },
-  { provider: 'azure', label: 'auth.continueWithMicrosoft' },
+const OAUTH_BUTTONS: { provider: OAuthProvider; label: string; icon: typeof GoogleIcon }[] = [
+  { provider: 'google', label: 'auth.continueWithGoogle', icon: GoogleIcon },
+  { provider: 'azure', label: 'auth.continueWithMicrosoft', icon: MicrosoftIcon },
 ];
 
 export function Login() {
@@ -151,17 +152,21 @@ export function Login() {
           {configured ? (
             <div className="mt-4 flex flex-col gap-4">
               <div className="flex flex-col gap-2">
-                {OAUTH_BUTTONS.map((b) => (
-                  <button
-                    key={b.provider}
-                    type="button"
-                    disabled={status === 'working'}
-                    onClick={() => void onOAuth(b.provider)}
-                    className="btn btn-secondary"
-                  >
-                    {t(b.label)}
-                  </button>
-                ))}
+                {OAUTH_BUTTONS.map((b) => {
+                  const Icon = b.icon;
+                  return (
+                    <button
+                      key={b.provider}
+                      type="button"
+                      disabled={status === 'working'}
+                      onClick={() => void onOAuth(b.provider)}
+                      className="btn btn-secondary"
+                    >
+                      <Icon size={20} />
+                      {t(b.label)}
+                    </button>
+                  );
+                })}
               </div>
 
               <div className="flex items-center gap-3" aria-hidden="true">

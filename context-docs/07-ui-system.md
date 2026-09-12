@@ -39,7 +39,8 @@ outlined Cancel. Errors thrown as i18n keys, translated at the form.
 Hand-drawn 24px stroke set, `currentColor`, `aria-hidden`: home, activity,
 budget, more, plus, minus, pencil, trash, bank, tag, repeat, gear, logout,
 chevron-right, check, X, clock, calendar, search. Navigation/links only —
-never inside `<button>`.
+never inside `<button>`, except OAuth provider brand marks (Google G,
+Microsoft squares) on the login buttons per user request.
 
 ## Charts
 
