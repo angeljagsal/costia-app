@@ -98,3 +98,9 @@ then sign out/in on the device. If the trigger itself is missing, re-run
 `0003_auth_trigger.sql` first. Note: two different sign-in methods
 (password vs Google) create two separate auth users and households by design —
 pick one account per person until multi-user households land.
+
+If counts stay zero everywhere (even global `categories`) despite a green
+pill, the device's local sync state is wedged: open More → Diagnostics →
+**Reset local data**, confirm, and let the app reload into a full fresh sync.
+If a fresh sync still yields zeros, the fault is server-side — check the
+ Supabase table counts and the PowerSync dashboard instance health.

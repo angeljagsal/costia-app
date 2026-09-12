@@ -122,7 +122,10 @@
     "title": "Diagnostics",
     "subtitle": "Technical details for troubleshooting. Share a screenshot when asked.",
     "copy": "Copy details",
-    "copied": "Copied"
+    "copied": "Copied",
+    "reset": "Reset local data",
+    "resetting": "Resetting…",
+    "resetConfirm": "Delete all data stored on this device and download everything again? Your cloud data is safe."
   },
   "reports": {
     "title": "Reports",
