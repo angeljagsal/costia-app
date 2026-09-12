@@ -33,6 +33,9 @@ select; collapses past 6 with show-all) · `.radio-row` + `.radio-dot[_-fill]`
 (accounts with live balances; collapses past 4) · `details.advanced` for
 splits/tags · `.form-cta` sticky row: total + equal-sized blue Save +
 outlined Cancel. Errors thrown as i18n keys, translated at the form.
+Forms read top-to-bottom as titled `.card` sections (each with `aria-label`
+and an `h2`); optionals carry explicit "(optional)" tags plus a form-level
+`common.requiredNote` legend. Filters live in their own titled card.
 
 ## Icons (`src/components/icons.tsx`)
 
