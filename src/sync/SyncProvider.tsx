@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useAuth } from '../auth/useAuth';
 import { isSupabaseConfigured } from '../lib/supabase';
@@ -12,6 +12,10 @@ import type { SyncCtx } from './useSync';
  * bidirectional sync. Connects only when a session exists (PowerSync
  * authenticates with the Supabase access token); otherwise the app keeps
  * working against the local database.
+ *
+ * When the signed-in account changes (including sign-out), the previous
+ * account's local rows are purged first — otherwise a new session would read
+ * stale data belonging to someone else.
  */
 export function SyncProvider({ children }: { children: ReactNode }) {
   const [online, setOnline] = useState(typeof navigator === 'undefined' ? true : navigator.onLine);
@@ -46,21 +50,44 @@ export function SyncProvider({ children }: { children: ReactNode }) {
 
   const userId = session?.user?.id ?? null;
   const canSync = isSupabaseConfigured && isSyncConfigured && userId !== null;
+  const prevUserId = useRef<string | null | undefined>(undefined);
 
   useEffect(() => {
-    if (!canSync) {
-      db.disconnect().catch(() => {
-        // No active connection to close; safe to ignore.
-      });
-      return;
-    }
     let cancelled = false;
-    // Note: syncError clears itself via statusChanged once sync succeeds.
-    if (!db.connected && !db.connecting) {
-      db.connect(connector).catch((e: unknown) => {
-        if (!cancelled) setSyncError(e instanceof Error ? e.message : String(e));
-      });
-    }
+    const run = async () => {
+      if (prevUserId.current === undefined) {
+        // First mount: local data (if any) belongs to the restored session.
+        prevUserId.current = userId;
+      } else if (prevUserId.current !== userId) {
+        // Account switch or sign-out: purge stale rows before anything else.
+        prevUserId.current = userId;
+        try {
+          await db.disconnectAndClear();
+        } catch {
+          // Nothing to clear; safe to ignore.
+        }
+        if (cancelled) return;
+      }
+      if (!canSync) {
+        if (db.connected || db.connecting) {
+          try {
+            await db.disconnect();
+          } catch {
+            // No active connection to close; safe to ignore.
+          }
+        }
+        return;
+      }
+      // Note: syncError clears itself via statusChanged once sync succeeds.
+      if (!db.connected && !db.connecting) {
+        try {
+          await db.connect(connector);
+        } catch (e: unknown) {
+          if (!cancelled) setSyncError(e instanceof Error ? e.message : String(e));
+        }
+      }
+    };
+    void run();
     return () => {
       cancelled = true;
     };
