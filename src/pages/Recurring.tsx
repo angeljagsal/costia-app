@@ -224,52 +224,49 @@ export function Recurring() {
                   <option value="USD">USD — US$</option>
                 </select>
               </label>
-              <div className="flex flex-col gap-2 sm:col-span-2">
-                <p className="form-section-title">{t('recurring.cadence')}</p>
-                <div className="segmented" role="group" aria-label={t('recurring.cadence')}>
+              <label className="label">
+                {t('recurring.cadence')}
+                <select
+                  className="input"
+                  value={form.cadence}
+                  onChange={(e) => set({ cadence: e.target.value as Cadence })}
+                >
                   {CADENCES.map((c) => (
-                    <button
-                      key={c}
-                      type="button"
-                      aria-pressed={form.cadence === c}
-                      onClick={() => set({ cadence: c })}
-                    >
+                    <option key={c} value={c}>
                       {t(`recurring.${c}`)}
-                    </button>
+                    </option>
                   ))}
-                </div>
-                {form.cadence === 'custom' ? (
-                  <div className="grid grid-cols-[6rem_1fr] items-end gap-2">
-                    <label className="label">
-                      {t('recurring.everyN')}
-                      <input
-                        className="input"
-                        inputMode="numeric"
-                        min={1}
-                        value={form.intervalN}
-                        onChange={(e) => set({ intervalN: e.target.value })}
-                        placeholder="1"
-                      />
-                    </label>
-                    <div
-                      className="segmented segmented-3"
-                      role="group"
-                      aria-label={t('recurring.cadence')}
+                </select>
+              </label>
+              {form.cadence === 'custom' ? (
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="label">
+                    {t('recurring.everyN')}
+                    <input
+                      className="input"
+                      inputMode="numeric"
+                      min={1}
+                      value={form.intervalN}
+                      onChange={(e) => set({ intervalN: e.target.value })}
+                      placeholder="1"
+                    />
+                  </label>
+                  <label className="label">
+                    {t('recurring.unit')}
+                    <select
+                      className="input"
+                      value={form.intervalUnit}
+                      onChange={(e) => set({ intervalUnit: e.target.value as IntervalUnit })}
                     >
                       {UNITS.map((u) => (
-                        <button
-                          key={u}
-                          type="button"
-                          aria-pressed={form.intervalUnit === u}
-                          onClick={() => set({ intervalUnit: u })}
-                        >
+                        <option key={u} value={u}>
                           {t(UNIT_LABEL[u])}
-                        </button>
+                        </option>
                       ))}
-                    </div>
-                  </div>
-                ) : null}
-              </div>
+                    </select>
+                  </label>
+                </div>
+              ) : null}
               <label className="label">
                 {t('recurring.nextDue')}
                 <span className="date-wrap">
@@ -323,28 +320,30 @@ export function Recurring() {
               {rules.map((r) => {
                 const income = r.category_kind === 'income';
                 return (
-                  <li key={r.id} className="card flex items-center gap-3">
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold">
-                        {categoryName(t, r)}
-                        {r.is_active ? null : (
-                          <span className="hint"> · {t('recurring.paused')}</span>
-                        )}
-                      </p>
-                      <p className="hint">
-                        {cadenceLabel(t, r)} · {t('recurring.dueOn')} {day(locale, r.next_due)} ·{' '}
-                        {r.account_name}
-                        {r.note ? ` · ${r.note}` : ''}
+                  <li key={r.id} className="card flex flex-col gap-2">
+                    <div className="flex items-center gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold">
+                          {categoryName(t, r)}
+                          {r.is_active ? null : (
+                            <span className="hint"> · {t('recurring.paused')}</span>
+                          )}
+                        </p>
+                        <p className="hint">
+                          {cadenceLabel(t, r)} · {t('recurring.dueOn')} {day(locale, r.next_due)} ·{' '}
+                          {r.account_name}
+                          {r.note ? ` · ${r.note}` : ''}
+                        </p>
+                      </div>
+                      <p
+                        className="amount shrink-0 text-lg"
+                        style={{ color: income ? 'var(--success)' : 'var(--danger)' }}
+                      >
+                        {income ? '+' : '−'}
+                        {money(locale, r.amount, r.currency)}
                       </p>
                     </div>
-                    <p
-                      className="shrink-0 text-lg font-bold"
-                      style={{ color: income ? 'var(--success)' : 'var(--danger)' }}
-                    >
-                      {income ? '+' : '−'}
-                      {money(locale, r.amount, r.currency)}
-                    </p>
-                    <div className="flex shrink-0 flex-col gap-1">
+                    <div className="grid grid-cols-3 gap-2">
                       <button
                         type="button"
                         className="btn btn-secondary"

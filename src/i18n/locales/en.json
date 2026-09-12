@@ -245,6 +245,7 @@
     "category": "Category",
     "account": "Account",
     "cadence": "Repeats",
+    "unit": "Unit",
     "weekly": "Weekly",
     "monthly": "Monthly",
     "yearly": "Yearly",
