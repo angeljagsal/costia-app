@@ -18,6 +18,11 @@ Date: 2026-09-11.
   derives `kind` from the category, so no migration was needed.
   (Income support added post-Phase 5; auth moved to password + OAuth the
   same day — see decisions log.)
+- Flexible intervals (post-Phase 5): cadences weekly, biweekly, monthly,
+  quarterly, yearly, plus custom every-N days/weeks/months. Migration
+  `0010_recurring_intervals.sql` (idempotent) extends the check constraint
+  and the generator; client `AppSchema` mirrors the new columns. Run 0010
+  in the SQL editor; no Sync Streams change needed (same table).
 
 ## Budgets page
 
