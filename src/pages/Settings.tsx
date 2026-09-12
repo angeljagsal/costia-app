@@ -10,6 +10,8 @@ import type { Locale } from '../i18n/I18nProvider';
 import { useTheme } from '../theme/useTheme';
 import type { ThemeChoice } from '../theme/ThemeProvider';
 
+const APP_VERSION = (import.meta.env.VITE_APP_VERSION as string | undefined) ?? 'dev';
+
 function row(title: string, control: ReactNode) {
   return (
     <label className="card flex items-center justify-between gap-4">
@@ -88,6 +90,8 @@ export function Settings() {
           {isSupabaseConfigured ? t('settings.backendConfigured') : t('settings.backendMissing')}
         </span>
       )}
+
+      {row(t('settings.version'), <span className="hint">{APP_VERSION}</span>)}
 
       {session ? (
         <button type="button" onClick={onSignOut} className="btn btn-secondary self-start">
