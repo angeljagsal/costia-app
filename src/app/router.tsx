@@ -1,7 +1,7 @@
 import { Navigate, createBrowserRouter } from 'react-router';
 import { Layout } from '../components/Layout';
+import { LazyDashboard } from './LazyDashboard';
 import { RequireAuth } from '../components/RequireAuth';
-import { Dashboard } from '../pages/Dashboard';
 import { Login } from '../pages/Login';
 import { NotFound } from '../pages/NotFound';
 import { More } from '../pages/More';
@@ -23,7 +23,10 @@ export const router = createBrowserRouter([
       </RequireAuth>
     ),
     children: [
-      { index: true, element: <Dashboard /> },
+      {
+        index: true,
+        element: <LazyDashboard />,
+      },
       { path: 'transactions', element: <Transactions /> },
       { path: 'transactions/new', element: <TransactionForm mode="new" /> },
       { path: 'transactions/:id/edit', element: <TransactionForm mode="edit" /> },

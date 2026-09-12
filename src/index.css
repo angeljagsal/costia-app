@@ -584,7 +584,28 @@ details.advanced .advanced-body {
   padding-left: 2.5rem;
 }
 
-/* Sticky save bar: above the mobile bottom nav, flush on desktop. */
+/* Flat loading skeleton (opacity pulse, no gradients). */
+.skeleton {
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
 .form-cta {
   position: sticky;
   bottom: calc(84px + env(safe-area-inset-bottom));

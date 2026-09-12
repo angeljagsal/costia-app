@@ -205,7 +205,8 @@
     "showAll": "Ver todo",
     "showLess": "Ver menos",
     "add": "Agregar",
-    "remove": "Quitar"
+    "remove": "Quitar",
+    "loading": "Cargando…"
   },
   "tx": {
     "title": "Movimientos",

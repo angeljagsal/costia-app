@@ -205,7 +205,8 @@
     "showAll": "Show all",
     "showLess": "Show less",
     "add": "Add",
-    "remove": "Remove"
+    "remove": "Remove",
+    "loading": "Loading…"
   },
   "tx": {
     "title": "Transactions",
