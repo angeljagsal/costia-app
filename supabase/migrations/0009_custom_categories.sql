@@ -1,14 +1,32 @@
 -- 0009_custom_categories.sql — household-scoped custom categories.
 -- Global catalog rows keep household_id NULL and a `key`; custom rows carry
 -- the household and a free-text `label` with key NULL (unique ignores NULLs).
+--
+-- IDEMPOTENT: every statement is safe to re-run. A previous partial run dies
+-- on plain ADD COLUMN, so all additions below use IF NOT EXISTS guards.
 
-alter table public.categories
-  add column household_id uuid references public.households(id) on delete cascade,
-  add column label text;
+alter table public.categories add column if not exists household_id uuid;
 
+alter table public.categories add column if not exists label text;
+
+-- Foreign key under a fixed name so re-runs (and PG's default naming from a
+-- partial first run) converge instead of duplicating.
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'categories_household_id_fkey'
+  ) then
+    alter table public.categories
+      add constraint categories_household_id_fkey
+      foreign key (household_id) references public.households(id) on delete cascade;
+  end if;
+end
+$$;
+
+-- No-op when already nullable.
 alter table public.categories alter column key drop not null;
 
-create index categories_household_idx on public.categories (household_id);
+create index if not exists categories_household_idx on public.categories (household_id);
 
 -- Replace the global-read policy with scoped access. Migrations run as
 -- postgres and bypass RLS, so seeds stay untouched.
