@@ -1,22 +1,19 @@
 import { useState } from 'react';
-import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useAuth } from '../auth/useAuth';
+import type { OAuthProvider } from '../auth/useAuth';
 import { BankIcon, BudgetIcon, RepeatIcon } from '../components/icons';
 import { useI18n } from '../i18n/useI18n';
 
-type Tab = 'password' | 'magic';
 type Status =
   | 'idle'
   | 'working'
-  | 'sent'
   | 'error'
   | 'invalid'
   | 'weak'
   | 'badCredentials'
   | 'emailInUse'
-  | 'confirmEmail'
-  | 'rateLimited';
+  | 'confirmEmail';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -26,12 +23,16 @@ const POINTS = [
   { icon: RepeatIcon, title: 'auth.point3Title', body: 'auth.point3Body' },
 ] as const;
 
+const OAUTH_BUTTONS: { provider: OAuthProvider; label: string }[] = [
+  { provider: 'google', label: 'auth.continueWithGoogle' },
+  { provider: 'azure', label: 'auth.continueWithMicrosoft' },
+];
+
 export function Login() {
   const { t } = useI18n();
-  const { configured, bypassed, session, sendMagicLink, signInWithPassword, signUpWithPassword } =
+  const { configured, bypassed, session, signInWithOAuth, signInWithPassword, signUpWithPassword } =
     useAuth();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>('password');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState<Status>('idle');
@@ -43,17 +44,11 @@ export function Login() {
 
   const validEmail = EMAIL_RE.test(email.trim());
 
-  const onMagicLink = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!validEmail) {
-      setStatus('invalid');
-      return;
-    }
+  const onOAuth = async (provider: OAuthProvider) => {
     setStatus('working');
-    const res = await sendMagicLink(email.trim());
-    if (res.ok) setStatus('sent');
-    else if (res.message === 'rateLimited') setStatus('rateLimited');
-    else setStatus('error');
+    const res = await signInWithOAuth(provider);
+    // Success leaves the page (provider redirect); anything here failed.
+    if (!res.ok) setStatus('error');
   };
 
   const runPassword = async (signup: boolean) => {
@@ -82,14 +77,10 @@ export function Login() {
   };
 
   const statusMessage =
-    status === 'sent' ? (
-      <p>{t('auth.checkEmail')}</p>
-    ) : status === 'confirmEmail' ? (
+    status === 'confirmEmail' ? (
       <p>{t('auth.confirmEmail')}</p>
     ) : status === 'error' ? (
       <p className="error-text">{t('auth.error')}</p>
-    ) : status === 'rateLimited' ? (
-      <p className="error-text">{t('auth.rateLimited')}</p>
     ) : status === 'invalid' ? (
       <p className="error-text">{t('auth.invalidEmail')}</p>
     ) : status === 'weak' ? (
@@ -158,96 +149,71 @@ export function Login() {
           ) : null}
 
           {configured ? (
-            <>
-              <div className="segmented mt-4" role="tablist" aria-label={t('auth.title')}>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={tab === 'password'}
-                  onClick={() => {
-                    setTab('password');
-                    setStatus('idle');
-                  }}
-                >
-                  {t('auth.tabPassword')}
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={tab === 'magic'}
-                  onClick={() => {
-                    setTab('magic');
-                    setStatus('idle');
-                  }}
-                >
-                  {t('auth.tabMagicLink')}
-                </button>
-              </div>
-
-              {tab === 'password' ? (
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    void runPassword(false);
-                  }}
-                  className="mt-4 flex flex-col gap-4"
-                >
-                  <label className="label">
-                    {t('auth.emailLabel')}
-                    <input
-                      type="email"
-                      autoComplete="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder={t('auth.emailPlaceholder')}
-                      className="input"
-                    />
-                  </label>
-                  <label className="label">
-                    {t('auth.passwordLabel')}
-                    <input
-                      type="password"
-                      autoComplete="current-password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      minLength={6}
-                      className="input"
-                    />
-                  </label>
-                  <button type="submit" disabled={status === 'working'} className="btn btn-primary">
-                    {status === 'working' ? t('auth.sending') : t('auth.signIn')}
-                  </button>
+            <div className="mt-4 flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                {OAUTH_BUTTONS.map((b) => (
                   <button
+                    key={b.provider}
                     type="button"
                     disabled={status === 'working'}
-                    onClick={() => void runPassword(true)}
+                    onClick={() => void onOAuth(b.provider)}
                     className="btn btn-secondary"
                   >
-                    {t('auth.createAccount')}
+                    {t(b.label)}
                   </button>
-                  {statusMessage}
-                </form>
-              ) : (
-                <form onSubmit={onMagicLink} className="mt-4 flex flex-col gap-4">
-                  <label className="label">
-                    {t('auth.emailLabel')}
-                    <input
-                      type="email"
-                      autoComplete="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder={t('auth.emailPlaceholder')}
-                      className="input"
-                    />
-                  </label>
-                  <button type="submit" disabled={status === 'working'} className="btn btn-primary">
-                    {status === 'working' ? t('auth.sending') : t('auth.sendLink')}
-                  </button>
-                  {statusMessage}
-                </form>
-              )}
-            </>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-3" aria-hidden="true">
+                <span className="h-px flex-1 bg-[var(--border)]" />
+                <span className="hint">{t('auth.orEmail')}</span>
+                <span className="h-px flex-1 bg-[var(--border)]" />
+              </div>
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  void runPassword(false);
+                }}
+                className="flex flex-col gap-4"
+              >
+                <label className="label">
+                  {t('auth.emailLabel')}
+                  <input
+                    type="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder={t('auth.emailPlaceholder')}
+                    className="input"
+                  />
+                </label>
+                <label className="label">
+                  {t('auth.passwordLabel')}
+                  <input
+                    type="password"
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    minLength={6}
+                    className="input"
+                  />
+                </label>
+                <button type="submit" disabled={status === 'working'} className="btn btn-primary">
+                  {status === 'working' ? t('auth.sending') : t('auth.signIn')}
+                </button>
+                <button
+                  type="button"
+                  disabled={status === 'working'}
+                  onClick={() => void runPassword(true)}
+                  className="btn btn-secondary"
+                >
+                  {t('auth.createAccount')}
+                </button>
+                {statusMessage}
+              </form>
+            </div>
           ) : null}
 
           {bypassed ? (
