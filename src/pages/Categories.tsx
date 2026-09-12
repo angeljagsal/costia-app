@@ -155,6 +155,7 @@ export function Categories() {
         <>
           <form onSubmit={onCreate} className="card flex flex-col gap-3">
             <h2 className="text-lg font-semibold">{t('categories.new')}</h2>
+            <p className="hint">{t('common.requiredNote')}</p>
             <div className="segmented" role="group" aria-label={t('categories.kind')}>
               {(['expense', 'income'] as Kind[]).map((k) => (
                 <button key={k} type="button" aria-pressed={kind === k} onClick={() => setKind(k)}>

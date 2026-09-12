@@ -85,6 +85,7 @@ export function Accounts() {
 
           <form onSubmit={onCreate} className="card flex flex-col gap-3">
             <h2 className="text-lg font-semibold">{t('accounts.new')}</h2>
+            <p className="hint">{t('common.requiredNote')}</p>
             <label className="label">
               {t('accounts.name')}
               <input

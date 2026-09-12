@@ -184,6 +184,7 @@ function TransactionFormInner({
   return (
     <form onSubmit={onSubmit} className="mx-auto flex w-full max-w-xl flex-col gap-5">
       <h1 className="page-title">{t(mode === 'new' ? 'tx.new' : 'tx.edit')}</h1>
+      <p className="hint">{t('common.requiredNote')}</p>
 
       <div className="segmented" role="group" aria-label={t('tx.kindExpense')}>
         {(['expense', 'income'] as Kind[]).map((k) => (

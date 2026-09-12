@@ -129,6 +129,7 @@ export function Recurring() {
 
           <form onSubmit={onSubmit} className="card flex flex-col gap-3">
             <h2 className="text-lg font-semibold">{t('recurring.new')}</h2>
+            <p className="hint">{t('common.requiredNote')}</p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <label className="label">
                 {t('recurring.account')}
