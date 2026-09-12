@@ -153,9 +153,18 @@
     "create": "Create account",
     "balance": "Balance",
     "totalBalance": "Total across accounts",
+    "netWorth": "Net worth",
+    "assets": "Assets",
+    "liabilities": "Debts",
+    "opening": "Opening balance (optional)",
+    "openingDebt": "Current debt owed (optional)",
+    "openingHint": "What this account holds today. New movements add on top of it.",
+    "openingDebtHint": "What you owe on this card today. New charges add on top of it.",
     "empty": "No accounts yet. Create your first one above.",
     "deleted": "Account deleted.",
     "errName": "Give the account a name.",
+    "errOpening": "Enter an opening balance of zero or more.",
+    "errNoFxRate": "No exchange rate available for this currency and date. Sync to download rates.",
     "errHasTransactions": "This account has transactions and cannot be deleted."
   },
   "tags": {

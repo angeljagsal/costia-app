@@ -8,6 +8,10 @@ export interface Account {
   household_id: string;
   name: string;
   type: AccountType;
+  /** Signed net-worth contribution in base terms (credit debt stored negative). */
+  opening_base: number;
+  opening_currency: string;
+  opening_date: string | null;
   created_at: string;
 }
 

@@ -1,7 +1,9 @@
 import { column, Schema, Table } from '@powersync/web';
 
 /**
- * Client SQLite schema. Mirrors supabase/migrations/0001_schema.sql (+0008 ids).
+ * Client SQLite schema. Mirrors supabase/migrations/0001_schema.sql
+ * (+0008 ids, +0009 custom categories, +0010 recurring intervals,
+ * +0011 transfers, +0012 account openings).
  * Type mapping: uuid/text/date/timestamptz -> text, numeric -> real, bool -> integer.
  * Table names must match the server tables exactly (uploads use them by name).
  */
@@ -27,6 +29,9 @@ const accounts = new Table(
     household_id: column.text,
     name: column.text,
     type: column.text,
+    opening_base: column.real,
+    opening_currency: column.text,
+    opening_date: column.text,
     created_at: column.text,
   },
   { indexes: { household: ['household_id'] } }

@@ -153,9 +153,18 @@
     "create": "Crear cuenta",
     "balance": "Saldo",
     "totalBalance": "Total de cuentas",
+    "netWorth": "Patrimonio",
+    "assets": "Activos",
+    "liabilities": "Deudas",
+    "opening": "Saldo inicial (opcional)",
+    "openingDebt": "Deuda actual (opcional)",
+    "openingHint": "Lo que tiene esta cuenta hoy. Los movimientos se suman encima.",
+    "openingDebtHint": "Lo que debes en esta tarjeta hoy. Los cargos se suman encima.",
     "empty": "Aún no hay cuentas. Crea la primera arriba.",
     "deleted": "Cuenta eliminada.",
     "errName": "Ponle un nombre a la cuenta.",
+    "errOpening": "Escribe un saldo inicial de cero o más.",
+    "errNoFxRate": "No hay tipo de cambio para esta moneda y fecha. Sincroniza para descargar tasas.",
     "errHasTransactions": "Esta cuenta tiene movimientos y no se puede eliminar."
   },
   "tags": {

@@ -32,7 +32,6 @@ import {
 import { useBalanceHistory, useCategoryTotals, useMonthlyFlow } from '../data/reports';
 import { useTransactions } from '../data/transactions';
 import { EMPTY_FILTERS } from '../data/types';
-import type { AccountType } from '../data/types';
 import { useI18n } from '../i18n/useI18n';
 import { formatDay, formatMoney, formatMonthLabel } from '../lib/format';
 import { loadBaseCurrency } from '../lib/prefs';
@@ -62,8 +61,16 @@ function Hero() {
   const { t, locale } = useI18n();
   const householdId = useHouseholdId();
   const baseCurrency = loadBaseCurrency();
+  const accounts = useAccounts(householdId);
   const balances = useAccountBalances(householdId);
-  const total = balances.reduce((sum, b) => sum + (b.balance ?? 0), 0);
+  const balanceOf = (id: string) => balances.find((b) => b.account_id === id)?.balance ?? 0;
+  const netWorth = balances.reduce((sum, b) => sum + (b.balance ?? 0), 0);
+  const assetsTotal = accounts
+    .filter((a) => a.type !== 'credit')
+    .reduce((sum, a) => sum + balanceOf(a.id), 0);
+  const debtsTotal = accounts
+    .filter((a) => a.type === 'credit')
+    .reduce((sum, a) => sum + Math.abs(Math.min(balanceOf(a.id), 0)), 0);
 
   const today = todayLocal();
   const month = today.slice(0, 7);
@@ -72,10 +79,14 @@ function Hero() {
   const monthExpenses = flow.reduce((s, f) => s + (f.expenses ?? 0), 0);
 
   return (
-    <section className="hero flex flex-col gap-4" aria-label={t('dashboard.totalBalance')}>
+    <section className="hero flex flex-col gap-4" aria-label={t('accounts.netWorth')}>
       <div>
-        <p className="hint">{t('dashboard.totalBalance')}</p>
-        <p className="amount text-4xl">{formatMoney(locale, total, baseCurrency)}</p>
+        <p className="hint">{t('accounts.netWorth')}</p>
+        <p className="amount text-4xl">{formatMoney(locale, netWorth, baseCurrency)}</p>
+        <p className="hint">
+          {t('accounts.assets')} {formatMoney(locale, assetsTotal, baseCurrency)} ·{' '}
+          {t('accounts.liabilities')} {formatMoney(locale, debtsTotal, baseCurrency)}
+        </p>
         <p className="hint">
           {t('dashboard.thisMonth')}:{' '}
           <span className="amount">+{formatMoney(locale, monthIncome, baseCurrency)}</span> ·{' '}
@@ -322,14 +333,6 @@ function BalanceHistory() {
   );
 }
 
-const ACCOUNT_TYPE_ORDER: AccountType[] = [
-  'bank',
-  'cash',
-  'credit',
-  'digital_wallet',
-  'investment',
-];
-
 function Balances() {
   const { t, locale } = useI18n();
   const householdId = useHouseholdId();
@@ -337,7 +340,15 @@ function Balances() {
   const accounts = useAccounts(householdId);
   const balances = useAccountBalances(householdId);
   const balanceOf = (id: string) => balances.find((b) => b.account_id === id)?.balance ?? 0;
-  const total = balances.reduce((sum, b) => sum + (b.balance ?? 0), 0);
+  const netWorth = balances.reduce((sum, b) => sum + (b.balance ?? 0), 0);
+  const groups = [
+    { title: t('accounts.assets'), list: accounts.filter((a) => a.type !== 'credit'), debt: false },
+    {
+      title: t('accounts.liabilities'),
+      list: accounts.filter((a) => a.type === 'credit'),
+      debt: true,
+    },
+  ];
   return (
     <section className="card flex min-w-0 flex-col gap-3" aria-label={t('dashboard.balances')}>
       <h2 className="text-lg font-semibold">{t('dashboard.balances')}</h2>
@@ -345,29 +356,44 @@ function Balances() {
         <p className="hint">{t('accounts.empty')}</p>
       ) : (
         <>
-          {ACCOUNT_TYPE_ORDER.map((type) => {
-            const group = accounts.filter((a) => a.type === type);
-            if (group.length === 0) return null;
-            const subtotal = group.reduce((sum, a) => sum + balanceOf(a.id), 0);
+          {groups.map((group) => {
+            if (group.list.length === 0) return null;
+            const subtotal = group.list.reduce(
+              (sum, a) =>
+                sum + (group.debt ? Math.abs(Math.min(balanceOf(a.id), 0)) : balanceOf(a.id)),
+              0
+            );
             return (
-              <div key={type} className="flex flex-col gap-1">
+              <div key={group.title} className="flex flex-col gap-1">
                 <p className="text-sm font-semibold text-[var(--text-muted)]">
-                  {accountTypeLabel(t, type)} · {formatMoney(locale, subtotal, baseCurrency)}
+                  {group.title} · {formatMoney(locale, subtotal, baseCurrency)}
                 </p>
-                {group.map((a) => (
-                  <p key={a.id} className="flex justify-between gap-2 text-sm">
-                    <span className="truncate">{a.name}</span>
-                    <span className="amount">
-                      {formatMoney(locale, balanceOf(a.id), baseCurrency)}
-                    </span>
-                  </p>
-                ))}
+                {group.list.map((a) => {
+                  const bal = balanceOf(a.id);
+                  return (
+                    <p key={a.id} className="flex justify-between gap-2 text-sm">
+                      <span className="truncate">
+                        {a.name} · {accountTypeLabel(t, a.type)}
+                      </span>
+                      <span
+                        className="amount"
+                        style={group.debt ? { color: 'var(--danger)' } : undefined}
+                      >
+                        {formatMoney(
+                          locale,
+                          group.debt ? Math.abs(Math.min(bal, 0)) : bal,
+                          baseCurrency
+                        )}
+                      </span>
+                    </p>
+                  );
+                })}
               </div>
             );
           })}
           <p className="flex justify-between border-t border-[var(--border)] pt-2 font-bold">
-            <span>{t('accounts.totalBalance')}</span>
-            <span className="amount">{formatMoney(locale, total, baseCurrency)}</span>
+            <span>{t('accounts.netWorth')}</span>
+            <span className="amount">{formatMoney(locale, netWorth, baseCurrency)}</span>
           </p>
         </>
       )}
