@@ -94,7 +94,7 @@ export function Settings() {
       {row(t('settings.version'), <span className="hint">{APP_VERSION}</span>)}
 
       {session ? (
-        <button type="button" onClick={onSignOut} className="btn btn-secondary self-start">
+        <button type="button" onClick={onSignOut} className="btn btn-danger self-end">
           {t('header.logout')}
         </button>
       ) : null}
