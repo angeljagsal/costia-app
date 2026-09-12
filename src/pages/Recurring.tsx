@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { usePowerSync } from '@powersync/react';
 import { Page } from '../components/Page';
+import { CalendarIcon } from '../components/icons';
 import { UpcomingBills } from '../components/UpcomingBills';
 import { useAccounts } from '../data/accounts';
 import { categoryName, useCategories } from '../data/categories';
@@ -15,10 +16,28 @@ import {
   useRecurring,
 } from '../data/recurring';
 import type { RecurringInput, RecurringView } from '../data/recurring';
-import type { BudgetPeriod, Currency, Kind } from '../data/types';
+import type { Cadence, IntervalUnit } from '../data/recurring';
+import type { Currency, Kind } from '../data/types';
 import { useI18n } from '../i18n/useI18n';
 
-const CADENCES: BudgetPeriod[] = ['weekly', 'monthly', 'yearly'];
+const CADENCES: Cadence[] = ['weekly', 'biweekly', 'monthly', 'quarterly', 'yearly', 'custom'];
+const UNITS: IntervalUnit[] = ['day', 'week', 'month'];
+const UNIT_LABEL: Record<IntervalUnit, string> = {
+  day: 'recurring.unitDay',
+  week: 'recurring.unitWeek',
+  month: 'recurring.unitMonth',
+};
+
+function cadenceLabel(t: (key: string) => string, r: RecurringView): string {
+  if (r.cadence !== 'custom') return t(`recurring.${r.cadence}`);
+  const unit =
+    r.interval_unit === 'day'
+      ? t('recurring.unitDay')
+      : r.interval_unit === 'week'
+        ? t('recurring.unitWeek')
+        : t('recurring.unitMonth');
+  return `${t('recurring.everyN')} ${r.interval_n ?? 1} ${unit}`;
+}
 
 function money(locale: string, amount: number, currency: string): string {
   const tag = locale === 'es-MX' ? 'es-MX' : 'en-US';
@@ -45,7 +64,9 @@ const EMPTY_FORM = {
   categoryId: '',
   amount: '',
   currency: 'MXN' as Currency,
-  cadence: 'monthly' as BudgetPeriod,
+  cadence: 'monthly' as Cadence,
+  intervalN: '1',
+  intervalUnit: 'month' as IntervalUnit,
   nextDue: todayLocal(),
   note: '',
 };
@@ -77,6 +98,8 @@ export function Recurring() {
     amount: Number(form.amount),
     currency: form.currency,
     cadence: form.cadence,
+    intervalN: form.cadence === 'custom' ? Number(form.intervalN) : null,
+    intervalUnit: form.cadence === 'custom' ? form.intervalUnit : null,
     nextDue: form.nextDue,
     note: form.note,
   });
@@ -109,7 +132,9 @@ export function Recurring() {
       categoryId: r.category_id,
       amount: String(r.amount),
       currency: r.currency as Currency,
-      cadence: r.cadence,
+      cadence: (r.cadence as Cadence) || 'monthly',
+      intervalN: r.interval_n != null ? String(r.interval_n) : '1',
+      intervalUnit: r.interval_unit ?? 'month',
       nextDue: r.next_due,
       note: r.note ?? '',
     });
@@ -199,13 +224,9 @@ export function Recurring() {
                   <option value="USD">USD — US$</option>
                 </select>
               </label>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 sm:col-span-2">
                 <p className="form-section-title">{t('recurring.cadence')}</p>
-                <div
-                  className="segmented segmented-3"
-                  role="group"
-                  aria-label={t('recurring.cadence')}
-                >
+                <div className="segmented" role="group" aria-label={t('recurring.cadence')}>
                   {CADENCES.map((c) => (
                     <button
                       key={c}
@@ -217,15 +238,49 @@ export function Recurring() {
                     </button>
                   ))}
                 </div>
+                {form.cadence === 'custom' ? (
+                  <div className="grid grid-cols-[6rem_1fr] items-end gap-2">
+                    <label className="label">
+                      {t('recurring.everyN')}
+                      <input
+                        className="input"
+                        inputMode="numeric"
+                        min={1}
+                        value={form.intervalN}
+                        onChange={(e) => set({ intervalN: e.target.value })}
+                        placeholder="1"
+                      />
+                    </label>
+                    <div
+                      className="segmented segmented-3"
+                      role="group"
+                      aria-label={t('recurring.cadence')}
+                    >
+                      {UNITS.map((u) => (
+                        <button
+                          key={u}
+                          type="button"
+                          aria-pressed={form.intervalUnit === u}
+                          onClick={() => set({ intervalUnit: u })}
+                        >
+                          {t(UNIT_LABEL[u])}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
               </div>
               <label className="label">
                 {t('recurring.nextDue')}
-                <input
-                  type="date"
-                  className="input"
-                  value={form.nextDue}
-                  onChange={(e) => set({ nextDue: e.target.value })}
-                />
+                <span className="date-wrap">
+                  <CalendarIcon size={18} />
+                  <input
+                    type="date"
+                    className="input"
+                    value={form.nextDue}
+                    onChange={(e) => set({ nextDue: e.target.value })}
+                  />
+                </span>
               </label>
             </div>
             <label className="label">
@@ -277,8 +332,8 @@ export function Recurring() {
                         )}
                       </p>
                       <p className="hint">
-                        {t(`recurring.${r.cadence}`)} · {t('recurring.dueOn')}{' '}
-                        {day(locale, r.next_due)} · {r.account_name}
+                        {cadenceLabel(t, r)} · {t('recurring.dueOn')} {day(locale, r.next_due)} ·{' '}
+                        {r.account_name}
                         {r.note ? ` · ${r.note}` : ''}
                       </p>
                     </div>
