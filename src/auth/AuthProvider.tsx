@@ -28,17 +28,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const sendMagicLink = useCallback(async (email: string) => {
+  const signInWithOAuth = useCallback(async (provider: 'google' | 'azure') => {
     const sb = getSupabase();
     if (!sb) return { ok: false, message: 'notConfigured' as const };
-    const { error } = await sb.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.origin },
+    // Browser redirect flow: Supabase returns the provider URL, the browser
+    // leaves, and the session restores via onAuthStateChange on return.
+    // Azure requires the email scope; harmless for Google.
+    const { error } = await sb.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: window.location.origin,
+        scopes: provider === 'azure' ? 'email' : undefined,
+      },
     });
-    if (!error) return { ok: true, message: 'checkEmail' };
-    // 429 = Supabase OTP rate limit (easy to hit while testing). Name it so
-    // the UI can tell the user to wait instead of showing a generic error.
-    return { ok: false, message: error.status === 429 ? 'rateLimited' : 'error' };
+    if (!error) return { ok: true, message: 'redirecting' };
+    return { ok: false, message: 'error' };
   }, []);
 
   const signInWithPassword = useCallback(async (email: string, password: string) => {
@@ -82,12 +86,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       bypassed: devAuthBypass,
       session,
       loading,
-      sendMagicLink,
+      signInWithOAuth,
       signInWithPassword,
       signUpWithPassword,
       signOut,
     }),
-    [session, loading, sendMagicLink, signInWithPassword, signUpWithPassword, signOut]
+    [session, loading, signInWithOAuth, signInWithPassword, signUpWithPassword, signOut]
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
