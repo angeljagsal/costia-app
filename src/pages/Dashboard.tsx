@@ -145,18 +145,28 @@ function RecentTransactions() {
       ) : (
         <ul className="flex flex-col gap-2">
           {rows.map((r) => {
+            const isTransfer = r.kind === 'transfer';
             const expense = r.kind === 'expense';
+            const title = isTransfer
+              ? `${t('tx.transferTitle')}: ${r.account_name} → ${r.to_account_name ?? ''}`
+              : categoryName(t, r);
             return (
               <li key={r.id} className="flex items-center gap-2 text-sm">
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium">{categoryName(t, r)}</p>
+                  <p className="truncate font-medium">{title}</p>
                   <p className="hint">{formatDay(locale, r.txn_date)}</p>
                 </div>
                 <p
                   className="amount shrink-0"
-                  style={{ color: expense ? 'var(--danger)' : 'var(--success)' }}
+                  style={{
+                    color: isTransfer
+                      ? 'var(--text)'
+                      : expense
+                        ? 'var(--danger)'
+                        : 'var(--success)',
+                  }}
                 >
-                  {expense ? '−' : '+'}
+                  {isTransfer ? '⇄' : expense ? '−' : '+'}
                   {formatMoney(locale, r.amount, r.currency)}
                 </p>
               </li>

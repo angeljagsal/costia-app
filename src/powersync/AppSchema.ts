@@ -47,6 +47,7 @@ const transactions = new Table(
   {
     household_id: column.text,
     account_id: column.text,
+    to_account_id: column.text,
     category_id: column.text,
     amount: column.real,
     currency: column.text,
@@ -57,7 +58,13 @@ const transactions = new Table(
     recurring_rule_id: column.text,
     created_at: column.text,
   },
-  { indexes: { household_date: ['household_id', 'txn_date'], account: ['account_id'] } }
+  {
+    indexes: {
+      household_date: ['household_id', 'txn_date'],
+      account: ['account_id'],
+      to_account: ['to_account_id'],
+    },
+  }
 );
 
 const transaction_splits = new Table(

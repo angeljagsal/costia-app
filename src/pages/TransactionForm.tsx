@@ -34,6 +34,7 @@ interface Initial {
   currency: Currency;
   categoryId: string;
   accountId: string;
+  toAccountId: string;
   date: string;
   note: string;
   splits: SplitRow[];
@@ -68,13 +69,15 @@ export function TransactionForm({ mode }: { mode: 'new' | 'edit' }) {
 
   const tx = existing.tx;
   // Dashboard quick actions link here with ?kind=income to pre-select it.
-  const kindParam = searchParams.get('kind') === 'income' ? 'income' : 'expense';
+  const rawKind = searchParams.get('kind');
+  const kindParam: Kind = rawKind === 'income' || rawKind === 'transfer' ? rawKind : 'expense';
   const initial: Initial = {
     kind: (tx?.kind as Kind | undefined) ?? kindParam,
     amount: tx ? String(tx.amount) : '',
     currency: (tx?.currency as Currency | undefined) ?? 'MXN',
     categoryId: tx?.category_id ?? '',
     accountId: tx?.account_id ?? '',
+    toAccountId: tx?.to_account_id ?? '',
     date: tx?.txn_date ?? todayLocal(),
     note: tx?.note ?? '',
     splits: existing.splits.map((s) => toRow(s.category_id, s.amount)),
@@ -103,6 +106,7 @@ function TransactionFormInner({
   const [currency, setCurrency] = useState<Currency>(initial.currency);
   const [categoryId, setCategoryId] = useState(initial.categoryId);
   const [accountId, setAccountId] = useState(initial.accountId);
+  const [toAccountId, setToAccountId] = useState(initial.toAccountId);
   const [date, setDate] = useState(initial.date);
   const [note, setNote] = useState(initial.note);
   const [splits, setSplits] = useState<SplitRow[]>(initial.splits);
@@ -111,7 +115,8 @@ function TransactionFormInner({
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const categories = useCategories(kind, householdId);
+  const isTransfer = kind === 'transfer';
+  const categories = useCategories(isTransfer ? undefined : kind, householdId);
   const accounts = useAccounts(householdId);
   const balances = useAccountBalances(householdId);
   const tags = useTags(householdId);
@@ -152,14 +157,17 @@ function TransactionFormInner({
     try {
       const input = {
         accountId,
-        categoryId,
+        toAccountId: isTransfer ? toAccountId : undefined,
+        categoryId: isTransfer ? undefined : categoryId,
         amount: parseAmount(amount),
         currency,
         kind,
         txnDate: date,
         note,
-        splits: splits.map((s) => ({ categoryId: s.categoryId, amount: parseAmount(s.amount) })),
-        tagIds,
+        splits: isTransfer
+          ? []
+          : splits.map((s) => ({ categoryId: s.categoryId, amount: parseAmount(s.amount) })),
+        tagIds: isTransfer ? [] : tagIds,
       };
       if (mode === 'new' || !editId) {
         await createTransaction(db, householdId, loadBaseCurrency(), input);
@@ -189,8 +197,8 @@ function TransactionFormInner({
 
       <section className="card flex flex-col gap-4" aria-label={t('tx.sectionType')}>
         <h2 className="text-lg font-semibold">{t('tx.sectionType')}</h2>
-        <div className="segmented" role="group" aria-label={t('tx.kindExpense')}>
-          {(['expense', 'income'] as Kind[]).map((k) => (
+        <div className="segmented segmented-3" role="group" aria-label={t('tx.sectionType')}>
+          {(['expense', 'income', 'transfer'] as Kind[]).map((k) => (
             <button
               key={k}
               type="button"
@@ -198,9 +206,14 @@ function TransactionFormInner({
               onClick={() => {
                 setKind(k);
                 setCategoryId('');
+                setError(null);
               }}
             >
-              {k === 'expense' ? `− ${t('tx.kindExpense')}` : `+ ${t('tx.kindIncome')}`}
+              {k === 'expense'
+                ? `− ${t('tx.kindExpense')}`
+                : k === 'income'
+                  ? `+ ${t('tx.kindIncome')}`
+                  : `⇄ ${t('tx.kindTransfer')}`}
             </button>
           ))}
         </div>
@@ -230,17 +243,42 @@ function TransactionFormInner({
         </div>
       </section>
 
-      <section className="card" aria-label={t('tx.category')}>
-        <CategoryGrid
-          categories={categories}
-          value={categoryId}
-          onChange={setCategoryId}
-          label={t('tx.category')}
-        />
-      </section>
+      {isTransfer ? null : (
+        <section className="card" aria-label={t('tx.category')}>
+          <CategoryGrid
+            categories={categories}
+            value={categoryId}
+            onChange={setCategoryId}
+            label={t('tx.category')}
+          />
+        </section>
+      )}
 
       {accounts.length === 0 ? (
         <p className="hint">{t('tx.errNoAccount')}</p>
+      ) : isTransfer ? (
+        <>
+          <section className="card" aria-label={t('tx.fromAccount')}>
+            <AccountPicker
+              accounts={accounts}
+              balanceOf={balanceOf}
+              baseCurrency={baseCurrency}
+              value={accountId}
+              onChange={setAccountId}
+              label={t('tx.fromAccount')}
+            />
+          </section>
+          <section className="card" aria-label={t('tx.toAccount')}>
+            <AccountPicker
+              accounts={accounts.filter((a) => a.id !== accountId)}
+              balanceOf={balanceOf}
+              baseCurrency={baseCurrency}
+              value={toAccountId}
+              onChange={setToAccountId}
+              label={t('tx.toAccount')}
+            />
+          </section>
+        </>
       ) : (
         <section className="card" aria-label={t('tx.account')}>
           <AccountPicker
@@ -282,107 +320,113 @@ function TransactionFormInner({
         </div>
       </section>
 
-      <details className="advanced">
-        <summary>{t('tx.splits')}</summary>
-        <div className="advanced-body">
-          <p className="hint">{t('tx.splitsHint')}</p>
-          {splits.map((s) => (
-            <div key={s.key} className="grid grid-cols-[1fr_7rem_auto] items-end gap-2">
-              <label className="label">
-                {t('tx.splitCategory')}
-                <select
-                  className="input"
-                  value={s.categoryId}
-                  onChange={(e) =>
-                    setSplits((rows) =>
-                      rows.map((r) => (r.key === s.key ? { ...r, categoryId: e.target.value } : r))
-                    )
-                  }
+      {isTransfer ? null : (
+        <details className="advanced">
+          <summary>{t('tx.splits')}</summary>
+          <div className="advanced-body">
+            <p className="hint">{t('tx.splitsHint')}</p>
+            {splits.map((s) => (
+              <div key={s.key} className="grid grid-cols-[1fr_7rem_auto] items-end gap-2">
+                <label className="label">
+                  {t('tx.splitCategory')}
+                  <select
+                    className="input"
+                    value={s.categoryId}
+                    onChange={(e) =>
+                      setSplits((rows) =>
+                        rows.map((r) =>
+                          r.key === s.key ? { ...r, categoryId: e.target.value } : r
+                        )
+                      )
+                    }
+                  >
+                    <option value="">—</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {categoryName(t, c)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="label">
+                  {t('tx.splitAmount')}
+                  <input
+                    className="input"
+                    inputMode="decimal"
+                    value={s.amount}
+                    onChange={(e) =>
+                      setSplits((rows) =>
+                        rows.map((r) => (r.key === s.key ? { ...r, amount: e.target.value } : r))
+                      )
+                    }
+                    placeholder="0.00"
+                  />
+                </label>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setSplits((rows) => rows.filter((r) => r.key !== s.key))}
+                  aria-label={t('tx.removeSplit')}
                 >
-                  <option value="">—</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {categoryName(t, c)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="label">
-                {t('tx.splitAmount')}
-                <input
-                  className="input"
-                  inputMode="decimal"
-                  value={s.amount}
-                  onChange={(e) =>
-                    setSplits((rows) =>
-                      rows.map((r) => (r.key === s.key ? { ...r, amount: e.target.value } : r))
-                    )
-                  }
-                  placeholder="0.00"
-                />
-              </label>
+                  {t('common.remove')}
+                </button>
+              </div>
+            ))}
+            {splits.length > 0 ? (
+              <p className="hint">
+                {t('tx.splitTotal')}: {splitTotal.toFixed(2)}
+              </p>
+            ) : null}
+            <button type="button" className="btn btn-secondary self-start" onClick={onAddSplit}>
+              {t('tx.addSplit')}
+            </button>
+          </div>
+        </details>
+      )}
+
+      {isTransfer ? null : (
+        <details className="advanced">
+          <summary>{t('tx.tags')}</summary>
+          <div className="advanced-body">
+            <div className="flex flex-wrap gap-2">
+              {tags.map((tag) => {
+                const on = tagIds.includes(tag.id);
+                return (
+                  <button
+                    key={tag.id}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() =>
+                      setTagIds((ids) => (on ? ids.filter((x) => x !== tag.id) : [...ids, tag.id]))
+                    }
+                    className={`btn ${on ? 'btn-primary' : 'btn-secondary'}`}
+                  >
+                    {tag.name}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="grid grid-cols-[1fr_auto] gap-2">
+              <input
+                className="input"
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                placeholder={t('tx.newTag')}
+                maxLength={40}
+                aria-label={t('tx.newTag')}
+              />
               <button
                 type="button"
                 className="btn btn-secondary"
-                onClick={() => setSplits((rows) => rows.filter((r) => r.key !== s.key))}
-                aria-label={t('tx.removeSplit')}
+                onClick={onAddTag}
+                aria-label={t('tx.newTag')}
               >
-                {t('common.remove')}
+                {t('common.add')}
               </button>
             </div>
-          ))}
-          {splits.length > 0 ? (
-            <p className="hint">
-              {t('tx.splitTotal')}: {splitTotal.toFixed(2)}
-            </p>
-          ) : null}
-          <button type="button" className="btn btn-secondary self-start" onClick={onAddSplit}>
-            {t('tx.addSplit')}
-          </button>
-        </div>
-      </details>
-
-      <details className="advanced">
-        <summary>{t('tx.tags')}</summary>
-        <div className="advanced-body">
-          <div className="flex flex-wrap gap-2">
-            {tags.map((tag) => {
-              const on = tagIds.includes(tag.id);
-              return (
-                <button
-                  key={tag.id}
-                  type="button"
-                  aria-pressed={on}
-                  onClick={() =>
-                    setTagIds((ids) => (on ? ids.filter((x) => x !== tag.id) : [...ids, tag.id]))
-                  }
-                  className={`btn ${on ? 'btn-primary' : 'btn-secondary'}`}
-                >
-                  {tag.name}
-                </button>
-              );
-            })}
           </div>
-          <div className="grid grid-cols-[1fr_auto] gap-2">
-            <input
-              className="input"
-              value={newTag}
-              onChange={(e) => setNewTag(e.target.value)}
-              placeholder={t('tx.newTag')}
-              maxLength={40}
-              aria-label={t('tx.newTag')}
-            />
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={onAddTag}
-              aria-label={t('tx.newTag')}
-            >
-              {t('common.add')}
-            </button>
-          </div>
-        </div>
-      </details>
+        </details>
+      )}
 
       {error ? (
         <p className="error-text" role="alert">
@@ -396,9 +440,16 @@ function TransactionFormInner({
             <p className="hint">{t('tx.amount')}</p>
             <p
               className="amount truncate text-xl"
-              style={{ color: kind === 'expense' ? 'var(--danger)' : 'var(--success)' }}
+              style={{
+                color:
+                  kind === 'expense'
+                    ? 'var(--danger)'
+                    : kind === 'income'
+                      ? 'var(--success)'
+                      : 'var(--text)',
+              }}
             >
-              {kind === 'expense' ? '−' : '+'}
+              {kind === 'expense' ? '−' : kind === 'income' ? '+' : '⇄'}
               {formatMoney(locale, preview, currency)}
             </p>
           </div>

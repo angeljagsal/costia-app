@@ -81,3 +81,45 @@ describe('createTransaction validation', () => {
     ).rejects.toThrow('tx.errNoFxRate');
   });
 });
+
+describe('transfers', () => {
+  function transfer(overrides: Partial<TransactionInput> = {}): TransactionInput {
+    return input({
+      kind: 'transfer',
+      categoryId: undefined,
+      accountId: 'acc-1',
+      toAccountId: 'acc-2',
+      ...overrides,
+    });
+  }
+
+  it('persists no splits for transfers', () => {
+    expect(resolveSplits(transfer())).toEqual([]);
+  });
+
+  it('requires two different accounts', async () => {
+    await expect(
+      createTransaction(db, 'hh', 'MXN', transfer({ toAccountId: undefined }))
+    ).rejects.toThrow('tx.errTransferAccounts');
+    await expect(
+      createTransaction(db, 'hh', 'MXN', transfer({ toAccountId: 'acc-1' }))
+    ).rejects.toThrow('tx.errTransferSame');
+  });
+
+  it('rejects categories, splits, and tags on transfers', async () => {
+    await expect(
+      createTransaction(db, 'hh', 'MXN', transfer({ categoryId: 'cat-1' }))
+    ).rejects.toThrow('tx.errTransferNoCategory');
+    await expect(
+      createTransaction(
+        db,
+        'hh',
+        'MXN',
+        transfer({ splits: [{ categoryId: 'cat-1', amount: 100 }] })
+      )
+    ).rejects.toThrow('tx.errTransferNoCategory');
+    await expect(
+      createTransaction(db, 'hh', 'MXN', transfer({ tagIds: ['tag-1'] }))
+    ).rejects.toThrow('tx.errTransferNoCategory');
+  });
+});

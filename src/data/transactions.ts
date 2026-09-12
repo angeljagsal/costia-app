@@ -12,18 +12,33 @@ import type {
 const toCents = (n: number) => Math.round(n * 100);
 
 /** Splits to persist: explicit splits, or a single whole-amount row.
- *  Exported for unit tests; throws `tx.errSplitMismatch` on imbalance. */
+ *  Transfers persist no splits. Exported for unit tests;
+ *  throws `tx.errSplitMismatch` on imbalance. */
 export function resolveSplits(input: TransactionInput): { categoryId: string; amount: number }[] {
+  if (input.kind === 'transfer') return [];
   const splits = (input.splits ?? []).filter((s) => s.categoryId && s.amount > 0);
-  if (splits.length === 0) return [{ categoryId: input.categoryId, amount: input.amount }];
+  if (splits.length === 0) {
+    if (!input.categoryId) throw new Error('tx.errRequired');
+    return [{ categoryId: input.categoryId, amount: input.amount }];
+  }
   const total = splits.reduce((sum, s) => sum + toCents(s.amount), 0);
   if (total !== toCents(input.amount)) throw new Error('tx.errSplitMismatch');
   return splits;
 }
 
 function validate(input: TransactionInput): void {
-  if (!input.accountId || !input.categoryId || !input.txnDate) throw new Error('tx.errRequired');
+  if (!input.accountId || !input.txnDate) throw new Error('tx.errRequired');
   if (!(input.amount > 0)) throw new Error('tx.errAmount');
+  if (input.kind === 'transfer') {
+    if (!input.toAccountId) throw new Error('tx.errTransferAccounts');
+    if (input.toAccountId === input.accountId) throw new Error('tx.errTransferSame');
+    if (input.categoryId) throw new Error('tx.errTransferNoCategory');
+    if ((input.splits ?? []).some((s) => s.categoryId && s.amount > 0))
+      throw new Error('tx.errTransferNoCategory');
+    if ((input.tagIds ?? []).length > 0) throw new Error('tx.errTransferNoCategory');
+    return;
+  }
+  if (!input.categoryId) throw new Error('tx.errRequired');
 }
 
 export async function createTransaction(
@@ -42,17 +57,19 @@ export async function createTransaction(
   }
   const id = crypto.randomUUID();
   const now = new Date().toISOString();
+  const isTransfer = input.kind === 'transfer';
   await db.writeTransaction(async (tx) => {
     await tx.execute(
       `INSERT INTO transactions
-        (id, household_id, account_id, category_id, amount, currency, base_amount,
+        (id, household_id, account_id, to_account_id, category_id, amount, currency, base_amount,
          txn_date, kind, note, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         householdId,
         input.accountId,
-        input.categoryId,
+        isTransfer ? input.toAccountId : null,
+        isTransfer ? null : (input.categoryId ?? null),
         input.amount,
         input.currency,
         baseAmount,
@@ -92,13 +109,15 @@ export async function updateTransaction(
   } catch {
     throw new Error('tx.errNoFxRate');
   }
+  const isTransfer = input.kind === 'transfer';
   await db.writeTransaction(async (tx) => {
     await tx.execute(
-      `UPDATE transactions SET account_id = ?, category_id = ?, amount = ?, currency = ?,
+      `UPDATE transactions SET account_id = ?, to_account_id = ?, category_id = ?, amount = ?, currency = ?,
         base_amount = ?, txn_date = ?, kind = ?, note = ? WHERE id = ?`,
       [
         input.accountId,
-        input.categoryId,
+        isTransfer ? input.toAccountId : null,
+        isTransfer ? null : (input.categoryId ?? null),
         input.amount,
         input.currency,
         baseAmount,
@@ -164,13 +183,17 @@ export function useTransactions(
     clauses.push('t.note LIKE ?');
     params.push(`%${search}%`);
   }
+  if (f.kind) {
+    clauses.push('t.kind = ?');
+    params.push(f.kind);
+  }
   if (f.categoryId) {
     clauses.push('t.category_id = ?');
     params.push(f.categoryId);
   }
   if (f.accountId) {
-    clauses.push('t.account_id = ?');
-    params.push(f.accountId);
+    clauses.push('(t.account_id = ? OR t.to_account_id = ?)');
+    params.push(f.accountId, f.accountId);
   }
   if (f.tagId) {
     clauses.push(
@@ -186,10 +209,12 @@ export function useTransactions(
     clauses.push('t.txn_date <= ?');
     params.push(f.to);
   }
-  const sql = `SELECT t.*, a.name AS account_name, c.key AS category_key, c.label AS category_label
+  const sql = `SELECT t.*, a.name AS account_name, d.name AS to_account_name,
+      c.key AS category_key, c.label AS category_label
     FROM transactions t
     JOIN accounts a ON a.id = t.account_id
-    JOIN categories c ON c.id = t.category_id
+    LEFT JOIN accounts d ON d.id = t.to_account_id
+    LEFT JOIN categories c ON c.id = t.category_id
     WHERE ${clauses.join(' AND ')}
     ORDER BY t.txn_date DESC, t.created_at DESC LIMIT ? OFFSET ?`;
   const { data } = useQuery<TransactionView>(sql, [...params, limit, offset]);

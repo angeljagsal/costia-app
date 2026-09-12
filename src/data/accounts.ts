@@ -20,12 +20,25 @@ export interface AccountBalance {
   balance: number;
 }
 
-/** Signed base_amount totals per account (expenses negative). */
+/**
+ * Signed base_amount totals per account. Expenses debit, income credits,
+ * transfers debit the source and credit the destination. Transfers never
+ * touch income/expense totals — balances only.
+ */
 export function useAccountBalances(householdId: string | null): AccountBalance[] {
   const { data } = useQuery<AccountBalance>(
-    `SELECT account_id, SUM(CASE WHEN kind = 'expense' THEN -base_amount ELSE base_amount END) AS balance
-     FROM transactions WHERE household_id = ? GROUP BY account_id`,
-    [householdId ?? '']
+    `SELECT account_id, SUM(balance) AS balance FROM (
+       SELECT account_id,
+         CASE WHEN kind = 'expense' THEN -base_amount ELSE base_amount END AS balance
+       FROM transactions WHERE household_id = ? AND kind IN ('expense', 'income')
+       UNION ALL
+       SELECT to_account_id AS account_id, base_amount AS balance
+       FROM transactions WHERE household_id = ? AND kind = 'transfer'
+       UNION ALL
+       SELECT account_id, -base_amount AS balance
+       FROM transactions WHERE household_id = ? AND kind = 'transfer'
+     ) GROUP BY account_id`,
+    [householdId ?? '', householdId ?? '', householdId ?? '']
   );
   return data;
 }
@@ -48,8 +61,8 @@ export async function createAccount(
 
 export async function deleteAccount(db: AppDatabase, id: string): Promise<void> {
   const used = await db.getOptional<{ n: number }>(
-    'SELECT COUNT(*) AS n FROM transactions WHERE account_id = ?',
-    [id]
+    'SELECT COUNT(*) AS n FROM transactions WHERE account_id = ? OR to_account_id = ?',
+    [id, id]
   );
   if ((used?.n ?? 0) > 0) throw new Error('accounts.errHasTransactions');
   await db.execute('DELETE FROM accounts WHERE id = ?', [id]);

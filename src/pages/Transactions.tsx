@@ -52,6 +52,7 @@ export function Transactions() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const activeFilterCount = [
     filters.search.trim(),
+    filters.kind,
     filters.categoryId,
     filters.accountId,
     filters.tagId,
@@ -125,6 +126,19 @@ export function Transactions() {
             />
           </div>
           <div className="grid grid-cols-2 gap-2">
+            <label className="label">
+              {t('tx.filterKind')}
+              <select
+                className="input"
+                value={filters.kind}
+                onChange={(e) => patch({ kind: e.target.value as TransactionFilters['kind'] })}
+              >
+                <option value="">{t('common.all')}</option>
+                <option value="expense">{t('tx.kindExpense')}</option>
+                <option value="income">{t('tx.kindIncome')}</option>
+                <option value="transfer">{t('tx.kindTransfer')}</option>
+              </select>
+            </label>
             <label className="label">
               {t('tx.filterCategory')}
               <select
@@ -218,36 +232,47 @@ export function Transactions() {
               <p className="form-section-title">{groupLabel(date)}</p>
               <ul className="flex flex-col gap-2">
                 {items.map((row) => {
+                  const isTransfer = row.kind === 'transfer';
                   const expense = row.kind === 'expense';
-                  const name = categoryName(t, {
-                    key: row.category_key,
-                    label: row.category_label,
-                  });
+                  const name = isTransfer
+                    ? t('tx.transferTitle')
+                    : categoryName(t, {
+                        key: row.category_key,
+                        label: row.category_label,
+                      });
+                  const sub = isTransfer
+                    ? `${row.account_name} → ${row.to_account_name ?? ''}${row.note ? ` · ${row.note}` : ''}`
+                    : `${row.account_name}${row.note ? ` · ${row.note}` : ''}`;
                   return (
                     <li key={row.id} className="card card-compact flex items-center gap-2.5">
                       <span
                         aria-hidden="true"
                         className="avatar avatar-sm"
                         style={{
-                          background: avatarColor(row.category_key ?? row.category_label ?? row.id),
+                          background: isTransfer
+                            ? 'var(--text-muted)'
+                            : avatarColor(row.category_key ?? row.category_label ?? row.id),
                         }}
                       >
-                        {initialOf(name)}
+                        {isTransfer ? '⇄' : initialOf(name)}
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-[0.9375rem] font-semibold">{name}</p>
-                        <p className="hint truncate">
-                          {row.account_name}
-                          {row.note ? ` · ${row.note}` : ''}
-                        </p>
+                        <p className="hint truncate">{sub}</p>
                       </div>
                       <div className="flex shrink-0 flex-col items-end gap-1.5">
                         <div className="text-right">
                           <p
                             className="amount text-base"
-                            style={{ color: expense ? 'var(--danger)' : 'var(--success)' }}
+                            style={{
+                              color: isTransfer
+                                ? 'var(--text)'
+                                : expense
+                                  ? 'var(--danger)'
+                                  : 'var(--success)',
+                            }}
                           >
-                            {expense ? '−' : '+'}
+                            {isTransfer ? '⇄' : expense ? '−' : '+'}
                             {money(locale, row.amount, row.currency)}
                           </p>
                           {row.currency !== baseCurrency ? (

@@ -66,7 +66,9 @@ export function useBalanceHistory(
 ): BalancePoint[] {
   const { data } = useQuery<{ month: string; net: number }>(
     `SELECT substr(t.txn_date, 1, 7) AS month,
-       SUM(CASE WHEN t.kind = 'income' THEN t.base_amount ELSE -t.base_amount END) AS net
+       SUM(CASE WHEN t.kind = 'income' THEN t.base_amount
+                WHEN t.kind = 'expense' THEN -t.base_amount
+                ELSE 0 END) AS net
      FROM transactions t
      WHERE t.household_id = ? AND substr(t.txn_date, 1, 7) <= ?
      GROUP BY month ORDER BY month`,

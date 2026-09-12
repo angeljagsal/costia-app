@@ -1,4 +1,4 @@
-export type Kind = 'expense' | 'income';
+export type Kind = 'expense' | 'income' | 'transfer';
 export type Currency = 'MXN' | 'USD';
 export type AccountType = 'bank' | 'cash' | 'credit' | 'digital_wallet' | 'investment';
 export type BudgetPeriod = 'weekly' | 'monthly' | 'yearly';
@@ -32,7 +32,10 @@ export interface TransactionRow {
   id: string;
   household_id: string;
   account_id: string;
-  category_id: string;
+  /** Destination for transfers, null otherwise. */
+  to_account_id: string | null;
+  /** Null for transfers (no category). */
+  category_id: string | null;
   amount: number;
   currency: string;
   base_amount: number;
@@ -53,6 +56,7 @@ export interface SplitRow {
 /** Transaction joined with display names for lists. */
 export interface TransactionView extends TransactionRow {
   account_name: string;
+  to_account_name: string | null;
   category_key: string | null;
   category_label: string | null;
 }
@@ -64,7 +68,10 @@ export interface SplitInput {
 
 export interface TransactionInput {
   accountId: string;
-  categoryId: string;
+  /** Destination for transfers. */
+  toAccountId?: string;
+  /** Ignored for transfers (must be empty). */
+  categoryId?: string;
   amount: number;
   currency: Currency;
   kind: Kind;
@@ -78,6 +85,7 @@ export interface TransactionInput {
 
 export interface TransactionFilters {
   search: string;
+  kind: '' | Kind;
   categoryId: string;
   accountId: string;
   tagId: string;
@@ -88,6 +96,7 @@ export interface TransactionFilters {
 
 export const EMPTY_FILTERS: TransactionFilters = {
   search: '',
+  kind: '',
   categoryId: '',
   accountId: '',
   tagId: '',
