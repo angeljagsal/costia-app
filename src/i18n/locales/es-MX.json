@@ -63,6 +63,12 @@
     "invalidCredentials": "Correo o contraseña incorrectos. Intenta de nuevo o crea una cuenta.",
     "emailInUse": "Ese correo ya tiene cuenta. Inicia sesión.",
     "confirmEmail": "Cuenta creada. Revisa tu correo para confirmarla y luego inicia sesión.",
+    "point1Title": "Todas tus cuentas en un lugar",
+    "point1Body": "Banco, efectivo, crédito y billeteras con saldos al día.",
+    "point2Title": "Presupuestos que se siguen solos",
+    "point2Body": "Límites por categoría con avance en vivo.",
+    "point3Title": "Funciona sin conexión",
+    "point3Body": "No necesitas internet. Todo se sincroniza al volver.",
     "emailLabel": "Correo electrónico",
     "emailPlaceholder": "tu@ejemplo.com",
     "sendLink": "Enviar enlace",
@@ -206,7 +212,8 @@
     "showLess": "Ver menos",
     "add": "Agregar",
     "remove": "Quitar",
-    "loading": "Cargando…"
+    "loading": "Cargando…",
+    "requiredNote": "Llena todos los campos. Solo los marcados como opcionales pueden quedar vacíos."
   },
   "tx": {
     "title": "Movimientos",

@@ -63,6 +63,12 @@
     "invalidCredentials": "Wrong email or password. Try again or create an account.",
     "emailInUse": "That email already has an account. Sign in instead.",
     "confirmEmail": "Account created. Check your email to confirm it, then sign in.",
+    "point1Title": "Every account in one place",
+    "point1Body": "Bank, cash, credit, and wallets with live balances.",
+    "point2Title": "Budgets that track themselves",
+    "point2Body": "Limits per category with live progress.",
+    "point3Title": "Works offline",
+    "point3Body": "No connection needed. Everything syncs when you're back.",
     "emailLabel": "Email address",
     "emailPlaceholder": "you@example.com",
     "sendLink": "Send magic link",
@@ -206,7 +212,8 @@
     "showLess": "Show less",
     "add": "Add",
     "remove": "Remove",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "requiredNote": "Fill in every field. Only fields marked optional can be left empty."
   },
   "tx": {
     "title": "Transactions",
