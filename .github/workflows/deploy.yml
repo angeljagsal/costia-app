@@ -33,6 +33,13 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_POWERSYNC_URL: ${{ secrets.VITE_POWERSYNC_URL }}
+      - name: Diagnose Cloudflare access
+        # Lists Pages projects visible to the token. Fails early with a clear
+        # error on bad token/account instead of a bare exit code at deploy.
+        run: npx -y wrangler@3 pages project list
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
