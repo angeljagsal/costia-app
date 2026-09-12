@@ -31,6 +31,10 @@ create index if not exists categories_household_idx on public.categories (househ
 -- Replace the global-read policy with scoped access. Migrations run as
 -- postgres and bypass RLS, so seeds stay untouched.
 drop policy if exists categories_read on public.categories;
+drop policy if exists categories_select on public.categories;
+drop policy if exists categories_insert on public.categories;
+drop policy if exists categories_update on public.categories;
+drop policy if exists categories_delete on public.categories;
 
 create policy categories_select on public.categories
   for select to authenticated
