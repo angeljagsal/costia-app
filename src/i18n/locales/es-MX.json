@@ -85,7 +85,7 @@
     "themeLight": "Claro",
     "themeDark": "Oscuro",
     "baseCurrency": "Moneda base",
-    "baseCurrencyHint": "Los reportes convierten todo a esta moneda. Se guarda localmente hasta la Fase 2.",
+    "baseCurrencyHint": "Los reportes convierten todo a esta moneda.",
     "version": "Versión"
   },
   "dashboard": {
@@ -110,7 +110,7 @@
     "accountsBody": "Banco, efectivo, crédito y billeteras.",
     "categoriesBody": "Categorías de gasto e ingreso.",
     "recurringBody": "Reglas automáticas y próximos cobros.",
-    "settingsBody": "Idioma, tema, moneda y backend."
+    "settingsBody": "Idioma, tema y moneda."
   },
   "reports": {
     "title": "Reportes",
@@ -131,40 +131,6 @@
     "balanceHistory": "Historial de saldo",
     "budgetVsActual": "Presupuestos vs real",
     "empty": "Sin movimientos en este periodo."
-  },
-  "pages": {
-    "transactions": {
-      "title": "Movimientos",
-      "body": "Agrega, edita, elimina y filtra gastos e ingresos. El CRUD completo llega en la Fase 3."
-    },
-    "transactionNew": {
-      "title": "Nuevo movimiento",
-      "body": "El formulario de movimientos llega en la Fase 3."
-    },
-    "transactionEdit": {
-      "title": "Editar movimiento",
-      "body": "El formulario de movimientos llega en la Fase 3."
-    },
-    "accounts": {
-      "title": "Cuentas",
-      "body": "Banco, efectivo, crédito, billeteras digitales e inversiones. La gestión llega en la Fase 4."
-    },
-    "categories": {
-      "title": "Categorías",
-      "body": "Categorías de gasto e ingreso con valores bilingües. La gestión llega en la Fase 4."
-    },
-    "budgets": {
-      "title": "Presupuestos",
-      "body": "Límites de gasto por categoría y periodo. El seguimiento llega en la Fase 5."
-    },
-    "recurring": {
-      "title": "Recurrentes",
-      "body": "Reglas que generan movimientos automáticamente. La gestión llega en la Fase 5."
-    },
-    "reports": {
-      "title": "Reportes",
-      "body": "Totales mensuales, desglose por categoría y tendencias. Los reportes llegan en la Fase 6."
-    }
   },
   "accounts": {
     "title": "Cuentas",
@@ -190,7 +156,6 @@
     "duplicate": "Esa etiqueta ya existe."
   },
   "common": {
-    "comingSoon": "Esta pantalla es provisional — su funcionalidad llega en su fase.",
     "backToDashboard": "Volver al panel",
     "save": "Guardar",
     "saving": "Guardando…",

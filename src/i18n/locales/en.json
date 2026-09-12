@@ -85,7 +85,7 @@
     "themeLight": "Light",
     "themeDark": "Dark",
     "baseCurrency": "Base currency",
-    "baseCurrencyHint": "Reports convert every transaction into this currency. Stored locally until Phase 2.",
+    "baseCurrencyHint": "Reports convert every transaction into this currency.",
     "version": "Version"
   },
   "dashboard": {
@@ -110,7 +110,7 @@
     "accountsBody": "Bank, cash, credit, wallets and investments.",
     "categoriesBody": "Expense and income categories.",
     "recurringBody": "Automatic rules and upcoming bills.",
-    "settingsBody": "Language, theme, currency, and backend."
+    "settingsBody": "Language, theme, and currency."
   },
   "reports": {
     "title": "Reports",
@@ -131,40 +131,6 @@
     "balanceHistory": "Balance history",
     "budgetVsActual": "Budgets vs actual",
     "empty": "No transactions in this period."
-  },
-  "pages": {
-    "transactions": {
-      "title": "Transactions",
-      "body": "Add, edit, delete and filter expenses and income. Full CRUD lands in Phase 3."
-    },
-    "transactionNew": {
-      "title": "New transaction",
-      "body": "The transaction form lands in Phase 3."
-    },
-    "transactionEdit": {
-      "title": "Edit transaction",
-      "body": "The transaction form lands in Phase 3."
-    },
-    "accounts": {
-      "title": "Accounts",
-      "body": "Bank, cash, credit, digital wallets and investments. Management lands in Phase 4."
-    },
-    "categories": {
-      "title": "Categories",
-      "body": "Expense and income categories with bilingual seeds. Management lands in Phase 4."
-    },
-    "budgets": {
-      "title": "Budgets",
-      "body": "Spending limits per category per period. Tracking lands in Phase 5."
-    },
-    "recurring": {
-      "title": "Recurring",
-      "body": "Rules that auto-generate transactions on schedule. Management lands in Phase 5."
-    },
-    "reports": {
-      "title": "Reports",
-      "body": "Monthly totals, category breakdowns and trends. Reporting lands in Phase 6."
-    }
   },
   "accounts": {
     "title": "Accounts",
@@ -190,7 +156,6 @@
     "duplicate": "That tag already exists."
   },
   "common": {
-    "comingSoon": "This screen is a placeholder — functionality arrives in its phase.",
     "backToDashboard": "Back to dashboard",
     "save": "Save",
     "saving": "Saving…",
