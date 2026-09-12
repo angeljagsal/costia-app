@@ -1,8 +1,10 @@
 name: ci
+# Release regime: normal commits build nothing. CI runs on version tags
+# (v*) and pull requests only; production deploys are manual in Cloudflare.
 on:
   pull_request:
   push:
-    branches: [main]
+    tags: ['v*']
 jobs:
   build:
     runs-on: ubuntu-latest

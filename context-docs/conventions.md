@@ -24,6 +24,15 @@ Exception: names dictated by tooling stay as the tool requires
 - Prettier owns formatting; `context-docs/` is prettier-ignored (hand formatting).
 - Never commit secrets (`.env`, passwords, keys). Verify with `git status` + `git diff`.
 
+## Release regime (manual deploys, tag-gated CI)
+
+- Normal commits to `main` trigger **nothing**: no CI runs, no Cloudflare builds.
+- CI (`.github/workflows/ci.yml`) runs on version tags (`v*`) and pull requests only.
+- To release: `git tag -a vX.Y.Z -m "notes"` → `git push origin vX.Y.Z` →
+  green CI certifies that exact commit → deploy it by hand in Cloudflare
+  (Deployments → Create deployment; all auto-builds are OFF).
+- Semver tags (`v1.0.0`, `v1.1.0`, …); the annotation is the release notes.
+
 ## UI rules (locked with the user)
 
 - Text-only `<button>` elements — never icons, emojis, or glyphs inside buttons.

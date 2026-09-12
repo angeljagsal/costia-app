@@ -21,18 +21,25 @@ in `lib/format` (form uses it). Browser/integration tests deliberately
 deferred: Playwright's Chromium download + flakiness budget outweighs value
 for a solo dev loop — the manual matrix below covers it.
 
-## Cloudflare Pages deploy (your dashboard steps)
+## Cloudflare Pages deploy (manual regime — all auto-builds OFF)
 
-1. dash.cloudflare.com → Workers & Pages → Create → Pages → Connect to Git →
-   select `angeljagsal/costia-app`.
-2. Build command `npm run build`, output `dist`, root `/`.
-3. Env vars (Production **and** Preview): `VITE_SUPABASE_URL`,
+> Regime change: every push used to redeploy. Now **nothing builds or deploys
+> automatically**. Releases happen by tag + hand deploy (see
+> `conventions.md` "Release regime").
+
+1. dash.cloudflare.com → Workers & Pages → costia-app → Settings → Builds &
+   deployments → Automatic deployments **OFF**, Preview deployments **OFF**.
+2. To release a tag: Deployments → Create deployment → pick the tagged commit.
+   (First-time setup instead: Connect to Git → `angeljagsal/costia-app`,
+   build `npm run build`, output `dist`, root `/`.)
+3. Env vars: `NODE_VERSION=24`, `VITE_SUPABASE_URL`,
    `VITE_SUPABASE_ANON_KEY`, `VITE_POWERSYNC_URL` (values from your `.env`).
-   Vars bake at build time — changing one needs a rebuild (Retry deployment).
+   Vars bake at build time — changing one needs a rebuild.
 4. Deploy → open `https://costia-app.pages.dev` → sign up/in.
 5. Supabase → Authentication → URL Configuration → add
-   `https://costia-app.pages.dev/**` to Redirect URLs (magic links + confirmations).
-6. Every push to `main` redeploys automatically.
+   `https://costia-app.pages.dev/**` to Redirect URLs.
+6. Google Cloud OAuth client → Authorized JavaScript origins → add
+   `https://costia-app.pages.dev`.
 
 ## Manual QA matrix (run on the deployed URL)
 
