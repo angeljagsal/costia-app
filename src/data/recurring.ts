@@ -20,6 +20,7 @@ export interface RecurringView extends RecurringRule {
   account_name: string;
   category_key: string | null;
   category_label: string | null;
+  category_kind: string;
 }
 
 export interface RecurringInput {
@@ -32,7 +33,8 @@ export interface RecurringInput {
   note?: string;
 }
 
-const VIEW_SELECT = `SELECT r.*, a.name AS account_name, c.key AS category_key, c.label AS category_label
+const VIEW_SELECT = `SELECT r.*, a.name AS account_name, c.key AS category_key, c.label AS category_label,
+  c.kind AS category_kind
   FROM recurring_rules r
   JOIN accounts a ON a.id = r.account_id
   JOIN categories c ON c.id = r.category_id`;

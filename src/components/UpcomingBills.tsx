@@ -40,17 +40,26 @@ export function UpcomingBills() {
         <p className="hint">{t('recurring.upcomingEmpty')}</p>
       ) : (
         <ul className="flex flex-col gap-2">
-          {bills.map((b) => (
-            <li key={b.id} className="flex items-center gap-3">
-              <div className="min-w-0 flex-1">
-                <p className="font-medium">{categoryName(t, b)}</p>
-                <p className="hint">
-                  {t('recurring.dueOn')} {day(b.next_due)} · {b.account_name}
+          {bills.map((b) => {
+            const income = b.category_kind === 'income';
+            return (
+              <li key={b.id} className="flex items-center gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium">{categoryName(t, b)}</p>
+                  <p className="hint">
+                    {t('recurring.dueOn')} {day(b.next_due)} · {b.account_name}
+                  </p>
+                </div>
+                <p
+                  className="shrink-0 font-bold"
+                  style={{ color: income ? 'var(--success)' : 'var(--danger)' }}
+                >
+                  {income ? '+' : '−'}
+                  {money(b.amount, b.currency)}
                 </p>
-              </div>
-              <p className="shrink-0 font-bold">{money(b.amount, b.currency)}</p>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       )}
       <Link to="/recurring" className="btn btn-secondary self-start">

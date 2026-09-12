@@ -277,6 +277,7 @@
     "upcoming": "Próximos cobros",
     "upcomingEmpty": "Nada por vencer en los próximos 7 días.",
     "new": "Nueva regla",
+    "kind": "Tipo",
     "amount": "Cantidad",
     "currency": "Moneda",
     "category": "Categoría",

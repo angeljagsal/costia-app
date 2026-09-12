@@ -15,7 +15,7 @@ import {
   useRecurring,
 } from '../data/recurring';
 import type { RecurringInput, RecurringView } from '../data/recurring';
-import type { BudgetPeriod, Currency } from '../data/types';
+import type { BudgetPeriod, Currency, Kind } from '../data/types';
 import { useI18n } from '../i18n/useI18n';
 
 const CADENCES: BudgetPeriod[] = ['weekly', 'monthly', 'yearly'];
@@ -56,7 +56,8 @@ export function Recurring() {
   const householdId = useHouseholdId();
   const rules = useRecurring(householdId);
   const accounts = useAccounts(householdId);
-  const categories = useCategories(undefined, householdId);
+  const [kind, setKind] = useState<Kind>('expense');
+  const categories = useCategories(kind, householdId);
 
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -102,6 +103,7 @@ export function Recurring() {
 
   const onEdit = (r: RecurringView) => {
     setEditingId(r.id);
+    setKind(r.category_kind === 'income' ? 'income' : 'expense');
     setForm({
       accountId: r.account_id,
       categoryId: r.category_id,
@@ -130,6 +132,21 @@ export function Recurring() {
           <form onSubmit={onSubmit} className="card flex flex-col gap-3">
             <h2 className="text-lg font-semibold">{t('recurring.new')}</h2>
             <p className="hint">{t('common.requiredNote')}</p>
+            <div className="segmented" role="group" aria-label={t('recurring.kind')}>
+              {(['expense', 'income'] as Kind[]).map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  aria-pressed={kind === k}
+                  onClick={() => {
+                    setKind(k);
+                    set({ categoryId: '' });
+                  }}
+                >
+                  {k === 'expense' ? `− ${t('tx.kindExpense')}` : `+ ${t('tx.kindIncome')}`}
+                </button>
+              ))}
+            </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <label className="label">
                 {t('recurring.account')}
@@ -248,46 +265,53 @@ export function Recurring() {
             <p className="hint">{t('recurring.empty')}</p>
           ) : (
             <ul className="flex flex-col gap-2">
-              {rules.map((r) => (
-                <li key={r.id} className="card flex items-center gap-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold">
-                      {categoryName(t, r)}
-                      {r.is_active ? null : (
-                        <span className="hint"> · {t('recurring.paused')}</span>
-                      )}
-                    </p>
-                    <p className="hint">
-                      {t(`recurring.${r.cadence}`)} · {t('recurring.dueOn')}{' '}
-                      {day(locale, r.next_due)} · {r.account_name}
-                      {r.note ? ` · ${r.note}` : ''}
-                    </p>
-                  </div>
-                  <p className="shrink-0 text-lg font-bold">
-                    {money(locale, r.amount, r.currency)}
-                  </p>
-                  <div className="flex shrink-0 flex-col gap-1">
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={() => setRecurringActive(db, r.id, !r.is_active)}
+              {rules.map((r) => {
+                const income = r.category_kind === 'income';
+                return (
+                  <li key={r.id} className="card flex items-center gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold">
+                        {categoryName(t, r)}
+                        {r.is_active ? null : (
+                          <span className="hint"> · {t('recurring.paused')}</span>
+                        )}
+                      </p>
+                      <p className="hint">
+                        {t(`recurring.${r.cadence}`)} · {t('recurring.dueOn')}{' '}
+                        {day(locale, r.next_due)} · {r.account_name}
+                        {r.note ? ` · ${r.note}` : ''}
+                      </p>
+                    </div>
+                    <p
+                      className="shrink-0 text-lg font-bold"
+                      style={{ color: income ? 'var(--success)' : 'var(--danger)' }}
                     >
-                      {r.is_active ? t('recurring.pause') : t('recurring.resume')}
-                    </button>
-                    <button type="button" className="btn btn-secondary" onClick={() => onEdit(r)}>
-                      {t('tx.edit')}
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-danger"
-                      onClick={() => onDelete(r.id)}
-                      aria-label={`${t('common.delete')}: ${categoryName(t, r)}`}
-                    >
-                      {t('common.delete')}
-                    </button>
-                  </div>
-                </li>
-              ))}
+                      {income ? '+' : '−'}
+                      {money(locale, r.amount, r.currency)}
+                    </p>
+                    <div className="flex shrink-0 flex-col gap-1">
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => setRecurringActive(db, r.id, !r.is_active)}
+                      >
+                        {r.is_active ? t('recurring.pause') : t('recurring.resume')}
+                      </button>
+                      <button type="button" className="btn btn-secondary" onClick={() => onEdit(r)}>
+                        {t('tx.edit')}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-danger"
+                        onClick={() => onDelete(r.id)}
+                        aria-label={`${t('common.delete')}: ${categoryName(t, r)}`}
+                      >
+                        {t('common.delete')}
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </>
