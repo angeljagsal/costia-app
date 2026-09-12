@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import { usePowerSync } from '@powersync/react';
 import { Page } from '../components/Page';
-import { CalendarIcon, PencilIcon, PlusIcon, SearchIcon } from '../components/icons';
+import { CalendarIcon, PencilIcon, PlusIcon, SearchIcon, TrashIcon } from '../components/icons';
 import { avatarColor, initialOf } from '../lib/avatar';
 import { useAccounts } from '../data/accounts';
 import { categoryName, useCategories } from '../data/categories';
@@ -224,27 +224,25 @@ export function Transactions() {
                     label: row.category_label,
                   });
                   return (
-                    <li key={row.id} className="card card-compact flex flex-col gap-1.5">
-                      <div className="flex items-center gap-2.5">
-                        <span
-                          aria-hidden="true"
-                          className="avatar avatar-sm"
-                          style={{
-                            background: avatarColor(
-                              row.category_key ?? row.category_label ?? row.id
-                            ),
-                          }}
-                        >
-                          {initialOf(name)}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-[0.9375rem] font-semibold">{name}</p>
-                          <p className="hint truncate">
-                            {row.account_name}
-                            {row.note ? ` · ${row.note}` : ''}
-                          </p>
-                        </div>
-                        <div className="shrink-0 text-right">
+                    <li key={row.id} className="card card-compact flex items-center gap-2.5">
+                      <span
+                        aria-hidden="true"
+                        className="avatar avatar-sm"
+                        style={{
+                          background: avatarColor(row.category_key ?? row.category_label ?? row.id),
+                        }}
+                      >
+                        {initialOf(name)}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[0.9375rem] font-semibold">{name}</p>
+                        <p className="hint truncate">
+                          {row.account_name}
+                          {row.note ? ` · ${row.note}` : ''}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 flex-col items-end gap-1.5">
+                        <div className="text-right">
                           <p
                             className="amount text-base"
                             style={{ color: expense ? 'var(--danger)' : 'var(--success)' }}
@@ -256,24 +254,23 @@ export function Transactions() {
                             <p className="hint">≈ {money(locale, row.base_amount, baseCurrency)}</p>
                           ) : null}
                         </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Link
-                          to={`/transactions/${row.id}/edit`}
-                          className="btn btn-secondary"
-                          aria-label={t('tx.edit')}
-                        >
-                          <PencilIcon size={16} />
-                          {t('tx.edit')}
-                        </Link>
-                        <button
-                          type="button"
-                          className="btn btn-danger"
-                          onClick={() => onDelete(row.id)}
-                          aria-label={`${t('common.delete')}: ${name}`}
-                        >
-                          {t('common.delete')}
-                        </button>
+                        <div className="flex gap-1.5">
+                          <Link
+                            to={`/transactions/${row.id}/edit`}
+                            className="btn btn-secondary btn-square"
+                            aria-label={`${t('tx.edit')}: ${name}`}
+                          >
+                            <PencilIcon size={18} />
+                          </Link>
+                          <button
+                            type="button"
+                            className="btn btn-danger btn-square"
+                            onClick={() => onDelete(row.id)}
+                            aria-label={`${t('common.delete')}: ${name}`}
+                          >
+                            <TrashIcon size={18} />
+                          </button>
+                        </div>
                       </div>
                     </li>
                   );

@@ -282,6 +282,14 @@ select.input {
   background: var(--surface-2);
 }
 
+/* Dense square action (44px): icon-only, always paired with an aria-label. */
+.btn-square {
+  width: 44px;
+  padding-left: 0;
+  padding-right: 0;
+  flex-shrink: 0;
+}
+
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
