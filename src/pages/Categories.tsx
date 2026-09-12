@@ -148,7 +148,7 @@ export function Categories() {
   };
 
   return (
-    <Page title={t('categories.title')} body={t('categories.subtitle')} placeholder={false}>
+    <Page title={t('categories.title')} body={t('categories.subtitle')}>
       {!householdId ? (
         <p className="hint">{t('tx.waitSync')}</p>
       ) : (

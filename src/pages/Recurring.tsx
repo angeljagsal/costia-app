@@ -122,7 +122,7 @@ export function Recurring() {
   };
 
   return (
-    <Page title={t('recurring.title')} body={t('recurring.subtitle')} placeholder={false}>
+    <Page title={t('recurring.title')} body={t('recurring.subtitle')}>
       {!householdId ? (
         <p className="hint">{t('tx.waitSync')}</p>
       ) : (

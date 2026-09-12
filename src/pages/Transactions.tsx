@@ -63,7 +63,7 @@ export function Transactions() {
   };
 
   return (
-    <Page title={t('tx.title')} body={t('tx.subtitle')} placeholder={false}>
+    <Page title={t('tx.title')} body={t('tx.subtitle')}>
       <Link to="/transactions/new" className="btn btn-primary self-start">
         <PlusIcon size={18} />
         {t('tx.new')}

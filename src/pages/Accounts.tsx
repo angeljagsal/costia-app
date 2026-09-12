@@ -73,7 +73,7 @@ export function Accounts() {
   };
 
   return (
-    <Page title={t('accounts.title')} body={t('accounts.subtitle')} placeholder={false}>
+    <Page title={t('accounts.title')} body={t('accounts.subtitle')}>
       {!householdId ? (
         <p className="hint">{t('tx.waitSync')}</p>
       ) : (

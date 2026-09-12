@@ -14,7 +14,7 @@ const LINKS = [
 export function More() {
   const { t } = useI18n();
   return (
-    <Page title={t('more.title')} body={t('more.subtitle')} placeholder={false}>
+    <Page title={t('more.title')} body={t('more.subtitle')}>
       <div className="flex flex-col gap-2">
         {LINKS.map((l) => {
           const Icon = l.icon;

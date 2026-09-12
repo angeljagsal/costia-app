@@ -171,7 +171,7 @@ export function Budgets() {
   };
 
   return (
-    <Page title={t('budgets.title')} body={t('budgets.subtitle')} placeholder={false}>
+    <Page title={t('budgets.title')} body={t('budgets.subtitle')}>
       {!householdId ? (
         <p className="hint">{t('tx.waitSync')}</p>
       ) : (
