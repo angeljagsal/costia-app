@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useStatus } from '@powersync/react';
 import { Page } from '../components/Page';
 import { useAuth } from '../auth/useAuth';
@@ -6,6 +6,8 @@ import { useHouseholdId } from '../data/household';
 import { useI18n } from '../i18n/useI18n';
 import { useSync } from '../sync/useSync';
 import { APP_VERSION } from '../lib/version';
+import { db } from '../powersync/db';
+import { resetLocalData } from '../powersync/reset';
 
 function useCount(table: string): number | null {
   const { data } = useQuery<{ n: number }>(`SELECT COUNT(*) AS n FROM ${table}`);
@@ -24,6 +26,22 @@ export function Diagnostics() {
   const status = useStatus();
   const householdId = useHouseholdId();
   const [copied, setCopied] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [clientId, setClientId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    db.getClientId()
+      .then((id) => {
+        if (mounted) setClientId(id);
+      })
+      .catch(() => {
+        // client id unavailable; row stays blank
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const counts: Record<string, number | null> = {
     users: useCount('users'),
@@ -42,7 +60,11 @@ export function Diagnostics() {
     connected,
     hasSynced,
     lastSyncedAt: status.lastSyncedAt?.toISOString() ?? null,
+    downloading: status.downloading,
+    uploading: status.uploading,
+    streams: status.syncStreams?.length ?? null,
     syncError,
+    clientId,
     userId: session?.user?.id ?? null,
     email: session?.user?.email ?? null,
     householdId,
@@ -56,6 +78,12 @@ export function Diagnostics() {
     } catch {
       setCopied(false);
     }
+  };
+
+  const onReset = async () => {
+    if (!window.confirm(t('diagnostics.resetConfirm'))) return;
+    setResetting(true);
+    await resetLocalData(); // reloads; never returns
   };
 
   const row = (label: string, value: string) => (
@@ -74,7 +102,11 @@ export function Diagnostics() {
         {row('connected', String(connected))}
         {row('hasSynced', String(hasSynced))}
         {row('lastSyncedAt', status.lastSyncedAt?.toLocaleString() ?? '—')}
+        {row('downloading', String(status.downloading))}
+        {row('uploading', String(status.uploading))}
+        {row('streams', status.syncStreams ? String(status.syncStreams.length) : '—')}
         {row('syncError', syncError ?? '—')}
+        {row('clientId', clientId ? `${clientId.slice(0, 8)}…` : '…')}
         {row('userId', session?.user?.id ?? '—')}
         {row('email', session?.user?.email ?? '—')}
         {row('householdId', householdId ?? 'MISSING')}
@@ -82,9 +114,14 @@ export function Diagnostics() {
       <div className="card flex flex-col gap-1">
         {Object.entries(counts).map(([table, n]) => row(table, n == null ? '…' : String(n)))}
       </div>
-      <button type="button" className="btn btn-secondary self-start" onClick={onCopy}>
-        {copied ? t('diagnostics.copied') : t('diagnostics.copy')}
-      </button>
+      <div className="flex gap-2">
+        <button type="button" className="btn btn-secondary" onClick={onCopy}>
+          {copied ? t('diagnostics.copied') : t('diagnostics.copy')}
+        </button>
+        <button type="button" className="btn btn-danger" onClick={onReset} disabled={resetting}>
+          {resetting ? t('diagnostics.resetting') : t('diagnostics.reset')}
+        </button>
+      </div>
     </Page>
   );
 }

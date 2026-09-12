@@ -116,7 +116,10 @@
     "title": "Diagnóstico",
     "subtitle": "Detalles técnicos para soporte. Comparte una captura si se te pide.",
     "copy": "Copiar detalles",
-    "copied": "Copiado"
+    "copied": "Copiado",
+    "reset": "Restablecer datos locales",
+    "resetting": "Restableciendo…",
+    "resetConfirm": "¿Borrar todos los datos de este dispositivo y descargar todo de nuevo? Tus datos en la nube están a salvo."
   },
   "reports": {
     "title": "Reportes",
