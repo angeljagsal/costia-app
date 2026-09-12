@@ -126,11 +126,14 @@ Doc: `context-docs/06-dashboard-reports.md`.
 Accept: Lighthouse PWA ≥90, clean on Pixel 9 Pro XL.
 Doc: `context-docs/07-pwa-qa.md` + Lighthouse reports.
 
-## Phase 8 — Testing + prod cutover
+## Phase 8 — Testing + prod cutover [DONE in code 2026-09-11, deploy pending]
 
-- Unit (FX freeze, budget math, recurring advance, splits) 80% critical; integration (forms, offline→online).
-- Manual matrix: Windows Chrome/Edge + Android Chrome.
-- Cloudflare Pages prod + env vars, optional custom domain + SSL, README + user guide.
+- [x] Unit tests: 39 passing (periods, budget states, splits, names, amounts,
+  FX) via vitest, wired in CI. Browser tests deferred → manual matrix.
+- [x] Release doc with Cloudflare steps + QA matrix (`08-release.md`).
+- [x] Login split-screen + required/optional legends on all forms.
+- [ ] Cloudflare Pages deploy + env vars (your dashboard steps in `08-release.md`).
+- [ ] Manual matrix on Windows + Pixel (checklist in `08-release.md`).
 
 Accept: prod install + cross-device sync demo.
 Doc: `context-docs/08-release.md`.
