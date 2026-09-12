@@ -91,13 +91,20 @@ export function Settings() {
         </span>
       )}
 
-      {row(t('settings.version'), <span className="hint">{APP_VERSION}</span>)}
-
       {session ? (
-        <button type="button" onClick={onSignOut} className="btn btn-danger self-end">
-          {t('header.logout')}
-        </button>
-      ) : null}
+        <div className="flex items-center justify-between gap-3">
+          <p className="hint">
+            {t('settings.version')} {APP_VERSION}
+          </p>
+          <button type="button" onClick={onSignOut} className="btn btn-danger shrink-0">
+            {t('header.logout')}
+          </button>
+        </div>
+      ) : (
+        <p className="hint">
+          {t('settings.version')} {APP_VERSION}
+        </p>
+      )}
     </div>
   );
 }
