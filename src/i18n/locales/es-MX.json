@@ -86,9 +86,6 @@
     "themeDark": "Oscuro",
     "baseCurrency": "Moneda base",
     "baseCurrencyHint": "Los reportes convierten todo a esta moneda. Se guarda localmente hasta la Fase 2.",
-    "backend": "Backend",
-    "backendConfigured": "Supabase configurado",
-    "backendMissing": "Supabase no configurado",
     "version": "Versión"
   },
   "dashboard": {

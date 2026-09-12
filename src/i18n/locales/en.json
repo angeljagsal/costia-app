@@ -86,9 +86,6 @@
     "themeDark": "Dark",
     "baseCurrency": "Base currency",
     "baseCurrencyHint": "Reports convert every transaction into this currency. Stored locally until Phase 2.",
-    "backend": "Backend",
-    "backendConfigured": "Supabase configured",
-    "backendMissing": "Supabase not configured",
     "version": "Version"
   },
   "dashboard": {

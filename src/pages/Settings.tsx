@@ -2,7 +2,6 @@ import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../auth/useAuth';
-import { isSupabaseConfigured } from '../lib/supabase';
 import { loadBaseCurrency, saveBaseCurrency } from '../lib/prefs';
 import type { BaseCurrency } from '../lib/prefs';
 import { useI18n } from '../i18n/useI18n';
@@ -83,13 +82,6 @@ export function Settings() {
         )}
         <p className="hint">{t('settings.baseCurrencyHint')}</p>
       </div>
-
-      {row(
-        t('settings.backend'),
-        <span className="hint">
-          {isSupabaseConfigured ? t('settings.backendConfigured') : t('settings.backendMissing')}
-        </span>
-      )}
 
       {session ? (
         <div className="flex items-center justify-between gap-3">
