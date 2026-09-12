@@ -11,8 +11,9 @@ import type {
 
 const toCents = (n: number) => Math.round(n * 100);
 
-/** Splits to persist: explicit splits, or a single whole-amount row. */
-function resolveSplits(input: TransactionInput): { categoryId: string; amount: number }[] {
+/** Splits to persist: explicit splits, or a single whole-amount row.
+ *  Exported for unit tests; throws `tx.errSplitMismatch` on imbalance. */
+export function resolveSplits(input: TransactionInput): { categoryId: string; amount: number }[] {
   const splits = (input.splits ?? []).filter((s) => s.categoryId && s.amount > 0);
   if (splits.length === 0) return [{ categoryId: input.categoryId, amount: input.amount }];
   const total = splits.reduce((sum, s) => sum + toCents(s.amount), 0);

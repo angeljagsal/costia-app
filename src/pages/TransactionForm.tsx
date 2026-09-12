@@ -11,7 +11,7 @@ import { createTag, useTags } from '../data/tags';
 import { createTransaction, updateTransaction, useTransaction } from '../data/transactions';
 import type { Currency, Kind } from '../data/types';
 import { useI18n } from '../i18n/useI18n';
-import { formatMoney } from '../lib/format';
+import { formatMoney, parseAmount } from '../lib/format';
 import { loadBaseCurrency } from '../lib/prefs';
 
 function todayLocal(): string {
@@ -19,15 +19,6 @@ function todayLocal(): string {
   const m = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${d.getFullYear()}-${m}-${day}`;
-}
-
-/** Accepts "1234.56", "1234,56" and "1,234.56". */
-function parseAmount(raw: string): number {
-  const s = raw.trim().replace(/\s/g, '');
-  if (!s) return NaN;
-  const normalized =
-    s.includes(',') && !s.includes('.') ? s.replace(',', '.') : s.replace(/,/g, '');
-  return Number(normalized);
 }
 
 interface SplitRow {
