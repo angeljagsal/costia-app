@@ -21,25 +21,33 @@ in `lib/format` (form uses it). Browser/integration tests deliberately
 deferred: Playwright's Chromium download + flakiness budget outweighs value
 for a solo dev loop — the manual matrix below covers it.
 
-## Cloudflare Pages deploy (manual regime — all auto-builds OFF)
+## Cloudflare Pages deploy (GitHub-native — no dashboard deploys)
 
-> Regime change: every push used to redeploy. Now **nothing builds or deploys
-> automatically**. Releases happen by tag + hand deploy (see
-> `conventions.md` "Release regime").
+> Regime: **everything from GitHub**. Tags trigger CI + deploy automatically;
+> the Cloudflare dashboard is never part of a release. Keep its
+> auto-builds OFF (Settings → Builds & deployments) so the workflow below
+> is the only deploy path. Workflow: `.github/workflows/deploy.yml`.
 
-1. dash.cloudflare.com → Workers & Pages → costia-app → Settings → Builds &
-   deployments → Automatic deployments **OFF**, Preview deployments **OFF**.
-2. To release a tag: Deployments → Create deployment → pick the tagged commit.
-   (First-time setup instead: Connect to Git → `angeljagsal/costia-app`,
-   build `npm run build`, output `dist`, root `/`.)
-3. Env vars: `NODE_VERSION=24`, `VITE_SUPABASE_URL`,
-   `VITE_SUPABASE_ANON_KEY`, `VITE_POWERSYNC_URL` (values from your `.env`).
-   Vars bake at build time — changing one needs a rebuild.
-4. Deploy → open `https://costia-app.pages.dev` → sign up/in.
-5. Supabase → Authentication → URL Configuration → add
-   `https://costia-app.pages.dev/**` to Redirect URLs.
-6. Google Cloud OAuth client → Authorized JavaScript origins → add
-   `https://costia-app.pages.dev`.
+One-time setup (repo Settings → Secrets and variables → Actions):
+
+- `CLOUDFLARE_API_TOKEN` — dash.cloudflare.com → My Profile → API Tokens →
+  Create Token → custom token with Account / Cloudflare Pages / **Edit**.
+- `CLOUDFLARE_ACCOUNT_ID` — the ID in your dash URL
+  (`dash.cloudflare.com/<ACCOUNT_ID>/...`) or the Workers & Pages sidebar.
+- `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_POWERSYNC_URL` —
+  same values as your local `.env` (public by design; baked at build time).
+
+Release flow afterwards:
+
+1. `git tag -a vX.Y.Z -m "notes"` → `git push origin vX.Y.Z`.
+2. Actions tab: `ci` proves the tag, then `deploy` builds (`npm run build`
+   with the secrets above) and publishes via wrangler. Watch both go green.
+3. Open `https://costia-app.pages.dev` (hard-refresh past the old service worker).
+4. Manual re-deploy without a tag: Actions → deploy → Run workflow.
+
+Post-deploy allowlists (unchanged): Supabase Redirect URLs
+(`https://costia-app.pages.dev/**`, localhost entry stays) and Google
+authorized origins (`https://costia-app.pages.dev`) must include the Pages URL.
 
 ## Manual QA matrix (run on the deployed URL)
 

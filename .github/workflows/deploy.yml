@@ -1,0 +1,38 @@
+name: deploy
+# GitHub-native releases. No push trigger: tags and manual runs only.
+# Tag flow:  git tag -a vX.Y.Z -m "notes" && git push origin vX.Y.Z
+# Manual flow: Actions tab → deploy → Run workflow (deploys current main).
+# Cloudflare auto-builds stay OFF; this workflow is the only deploy path.
+#
+# One-time setup (repo Settings → Secrets and variables → Actions):
+#   CLOUDFLARE_API_TOKEN  — API token with Account / Cloudflare Pages / Edit
+#   CLOUDFLARE_ACCOUNT_ID — from the dash.cloudflare.com URL or sidebar
+#   VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_POWERSYNC_URL
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Build
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_POWERSYNC_URL: ${{ secrets.VITE_POWERSYNC_URL }}
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=costia-app
