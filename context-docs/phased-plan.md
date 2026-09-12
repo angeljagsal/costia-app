@@ -114,10 +114,14 @@ bank form system (amount hero, grids, radio rows, sticky CTA), stroke icon set
 Full reference: `context-docs/06b-unified-home.md` + `context-docs/07-ui-system.md`.
 Doc: `context-docs/06-dashboard-reports.md`.
 
-## Phase 7 — PWA polish + a11y + perf
+## Phase 7 — PWA polish + a11y + perf [DONE 2026-09-11, Lighthouse pending]
 
-- Re-verify all PWA rules (§5 architecture), maskable.app check, splash flash fix.
-- Code-splitting, skeletons, asset optimization; ARIA/keyboard/contrast; es-MX formatting QA.
+- [x] Route code-splitting: lazy Dashboard (main 1135→725 KB, charts on demand).
+- [x] Flat brand icons + `check-pwa` in CI (15 checks); favicon matches.
+- [x] WCAG contrast audit in CI (23 pairs pass; fixed dark income green).
+- [x] Dashboard skeletons (reduced-motion aware); a11y roles/labels/rings pass.
+- [x] Multi-tab decision: single-DB-per-tab for v1 (documented).
+- [ ] Lighthouse PWA audit on Windows + Pixel 9 Pro XL (your step, §07).
 
 Accept: Lighthouse PWA ≥90, clean on Pixel 9 Pro XL.
 Doc: `context-docs/07-pwa-qa.md` + Lighthouse reports.

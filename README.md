@@ -14,7 +14,9 @@ it is kept current so a fresh session can continue from here.
 Phases 0–6 built and pushed: offline-first sync, transactions with splits/tags/FX
 freeze, accounts with live balances, custom categories, budgets, recurring rules,
 bank-style home (hero, charts, bills, balances), password-first auth.
-Next: your live checks, then Phase 7 PWA polish, accessibility, performance.
+Phase 7 done in code (lazy dashboard, verified icons, contrast + PWA checks in CI).
+Open: your Lighthouse + device pass (see `context-docs/07-pwa-qa.md`), then
+Phase 8 testing + Cloudflare deploy.
 
 ## Quickstart
 
