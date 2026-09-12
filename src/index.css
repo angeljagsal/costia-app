@@ -290,6 +290,11 @@ select.input {
   box-shadow: var(--shadow);
 }
 
+/* Denser card for long lists (activity, rules). Buttons stay 44px. */
+.card-compact {
+  padding: 0.75rem;
+}
+
 /* Bank hero: flat solid navy, balance first, actions second. No gradients. */
 .hero {
   background: var(--hero-bg);
@@ -514,6 +519,12 @@ select.input {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.avatar-sm {
+  width: 28px;
+  height: 28px;
+  font-size: 0.875rem;
 }
 
 .option-card .check {
