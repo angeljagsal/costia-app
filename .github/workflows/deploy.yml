@@ -52,8 +52,11 @@ jobs:
         # error on bad token/account instead of a bare exit code at deploy.
         run: npx -y wrangler@3 pages project list
       - name: Deploy to Cloudflare Pages
+        # --branch=main is load-bearing: tag builds check out a detached HEAD,
+        # and without it wrangler publishes a preview deployment that never
+        # promotes to production. --commit-hash keeps dashboard traceability.
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=costia-app
+          command: pages deploy dist --project-name=costia-app --branch=main --commit-hash=${{ github.sha }}
