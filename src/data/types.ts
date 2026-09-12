@@ -104,6 +104,7 @@ export interface TransactionFilters {
   /** YYYY-MM-DD, empty = unbounded */
   from: string;
   to: string;
+  sort: 'newest' | 'oldest' | 'amount';
 }
 
 export const EMPTY_FILTERS: TransactionFilters = {
@@ -114,4 +115,5 @@ export const EMPTY_FILTERS: TransactionFilters = {
   tagId: '',
   from: '',
   to: '',
+  sort: 'newest',
 };

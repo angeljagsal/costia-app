@@ -9,9 +9,11 @@ import { categoryName, useCategories } from '../data/categories';
 import { useHouseholdId } from '../data/household';
 import { todayLocal } from '../data/periods';
 import {
+  clearSkip,
   createRecurring,
   deleteRecurring,
   setRecurringActive,
+  skipNextOccurrence,
   updateRecurring,
   useRecurring,
 } from '../data/recurring';
@@ -68,6 +70,7 @@ const EMPTY_FORM = {
   intervalN: '1',
   intervalUnit: 'month' as IntervalUnit,
   nextDue: todayLocal(),
+  endDate: '',
   note: '',
 };
 
@@ -101,6 +104,7 @@ export function Recurring() {
     intervalN: form.cadence === 'custom' ? Number(form.intervalN) : null,
     intervalUnit: form.cadence === 'custom' ? form.intervalUnit : null,
     nextDue: form.nextDue,
+    endDate: form.endDate,
     note: form.note,
   });
 
@@ -136,6 +140,7 @@ export function Recurring() {
       intervalN: r.interval_n != null ? String(r.interval_n) : '1',
       intervalUnit: r.interval_unit ?? 'month',
       nextDue: r.next_due,
+      endDate: r.end_date ?? '',
       note: r.note ?? '',
     });
     setError(null);
@@ -279,6 +284,18 @@ export function Recurring() {
                   />
                 </span>
               </label>
+              <label className="label">
+                {t('recurring.endDate')}
+                <span className="date-wrap">
+                  <CalendarIcon size={18} />
+                  <input
+                    type="date"
+                    className="input"
+                    value={form.endDate}
+                    onChange={(e) => set({ endDate: e.target.value })}
+                  />
+                </span>
+              </label>
             </div>
             <label className="label">
               {t('recurring.note')}
@@ -332,6 +349,15 @@ export function Recurring() {
                         <p className="hint">
                           {cadenceLabel(t, r)} · {t('recurring.dueOn')} {day(locale, r.next_due)} ·{' '}
                           {r.account_name}
+                          {r.end_date
+                            ? ` · ${t('recurring.endsOn')} ${day(locale, r.end_date)}`
+                            : ''}
+                          {r.skip_date ? (
+                            <span>
+                              {' '}
+                              · {t('recurring.skippedOn')} {day(locale, r.skip_date)}
+                            </span>
+                          ) : null}
                           {r.note ? ` · ${r.note}` : ''}
                         </p>
                       </div>
@@ -351,9 +377,28 @@ export function Recurring() {
                       >
                         {r.is_active ? t('recurring.pause') : t('recurring.resume')}
                       </button>
+                      {r.skip_date ? (
+                        <button
+                          type="button"
+                          className="btn btn-secondary"
+                          onClick={() => clearSkip(db, r.id)}
+                        >
+                          {t('recurring.cancelSkip')}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="btn btn-secondary"
+                          onClick={() => skipNextOccurrence(db, r.id, r.next_due)}
+                        >
+                          {t('recurring.skipNext')}
+                        </button>
+                      )}
                       <button type="button" className="btn btn-secondary" onClick={() => onEdit(r)}>
                         {t('tx.edit')}
                       </button>
+                    </div>
+                    <div className="flex gap-2">
                       <button
                         type="button"
                         className="btn btn-danger"

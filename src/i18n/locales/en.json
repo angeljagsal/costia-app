@@ -53,7 +53,7 @@
   },
   "auth": {
     "title": "Sign in",
-    "subtitle": "Use your Google or Microsoft account, or your password.",
+    "subtitle": "Use your Google account, or your password.",
     "continueWithGoogle": "Continue with Google",
     "orEmail": "or use email",
     "passwordLabel": "Password",
@@ -171,7 +171,10 @@
     "openingDebtHint": "What you owe on this card today. New charges add on top of it.",
     "empty": "No accounts yet. Create your first one above.",
     "deleted": "Account deleted.",
+    "moveTo": "Move its movements to…",
+    "moveDelete": "Move & delete",
     "errName": "Give the account a name.",
+    "errMoveTarget": "Pick a different account to move to.",
     "errOpening": "Enter an opening balance of zero or more.",
     "errNoFxRate": "No exchange rate available for this currency and date. Sync to download rates.",
     "errHasTransactions": "This account has transactions and cannot be deleted."
@@ -233,6 +236,10 @@
     "filterCategory": "Category",
     "filterAccount": "Account",
     "filterKind": "Type",
+    "filterSort": "Sort",
+    "sortNewest": "Newest first",
+    "sortOldest": "Oldest first",
+    "sortAmount": "Largest amount",
     "filterFrom": "From",
     "filterTo": "To",
     "errRequired": "Please complete all required fields.",
@@ -298,6 +305,12 @@
     "unitMonth": "Months",
     "errInterval": "For a custom repeat, enter 1 or more plus a unit.",
     "nextDue": "Next due",
+    "endDate": "Ends (optional)",
+    "endsOn": "ends",
+    "skipNext": "Skip next",
+    "cancelSkip": "Don't skip",
+    "skippedOn": "skipped",
+    "dueTomorrow": "Due tomorrow",
     "note": "Note (optional)",
     "create": "Create rule",
     "pause": "Pause",
@@ -306,6 +319,7 @@
     "dueOn": "Due",
     "empty": "No recurring rules yet.",
     "deleted": "Rule deleted.",
-    "errRequired": "Complete account, category, amount, and next due date."
+    "errRequired": "Complete account, category, amount, and next due date.",
+    "errEndDate": "The end date cannot be before the next due date."
   }
 }

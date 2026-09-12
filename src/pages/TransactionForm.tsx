@@ -6,12 +6,16 @@ import { AccountPicker } from '../components/AccountPicker';
 import { CategoryGrid } from '../components/CategoryGrid';
 import { CalendarIcon } from '../components/icons';
 import { useAccountBalances, useAccounts } from '../data/accounts';
+import { budgetStateFor, useBudgets } from '../data/budgets';
+import type { BudgetView } from '../data/budgets';
 import { categoryName, useCategories } from '../data/categories';
 import { useHouseholdId } from '../data/household';
 import { createTag, useTags } from '../data/tags';
 import { createTransaction, updateTransaction, useTransaction } from '../data/transactions';
 import type { Currency, Kind } from '../data/types';
 import { useI18n } from '../i18n/useI18n';
+import { useBudgetSpent } from '../data/budgets';
+import { getPeriodRange, todayLocal as todayISODate } from '../data/periods';
 import { formatMoney, parseAmount } from '../lib/format';
 import { getRate } from '../lib/fx';
 import { loadBaseCurrency } from '../lib/prefs';
@@ -48,6 +52,50 @@ function toRow(categoryId: string, amount: number): SplitRow {
     categoryId,
     amount: Number.isFinite(amount) ? String(amount) : '',
   };
+}
+
+/** Soft budget warning for the chosen expense category (never blocks saving). */
+function BudgetHintRow({ budget, previewBase }: { budget: BudgetView; previewBase: number }) {
+  const { t, locale } = useI18n();
+  const householdId = useHouseholdId();
+  const baseCurrency = loadBaseCurrency();
+  const range = getPeriodRange(budget.period, todayISODate());
+  const spent = useBudgetSpent(householdId, budget.category_id, range.from, range.to, baseCurrency);
+  const state = budgetStateFor(spent + previewBase, budget.limit_amount);
+  if (state === 'onTrack') return null;
+  return (
+    <p
+      className="hint"
+      role="status"
+      style={{ color: state === 'overLimit' ? 'var(--danger)' : '#e8930c' }}
+    >
+      {t(`budgets.${state}`)} · {formatMoney(locale, spent + previewBase, baseCurrency)} /{' '}
+      {formatMoney(locale, budget.limit_amount, baseCurrency)}
+    </p>
+  );
+}
+
+function BudgetHint({
+  categoryId,
+  previewBase,
+  ready,
+}: {
+  categoryId: string;
+  previewBase: number;
+  ready: boolean;
+}) {
+  const householdId = useHouseholdId();
+  const budgets = useBudgets(householdId);
+  if (!categoryId || !ready || !(previewBase > 0)) return null;
+  const matches = budgets.filter((b) => b.category_id === categoryId);
+  if (matches.length === 0) return null;
+  return (
+    <>
+      {matches.map((b) => (
+        <BudgetHintRow key={b.id} budget={b} previewBase={previewBase} />
+      ))}
+    </>
+  );
 }
 
 export function TransactionForm({ mode }: { mode: 'new' | 'edit' }) {
@@ -289,13 +337,20 @@ function TransactionFormInner({
       </section>
 
       {isTransfer ? null : (
-        <section className="card" aria-label={t('tx.category')}>
+        <section className="card flex flex-col gap-2" aria-label={t('tx.category')}>
           <CategoryGrid
             categories={categories}
             value={categoryId}
             onChange={setCategoryId}
             label={t('tx.category')}
           />
+          {kind === 'expense' ? (
+            <BudgetHint
+              categoryId={categoryId}
+              previewBase={knownRate == null ? 0 : preview * knownRate}
+              ready={knownRate != null}
+            />
+          ) : null}
         </section>
       )}
 

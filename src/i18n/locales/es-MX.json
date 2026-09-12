@@ -53,7 +53,7 @@
   },
   "auth": {
     "title": "Iniciar sesión",
-    "subtitle": "Usa tu cuenta de Google o Microsoft, o tu contraseña.",
+    "subtitle": "Usa tu cuenta de Google o tu contraseña.",
     "continueWithGoogle": "Continuar con Google",
     "orEmail": "o usa tu correo",
     "passwordLabel": "Contraseña",
@@ -171,7 +171,10 @@
     "openingDebtHint": "Lo que debes en esta tarjeta hoy. Los cargos se suman encima.",
     "empty": "Aún no hay cuentas. Crea la primera arriba.",
     "deleted": "Cuenta eliminada.",
+    "moveTo": "Mover sus movimientos a…",
+    "moveDelete": "Mover y eliminar",
     "errName": "Ponle un nombre a la cuenta.",
+    "errMoveTarget": "Elige otra cuenta como destino.",
     "errOpening": "Escribe un saldo inicial de cero o más.",
     "errNoFxRate": "No hay tipo de cambio para esta moneda y fecha. Sincroniza para descargar tasas.",
     "errHasTransactions": "Esta cuenta tiene movimientos y no se puede eliminar."
@@ -233,6 +236,10 @@
     "filterCategory": "Categoría",
     "filterAccount": "Cuenta",
     "filterKind": "Tipo",
+    "filterSort": "Orden",
+    "sortNewest": "Más recientes",
+    "sortOldest": "Más antiguos",
+    "sortAmount": "Mayor cantidad",
     "filterFrom": "Desde",
     "filterTo": "Hasta",
     "errRequired": "Completa todos los campos obligatorios.",
@@ -298,6 +305,12 @@
     "unitMonth": "Meses",
     "errInterval": "Para repetición personalizada, escribe un número de 1 o más y una unidad.",
     "nextDue": "Próximo vencimiento",
+    "endDate": "Termina (opcional)",
+    "endsOn": "termina",
+    "skipNext": "Omitir próximo",
+    "cancelSkip": "No omitir",
+    "skippedOn": "omitido",
+    "dueTomorrow": "Vence mañana",
     "note": "Nota (opcional)",
     "create": "Crear regla",
     "pause": "Pausar",
@@ -306,6 +319,7 @@
     "dueOn": "Vence",
     "empty": "Aún no hay reglas recurrentes.",
     "deleted": "Regla eliminada.",
-    "errRequired": "Completa cuenta, categoría, cantidad y vencimiento."
+    "errRequired": "Completa cuenta, categoría, cantidad y vencimiento.",
+    "errEndDate": "La fecha de término no puede ser anterior al vencimiento."
   }
 }

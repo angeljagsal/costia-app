@@ -229,6 +229,12 @@ export function useTransactions(
     clauses.push('t.txn_date <= ?');
     params.push(f.to);
   }
+  const orderBy =
+    f.sort === 'oldest'
+      ? 'ORDER BY t.txn_date ASC, t.created_at ASC'
+      : f.sort === 'amount'
+        ? 'ORDER BY t.amount DESC, t.txn_date DESC'
+        : 'ORDER BY t.txn_date DESC, t.created_at DESC';
   const sql = `SELECT t.*, a.name AS account_name, d.name AS to_account_name,
       c.key AS category_key, c.label AS category_label,
       ${txnDisplaySQL('t')} AS display_amount
@@ -237,7 +243,7 @@ export function useTransactions(
     LEFT JOIN accounts d ON d.id = t.to_account_id
     LEFT JOIN categories c ON c.id = t.category_id
     WHERE ${clauses.join(' AND ')}
-    ORDER BY t.txn_date DESC, t.created_at DESC LIMIT ? OFFSET ?`;
+    ${orderBy} LIMIT ? OFFSET ?`;
   const { data } = useQuery<TransactionView>(sql, [
     ...params,
     ...txnDisplayParams(displayBase),

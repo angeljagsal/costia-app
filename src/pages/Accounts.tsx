@@ -101,12 +101,23 @@ export function Accounts() {
     }
   };
 
-  const onDelete = async (id: string) => {
+  const [moveFor, setMoveFor] = useState<string | null>(null);
+  const [moveTo, setMoveTo] = useState('');
+
+  const onDelete = async (id: string, moveToId?: string) => {
     if (!window.confirm(t('common.confirmDelete'))) return;
     setError(null);
     try {
-      await deleteAccount(db, id);
+      await deleteAccount(db, id, moveToId || undefined);
+      if (moveFor === id) {
+        setMoveFor(null);
+        setMoveTo('');
+      }
     } catch (err) {
+      if (err instanceof Error && err.message === 'accounts.errHasTransactions') {
+        setMoveFor(id);
+        setMoveTo('');
+      }
       showError(err);
     }
   };
@@ -233,25 +244,65 @@ export function Accounts() {
                         const bal = balanceOf(a.id);
                         const shown = group.debt ? Math.abs(Math.min(bal, 0)) : bal;
                         return (
-                          <li key={a.id} className="card flex items-center gap-3">
-                            <div className="min-w-0 flex-1">
-                              <p className="font-semibold">{a.name}</p>
-                              <p className="hint">{accountTypeLabel(t, a.type)}</p>
+                          <li key={a.id} className="card flex flex-col gap-2">
+                            <div className="flex items-center gap-3">
+                              <div className="min-w-0 flex-1">
+                                <p className="font-semibold">{a.name}</p>
+                                <p className="hint">{accountTypeLabel(t, a.type)}</p>
+                              </div>
+                              <p
+                                className="amount shrink-0 text-lg"
+                                style={group.debt ? { color: 'var(--danger)' } : undefined}
+                              >
+                                {money(locale, shown, baseCurrency)}
+                              </p>
+                              <button
+                                type="button"
+                                className="btn btn-danger shrink-0"
+                                onClick={() => onDelete(a.id)}
+                                aria-label={`${t('common.delete')}: ${a.name}`}
+                              >
+                                {t('common.delete')}
+                              </button>
                             </div>
-                            <p
-                              className="amount shrink-0 text-lg"
-                              style={group.debt ? { color: 'var(--danger)' } : undefined}
-                            >
-                              {money(locale, shown, baseCurrency)}
-                            </p>
-                            <button
-                              type="button"
-                              className="btn btn-danger shrink-0"
-                              onClick={() => onDelete(a.id)}
-                              aria-label={`${t('common.delete')}: ${a.name}`}
-                            >
-                              {t('common.delete')}
-                            </button>
+                            {moveFor === a.id ? (
+                              <div className="grid grid-cols-[1fr_auto_auto] items-end gap-2 border-t border-[var(--border)] pt-2">
+                                <label className="label">
+                                  {t('accounts.moveTo')}
+                                  <select
+                                    className="input"
+                                    value={moveTo}
+                                    onChange={(e) => setMoveTo(e.target.value)}
+                                  >
+                                    <option value="">{t('accounts.moveTo')}</option>
+                                    {accounts
+                                      .filter((o) => o.id !== a.id)
+                                      .map((o) => (
+                                        <option key={o.id} value={o.id}>
+                                          {o.name}
+                                        </option>
+                                      ))}
+                                  </select>
+                                </label>
+                                <button
+                                  type="button"
+                                  className="btn btn-primary"
+                                  onClick={() => onDelete(a.id, moveTo)}
+                                >
+                                  {t('accounts.moveDelete')}
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn btn-secondary"
+                                  onClick={() => {
+                                    setMoveFor(null);
+                                    setMoveTo('');
+                                  }}
+                                >
+                                  {t('common.cancel')}
+                                </button>
+                              </div>
+                            ) : null}
                           </li>
                         );
                       })}

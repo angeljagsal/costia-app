@@ -17,6 +17,8 @@ export interface RecurringRule {
   interval_n: number | null;
   interval_unit: IntervalUnit | null;
   next_due: string;
+  end_date: string | null;
+  skip_date: string | null;
   note: string | null;
   is_active: number;
   created_at: string;
@@ -39,6 +41,8 @@ export interface RecurringInput {
   intervalN?: number | null;
   intervalUnit?: IntervalUnit | null;
   nextDue: string;
+  /** YYYY-MM-DD or empty = runs forever. */
+  endDate?: string;
   note?: string;
 }
 
@@ -78,6 +82,7 @@ function validate(input: RecurringInput): void {
     if (!(input.intervalN != null && input.intervalN >= 1 && input.intervalUnit))
       throw new Error('recurring.errInterval');
   }
+  if (input.endDate && input.endDate < input.nextDue) throw new Error('recurring.errEndDate');
 }
 
 export async function createRecurring(
@@ -91,8 +96,8 @@ export async function createRecurring(
   await db.execute(
     `INSERT INTO recurring_rules
       (id, household_id, account_id, category_id, amount, currency, cadence,
-       interval_n, interval_unit, next_due, note, is_active, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)`,
+       interval_n, interval_unit, next_due, end_date, skip_date, note, is_active, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, 1, ?)`,
     [
       id,
       householdId,
@@ -104,6 +109,7 @@ export async function createRecurring(
       custom ? input.intervalN : null,
       custom ? input.intervalUnit : null,
       input.nextDue,
+      input.endDate?.trim() || null,
       input.note?.trim() || null,
       new Date().toISOString(),
     ]
@@ -120,7 +126,8 @@ export async function updateRecurring(
   const custom = input.cadence === 'custom';
   await db.execute(
     `UPDATE recurring_rules SET account_id = ?, category_id = ?, amount = ?, currency = ?,
-      cadence = ?, interval_n = ?, interval_unit = ?, next_due = ?, note = ? WHERE id = ?`,
+      cadence = ?, interval_n = ?, interval_unit = ?, next_due = ?,
+      end_date = ?, note = ? WHERE id = ?`,
     [
       input.accountId,
       input.categoryId,
@@ -130,6 +137,7 @@ export async function updateRecurring(
       custom ? input.intervalN : null,
       custom ? input.intervalUnit : null,
       input.nextDue,
+      input.endDate?.trim() || null,
       input.note?.trim() || null,
       id,
     ]
@@ -142,6 +150,21 @@ export async function setRecurringActive(
   active: boolean
 ): Promise<void> {
   await db.execute('UPDATE recurring_rules SET is_active = ? WHERE id = ?', [active ? 1 : 0, id]);
+}
+
+/** Skip exactly the given occurrence (normally the rule's next_due). */
+export async function skipNextOccurrence(
+  db: AppDatabase,
+  id: string,
+  dateISO: string
+): Promise<void> {
+  if (!dateISO) throw new Error('recurring.errRequired');
+  await db.execute('UPDATE recurring_rules SET skip_date = ? WHERE id = ?', [dateISO, id]);
+}
+
+/** Cancel a pending skip so the occurrence generates normally. */
+export async function clearSkip(db: AppDatabase, id: string): Promise<void> {
+  await db.execute('UPDATE recurring_rules SET skip_date = NULL WHERE id = ?', [id]);
 }
 
 export async function deleteRecurring(db: AppDatabase, id: string): Promise<void> {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { AppDatabase } from '../powersync/db';
-import { createAccount, signOpening, updateOpening } from './accounts';
+import { createAccount, moveTransactions, signOpening, updateOpening } from './accounts';
 
 const db = {} as AppDatabase; // validation throws before touching the db
 
@@ -43,6 +43,13 @@ describe('createAccount validation', () => {
     await expect(
       createAccount(db, 'hh', 'Cash', 'cash', 'MXN', { amount: 100, currency: 'MXN', date: '' })
     ).rejects.toThrow('accounts.errOpening');
+  });
+});
+
+describe('moveTransactions validation', () => {
+  it('rejects a missing or identical destination before touching the db', async () => {
+    await expect(moveTransactions(db, 'acc-1', '')).rejects.toThrow('accounts.errMoveTarget');
+    await expect(moveTransactions(db, 'acc-1', 'acc-1')).rejects.toThrow('accounts.errMoveTarget');
   });
 });
 

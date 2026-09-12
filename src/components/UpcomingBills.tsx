@@ -42,10 +42,18 @@ export function UpcomingBills() {
         <ul className="flex flex-col gap-2">
           {bills.map((b) => {
             const income = b.category_kind === 'income';
+            const dueTomorrow = b.next_due === addDaysISO(today, 1);
             return (
               <li key={b.id} className="flex items-center gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium">{categoryName(t, b)}</p>
+                  <p className="font-medium">
+                    {categoryName(t, b)}{' '}
+                    {dueTomorrow ? (
+                      <span className="rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-xs font-bold text-[var(--accent-strong)]">
+                        {t('recurring.dueTomorrow')}
+                      </span>
+                    ) : null}
+                  </p>
                   <p className="hint">
                     {t('recurring.dueOn')} {day(b.next_due)} · {b.account_name}
                   </p>

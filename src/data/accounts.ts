@@ -175,7 +175,32 @@ export async function updateOpening(
   );
 }
 
-export async function deleteAccount(db: AppDatabase, id: string): Promise<void> {
+/**
+ * Move every transaction leg off one account onto another (both source and
+ * destination legs of transfers). Throws `accounts.errMoveTarget` for a
+ * missing or identical destination.
+ */
+export async function moveTransactions(
+  db: AppDatabase,
+  fromId: string,
+  toId: string
+): Promise<void> {
+  if (!toId || toId === fromId) throw new Error('accounts.errMoveTarget');
+  const target = await db.getOptional<{ id: string }>('SELECT id FROM accounts WHERE id = ?', [
+    toId,
+  ]);
+  if (!target) throw new Error('accounts.errMoveTarget');
+  await db.writeTransaction(async (tx) => {
+    await tx.execute('UPDATE transactions SET account_id = ? WHERE account_id = ?', [toId, fromId]);
+    await tx.execute('UPDATE transactions SET to_account_id = ? WHERE to_account_id = ?', [
+      toId,
+      fromId,
+    ]);
+  });
+}
+
+export async function deleteAccount(db: AppDatabase, id: string, moveToId?: string): Promise<void> {
+  if (moveToId) await moveTransactions(db, id, moveToId);
   const used = await db.getOptional<{ n: number }>(
     'SELECT COUNT(*) AS n FROM transactions WHERE account_id = ? OR to_account_id = ?',
     [id, id]

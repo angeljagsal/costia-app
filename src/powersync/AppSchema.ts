@@ -121,6 +121,8 @@ const recurring_rules = new Table(
     interval_n: column.integer,
     interval_unit: column.text,
     next_due: column.text,
+    end_date: column.text,
+    skip_date: column.text,
     note: column.text,
     is_active: column.integer,
     created_at: column.text,

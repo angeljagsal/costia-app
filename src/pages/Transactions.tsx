@@ -58,6 +58,7 @@ export function Transactions() {
     filters.tagId,
     filters.from,
     filters.to,
+    filters.sort === 'newest' ? '' : filters.sort,
   ].filter(Boolean).length;
 
   const baseCurrency = loadBaseCurrency();
@@ -138,6 +139,18 @@ export function Transactions() {
                 <option value="expense">{t('tx.kindExpense')}</option>
                 <option value="income">{t('tx.kindIncome')}</option>
                 <option value="transfer">{t('tx.kindTransfer')}</option>
+              </select>
+            </label>
+            <label className="label">
+              {t('tx.filterSort')}
+              <select
+                className="input"
+                value={filters.sort}
+                onChange={(e) => patch({ sort: e.target.value as TransactionFilters['sort'] })}
+              >
+                <option value="newest">{t('tx.sortNewest')}</option>
+                <option value="oldest">{t('tx.sortOldest')}</option>
+                <option value="amount">{t('tx.sortAmount')}</option>
               </select>
             </label>
             <label className="label">
