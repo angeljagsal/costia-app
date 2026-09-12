@@ -40,8 +40,10 @@ Exception: names dictated by tooling stay as the tool requires
 
 - Text-only `<button>` elements — never icons, emojis, or glyphs inside buttons.
   Icons live only on navigation (sidebar/bottom tabs, hero quick actions,
-  view-all chevrons, More tiles, search field decoration). Single exception:
-  OAuth provider brand marks on the login buttons (user-requested standard).
+  view-all chevrons, More tiles, search field decoration). Two exceptions:
+  OAuth provider brand marks on the login buttons (user-requested standard),
+  and icon-only `.btn-square` dense list actions, which always carry
+  descriptive `aria-label`s (e.g. activity edit/delete).
 - No gradients anywhere — flat solid colors + borders + soft shadows only.
 - No emojis anywhere in UI or code comments.
 - GitLab-inspired, bank-style: neutral grays, one action blue, tabular numerals.
