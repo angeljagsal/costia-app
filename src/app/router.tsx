@@ -9,6 +9,7 @@ import { Budgets } from '../pages/Budgets';
 import { Recurring } from '../pages/Recurring';
 import { Accounts } from '../pages/Accounts';
 import { Categories } from '../pages/Categories';
+import { Diagnostics } from '../pages/Diagnostics';
 import { Settings } from '../pages/Settings';
 import { TransactionForm } from '../pages/TransactionForm';
 import { Transactions } from '../pages/Transactions';
@@ -37,6 +38,7 @@ export const router = createBrowserRouter([
       { path: 'reports', element: <Navigate to="/" replace /> },
       { path: 'more', element: <More /> },
       { path: 'settings', element: <Settings /> },
+      { path: 'diagnostics', element: <Diagnostics /> },
     ],
   },
   { path: '*', element: <NotFound /> },

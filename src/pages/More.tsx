@@ -1,6 +1,13 @@
 import { Link } from 'react-router';
 import { Page } from '../components/Page';
-import { BankIcon, ChevronRightIcon, GearIcon, RepeatIcon, TagIcon } from '../components/icons';
+import {
+  BankIcon,
+  ChevronRightIcon,
+  GearIcon,
+  RepeatIcon,
+  SearchIcon,
+  TagIcon,
+} from '../components/icons';
 import { useI18n } from '../i18n/useI18n';
 
 const LINKS = [
@@ -8,6 +15,7 @@ const LINKS = [
   { to: '/categories', key: 'nav.categories', body: 'more.categoriesBody', icon: TagIcon },
   { to: '/recurring', key: 'nav.recurring', body: 'more.recurringBody', icon: RepeatIcon },
   { to: '/settings', key: 'nav.settings', body: 'more.settingsBody', icon: GearIcon },
+  { to: '/diagnostics', key: 'diagnostics.title', body: 'diagnostics.subtitle', icon: SearchIcon },
 ] as const;
 
 /** Second-level sections live here so the main nav stays at four items. */
