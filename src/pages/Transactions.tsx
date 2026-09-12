@@ -49,6 +49,16 @@ export function Transactions() {
     setLimit(PAGE_SIZE);
   };
 
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const activeFilterCount = [
+    filters.search.trim(),
+    filters.categoryId,
+    filters.accountId,
+    filters.tagId,
+    filters.from,
+    filters.to,
+  ].filter(Boolean).length;
+
   // Fetch one extra row to know whether more pages exist.
   const rows = useTransactions(householdId, filters, limit + 1, 0);
   const visible = rows.slice(0, limit);
@@ -87,107 +97,122 @@ export function Transactions() {
         {t('tx.new')}
       </Link>
 
-      <div className="card flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">{t('tx.filters')}</h2>
-        <div className="search-wrap">
-          <SearchIcon size={18} />
-          <input
-            className="input"
-            value={filters.search}
-            onChange={(e) => patch({ search: e.target.value })}
-            placeholder={t('tx.searchPlaceholder')}
-            aria-label={t('common.search')}
-            type="search"
-          />
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <label className="label">
-            {t('tx.filterCategory')}
-            <select
+      <details
+        className="advanced"
+        open={filtersOpen}
+        onToggle={(e) => setFiltersOpen(e.currentTarget.open)}
+      >
+        <summary>
+          <span className="flex items-center gap-2 text-base font-bold">
+            {t('tx.filters')}
+            {activeFilterCount > 0 ? (
+              <span className="rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-xs font-bold text-[var(--accent-strong)]">
+                {activeFilterCount}
+              </span>
+            ) : null}
+          </span>
+        </summary>
+        <div className="advanced-body">
+          <div className="search-wrap">
+            <SearchIcon size={18} />
+            <input
               className="input"
-              value={filters.categoryId}
-              onChange={(e) => patch({ categoryId: e.target.value })}
-            >
-              <option value="">{t('common.all')}</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {categoryName(t, c)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="label">
-            {t('tx.filterAccount')}
-            <select
-              className="input"
-              value={filters.accountId}
-              onChange={(e) => patch({ accountId: e.target.value })}
-            >
-              <option value="">{t('common.all')}</option>
-              {accounts.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="label">
-            {t('tx.tags')}
-            <select
-              className="input"
-              value={filters.tagId}
-              onChange={(e) => patch({ tagId: e.target.value })}
-            >
-              <option value="">{t('common.all')}</option>
-              {tags.map((tag) => (
-                <option key={tag.id} value={tag.id}>
-                  {tag.name}
-                </option>
-              ))}
-            </select>
-          </label>
+              value={filters.search}
+              onChange={(e) => patch({ search: e.target.value })}
+              placeholder={t('tx.searchPlaceholder')}
+              aria-label={t('common.search')}
+              type="search"
+            />
+          </div>
           <div className="grid grid-cols-2 gap-2">
             <label className="label">
-              {t('tx.filterFrom')}
-              <span className="date-wrap">
-                <CalendarIcon size={18} />
-                <input
-                  type="date"
-                  className="input"
-                  value={filters.from}
-                  onChange={(e) => patch({ from: e.target.value })}
-                />
-              </span>
+              {t('tx.filterCategory')}
+              <select
+                className="input"
+                value={filters.categoryId}
+                onChange={(e) => patch({ categoryId: e.target.value })}
+              >
+                <option value="">{t('common.all')}</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {categoryName(t, c)}
+                  </option>
+                ))}
+              </select>
             </label>
             <label className="label">
-              {t('tx.filterTo')}
-              <span className="date-wrap">
-                <CalendarIcon size={18} />
-                <input
-                  type="date"
-                  className="input"
-                  value={filters.to}
-                  onChange={(e) => patch({ to: e.target.value })}
-                />
-              </span>
+              {t('tx.filterAccount')}
+              <select
+                className="input"
+                value={filters.accountId}
+                onChange={(e) => patch({ accountId: e.target.value })}
+              >
+                <option value="">{t('common.all')}</option>
+                {accounts.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
             </label>
+            <label className="label">
+              {t('tx.tags')}{' '}
+              <select
+                className="input"
+                value={filters.tagId}
+                onChange={(e) => patch({ tagId: e.target.value })}
+              >
+                <option value="">{t('common.all')}</option>
+                {tags.map((tag) => (
+                  <option key={tag.id} value={tag.id}>
+                    {tag.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <label className="label">
+                {t('tx.filterFrom')}
+                <span className="date-wrap">
+                  <CalendarIcon size={18} />
+                  <input
+                    type="date"
+                    className="input"
+                    value={filters.from}
+                    onChange={(e) => patch({ from: e.target.value })}
+                  />
+                </span>
+              </label>
+              <label className="label">
+                {t('tx.filterTo')}
+                <span className="date-wrap">
+                  <CalendarIcon size={18} />
+                  <input
+                    type="date"
+                    className="input"
+                    value={filters.to}
+                    onChange={(e) => patch({ to: e.target.value })}
+                  />
+                </span>
+              </label>
+            </div>
           </div>
+          <button
+            type="button"
+            className="btn btn-secondary self-start"
+            onClick={() => patch({ ...EMPTY_FILTERS })}
+          >
+            {t('common.clear')}
+          </button>
         </div>
-        <button
-          type="button"
-          className="btn btn-secondary self-start"
-          onClick={() => patch({ ...EMPTY_FILTERS })}
-        >
-          {t('common.clear')}
-        </button>
-      </div>
+      </details>
 
       {!householdId ? (
         <p className="hint">{t('tx.waitSync')}</p>
       ) : visible.length === 0 ? (
         <p className="hint">{t('common.empty')}</p>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           {groups.map(([date, items]) => (
             <section key={date} aria-label={groupLabel(date)} className="flex flex-col gap-2">
               <p className="form-section-title">{groupLabel(date)}</p>
@@ -199,11 +224,11 @@ export function Transactions() {
                     label: row.category_label,
                   });
                   return (
-                    <li key={row.id} className="card flex flex-col gap-2">
-                      <div className="flex items-center gap-3">
+                    <li key={row.id} className="card card-compact flex flex-col gap-1.5">
+                      <div className="flex items-center gap-2.5">
                         <span
                           aria-hidden="true"
-                          className="avatar"
+                          className="avatar avatar-sm"
                           style={{
                             background: avatarColor(
                               row.category_key ?? row.category_label ?? row.id
@@ -213,7 +238,7 @@ export function Transactions() {
                           {initialOf(name)}
                         </span>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate font-semibold">{name}</p>
+                          <p className="truncate text-[0.9375rem] font-semibold">{name}</p>
                           <p className="hint truncate">
                             {row.account_name}
                             {row.note ? ` · ${row.note}` : ''}
@@ -221,13 +246,15 @@ export function Transactions() {
                         </div>
                         <div className="shrink-0 text-right">
                           <p
-                            className="amount text-lg"
+                            className="amount text-base"
                             style={{ color: expense ? 'var(--danger)' : 'var(--success)' }}
                           >
                             {expense ? '−' : '+'}
                             {money(locale, row.amount, row.currency)}
                           </p>
-                          <p className="hint">≈ {money(locale, row.base_amount, baseCurrency)}</p>
+                          {row.currency !== baseCurrency ? (
+                            <p className="hint">≈ {money(locale, row.base_amount, baseCurrency)}</p>
+                          ) : null}
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
