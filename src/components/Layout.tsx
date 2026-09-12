@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from 'react-router';
+import { NavLink, Outlet } from 'react-router';
 import { useAuth } from '../auth/useAuth';
 import { useI18n } from '../i18n/useI18n';
 import { useSync } from '../sync/useSync';
@@ -31,13 +31,7 @@ function topLinkClass({ isActive }: { isActive: boolean }) {
 export function Layout() {
   const { t } = useI18n();
   const { online, engine, connected, hasSynced, syncError } = useSync();
-  const { session, bypassed, signOut } = useAuth();
-  const navigate = useNavigate();
-
-  const onSignOut = async () => {
-    await signOut();
-    navigate('/login');
-  };
+  const { bypassed } = useAuth();
 
   const syncState = (() => {
     if (engine === 'local-only') return online ? 'online' : 'offline';
@@ -87,12 +81,6 @@ export function Layout() {
     </span>
   );
 
-  const signOutButton = session ? (
-    <button type="button" onClick={onSignOut} className="btn btn-secondary w-full">
-      {t('header.logout')}
-    </button>
-  ) : null;
-
   return (
     <div className="flex min-h-[100dvh] flex-col bg-[var(--bg)] text-[var(--text)] md:flex-row">
       {/* Sidebar (desktop): light GitLab style, fixed while content scrolls. */}
@@ -119,7 +107,6 @@ export function Layout() {
         </nav>
         <div className="mt-auto flex flex-col items-start gap-3 border-t border-[var(--sidebar-border)] p-4">
           {statusPill}
-          {signOutButton}
         </div>
       </aside>
 

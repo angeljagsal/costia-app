@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
+import { useAuth } from '../auth/useAuth';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { loadBaseCurrency, saveBaseCurrency } from '../lib/prefs';
 import type { BaseCurrency } from '../lib/prefs';
@@ -20,11 +22,18 @@ function row(title: string, control: ReactNode) {
 export function Settings() {
   const { t, locale, setLocale } = useI18n();
   const { choice, setChoice } = useTheme();
+  const { session, signOut } = useAuth();
+  const navigate = useNavigate();
   const [currency, setCurrency] = useState<BaseCurrency>(loadBaseCurrency);
 
   useEffect(() => {
     saveBaseCurrency(currency);
   }, [currency]);
+
+  const onSignOut = async () => {
+    await signOut();
+    navigate('/login');
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -79,6 +88,12 @@ export function Settings() {
           {isSupabaseConfigured ? t('settings.backendConfigured') : t('settings.backendMissing')}
         </span>
       )}
+
+      {session ? (
+        <button type="button" onClick={onSignOut} className="btn btn-secondary self-start">
+          {t('header.logout')}
+        </button>
+      ) : null}
     </div>
   );
 }
