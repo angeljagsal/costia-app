@@ -112,6 +112,12 @@
     "recurringBody": "Automatic rules and upcoming bills.",
     "settingsBody": "Language, theme, and currency."
   },
+  "diagnostics": {
+    "title": "Diagnostics",
+    "subtitle": "Technical details for troubleshooting. Share a screenshot when asked.",
+    "copy": "Copy details",
+    "copied": "Copied"
+  },
   "reports": {
     "title": "Reports",
     "subtitle": "Explore your money across any period.",

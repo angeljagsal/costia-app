@@ -8,8 +8,7 @@ import { useI18n } from '../i18n/useI18n';
 import type { Locale } from '../i18n/I18nProvider';
 import { useTheme } from '../theme/useTheme';
 import type { ThemeChoice } from '../theme/ThemeProvider';
-
-const APP_VERSION = (import.meta.env.VITE_APP_VERSION as string | undefined) ?? 'dev';
+import { APP_VERSION } from '../lib/version';
 
 function row(title: string, control: ReactNode) {
   return (

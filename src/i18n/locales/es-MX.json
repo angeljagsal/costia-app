@@ -112,6 +112,12 @@
     "recurringBody": "Reglas automáticas y próximos cobros.",
     "settingsBody": "Idioma, tema y moneda."
   },
+  "diagnostics": {
+    "title": "Diagnóstico",
+    "subtitle": "Detalles técnicos para soporte. Comparte una captura si se te pide.",
+    "copy": "Copiar detalles",
+    "copied": "Copiado"
+  },
   "reports": {
     "title": "Reportes",
     "subtitle": "Explora tu dinero en cualquier periodo.",
