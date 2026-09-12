@@ -97,6 +97,12 @@ describe('transfers', () => {
     expect(resolveSplits(transfer())).toEqual([]);
   });
 
+  it('validates before using any rate override', async () => {
+    await expect(
+      createTransaction(db, 'hh', 'MXN', transfer({ toAccountId: 'acc-1' }), 17.5)
+    ).rejects.toThrow('tx.errTransferSame');
+  });
+
   it('requires two different accounts', async () => {
     await expect(
       createTransaction(db, 'hh', 'MXN', transfer({ toAccountId: undefined }))

@@ -1,5 +1,6 @@
 import { useQuery } from '@powersync/react';
 import { toBaseAmount } from '../lib/fx';
+import { txnDisplayParams, txnDisplaySQL } from './display';
 import type { AppDatabase } from '../powersync/db';
 import type {
   SplitRow,
@@ -45,13 +46,20 @@ export async function createTransaction(
   db: AppDatabase,
   householdId: string,
   baseCurrency: string,
-  input: TransactionInput
+  input: TransactionInput,
+  fxRateOverride?: number | null
 ): Promise<string> {
   validate(input);
   const splits = resolveSplits(input);
-  let baseAmount: number;
+  let fx: { base: number; rate: number };
   try {
-    baseAmount = await toBaseAmount(input.amount, input.currency, baseCurrency, input.txnDate);
+    fx = await toBaseAmount(
+      input.amount,
+      input.currency,
+      baseCurrency,
+      input.txnDate,
+      fxRateOverride
+    );
   } catch {
     throw new Error('tx.errNoFxRate');
   }
@@ -62,8 +70,8 @@ export async function createTransaction(
     await tx.execute(
       `INSERT INTO transactions
         (id, household_id, account_id, to_account_id, category_id, amount, currency, base_amount,
-         txn_date, kind, note, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         base_currency, fx_rate, txn_date, kind, note, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         householdId,
@@ -72,7 +80,9 @@ export async function createTransaction(
         isTransfer ? null : (input.categoryId ?? null),
         input.amount,
         input.currency,
-        baseAmount,
+        fx.base,
+        baseCurrency,
+        fx.rate,
         input.txnDate,
         input.kind,
         input.note?.trim() || null,
@@ -99,13 +109,20 @@ export async function updateTransaction(
   db: AppDatabase,
   id: string,
   baseCurrency: string,
-  input: TransactionInput
+  input: TransactionInput,
+  fxRateOverride?: number | null
 ): Promise<void> {
   validate(input);
   const splits = resolveSplits(input);
-  let baseAmount: number;
+  let fx: { base: number; rate: number };
   try {
-    baseAmount = await toBaseAmount(input.amount, input.currency, baseCurrency, input.txnDate);
+    fx = await toBaseAmount(
+      input.amount,
+      input.currency,
+      baseCurrency,
+      input.txnDate,
+      fxRateOverride
+    );
   } catch {
     throw new Error('tx.errNoFxRate');
   }
@@ -113,14 +130,16 @@ export async function updateTransaction(
   await db.writeTransaction(async (tx) => {
     await tx.execute(
       `UPDATE transactions SET account_id = ?, to_account_id = ?, category_id = ?, amount = ?, currency = ?,
-        base_amount = ?, txn_date = ?, kind = ?, note = ? WHERE id = ?`,
+        base_amount = ?, base_currency = ?, fx_rate = ?, txn_date = ?, kind = ?, note = ? WHERE id = ?`,
       [
         input.accountId,
         isTransfer ? input.toAccountId : null,
         isTransfer ? null : (input.categoryId ?? null),
         input.amount,
         input.currency,
-        baseAmount,
+        fx.base,
+        baseCurrency,
+        fx.rate,
         input.txnDate,
         input.kind,
         input.note?.trim() || null,
@@ -174,7 +193,8 @@ export function useTransactions(
   householdId: string | null,
   f: TransactionFilters,
   limit: number,
-  offset: number
+  offset: number,
+  displayBase: string
 ): TransactionView[] {
   const clauses = ['t.household_id = ?'];
   const params: (string | number)[] = [householdId ?? ''];
@@ -210,13 +230,19 @@ export function useTransactions(
     params.push(f.to);
   }
   const sql = `SELECT t.*, a.name AS account_name, d.name AS to_account_name,
-      c.key AS category_key, c.label AS category_label
+      c.key AS category_key, c.label AS category_label,
+      ${txnDisplaySQL('t')} AS display_amount
     FROM transactions t
     JOIN accounts a ON a.id = t.account_id
     LEFT JOIN accounts d ON d.id = t.to_account_id
     LEFT JOIN categories c ON c.id = t.category_id
     WHERE ${clauses.join(' AND ')}
     ORDER BY t.txn_date DESC, t.created_at DESC LIMIT ? OFFSET ?`;
-  const { data } = useQuery<TransactionView>(sql, [...params, limit, offset]);
+  const { data } = useQuery<TransactionView>(sql, [
+    ...params,
+    ...txnDisplayParams(displayBase),
+    limit,
+    offset,
+  ]);
   return data;
 }

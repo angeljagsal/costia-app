@@ -62,7 +62,7 @@ function Hero() {
   const householdId = useHouseholdId();
   const baseCurrency = loadBaseCurrency();
   const accounts = useAccounts(householdId);
-  const balances = useAccountBalances(householdId);
+  const balances = useAccountBalances(householdId, baseCurrency);
   const balanceOf = (id: string) => balances.find((b) => b.account_id === id)?.balance ?? 0;
   const netWorth = balances.reduce((sum, b) => sum + (b.balance ?? 0), 0);
   const assetsTotal = accounts
@@ -74,7 +74,7 @@ function Hero() {
 
   const today = todayLocal();
   const month = today.slice(0, 7);
-  const flow = useMonthlyFlow(householdId, monthStart(month), monthEnd(month));
+  const flow = useMonthlyFlow(householdId, monthStart(month), monthEnd(month), baseCurrency);
   const monthIncome = flow.reduce((s, f) => s + (f.income ?? 0), 0);
   const monthExpenses = flow.reduce((s, f) => s + (f.expenses ?? 0), 0);
 
@@ -138,7 +138,8 @@ function BudgetOverview() {
 function RecentTransactions() {
   const { t, locale } = useI18n();
   const householdId = useHouseholdId();
-  const rows = useTransactions(householdId, EMPTY_FILTERS, 10, 0);
+  const baseCurrency = loadBaseCurrency();
+  const rows = useTransactions(householdId, EMPTY_FILTERS, 10, 0, baseCurrency);
   return (
     <section className="card flex min-w-0 flex-col gap-2" aria-label={t('dashboard.recentTx')}>
       <div className="flex items-center justify-between">
@@ -195,7 +196,7 @@ function CategoryBreakdown() {
   const baseCurrency = loadBaseCurrency();
   const today = todayLocal();
   const range = getPeriodRange('monthly', today);
-  const totals = useCategoryTotals(householdId, 'expense', range.from, range.to);
+  const totals = useCategoryTotals(householdId, 'expense', range.from, range.to, baseCurrency);
   const data = totals.map((row, i) => ({
     name: categoryName(t, row),
     value: row.total,
@@ -252,7 +253,12 @@ function IncomeVsExpenses() {
   const baseCurrency = loadBaseCurrency();
   const endMonth = todayLocal().slice(0, 7);
   const startMonth = shiftMonth(endMonth, -5);
-  const flow = useMonthlyFlow(householdId, monthStart(startMonth), monthEnd(endMonth));
+  const flow = useMonthlyFlow(
+    householdId,
+    monthStart(startMonth),
+    monthEnd(endMonth),
+    baseCurrency
+  );
   const byMonth = new Map(flow.map((f) => [f.month, f]));
   const data = monthRange(startMonth, endMonth).map((m) => ({
     month: formatMonthLabel(locale, m),
@@ -293,7 +299,7 @@ function BalanceHistory() {
   const baseCurrency = loadBaseCurrency();
   const endMonth = todayLocal().slice(0, 7);
   const startMonth = shiftMonth(endMonth, -5);
-  const history = useBalanceHistory(householdId, startMonth, endMonth);
+  const history = useBalanceHistory(householdId, startMonth, endMonth, baseCurrency);
   const data = history.map((p) => ({
     month: formatMonthLabel(locale, p.month),
     [t('dashboard.balanceHistory')]: Math.round(p.balance * 100) / 100,
@@ -338,7 +344,7 @@ function Balances() {
   const householdId = useHouseholdId();
   const baseCurrency = loadBaseCurrency();
   const accounts = useAccounts(householdId);
-  const balances = useAccountBalances(householdId);
+  const balances = useAccountBalances(householdId, baseCurrency);
   const balanceOf = (id: string) => balances.find((b) => b.account_id === id)?.balance ?? 0;
   const netWorth = balances.reduce((sum, b) => sum + (b.balance ?? 0), 0);
   const groups = [

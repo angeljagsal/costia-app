@@ -41,7 +41,7 @@ function BudgetCard({ budget }: { budget: BudgetView }) {
   const [error, setError] = useState<string | null>(null);
 
   const range = getPeriodRange(budget.period, todayLocal());
-  const spent = useBudgetSpent(householdId, budget.category_id, range.from, range.to);
+  const spent = useBudgetSpent(householdId, budget.category_id, range.from, range.to, baseCurrency);
   const ratio = budget.limit_amount > 0 ? spent / budget.limit_amount : 0;
   const state = budgetStateFor(spent, budget.limit_amount);
   const barColor = budgetBarColor(state);

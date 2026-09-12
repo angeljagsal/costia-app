@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import { usePowerSync } from '@powersync/react';
@@ -13,6 +13,7 @@ import { createTransaction, updateTransaction, useTransaction } from '../data/tr
 import type { Currency, Kind } from '../data/types';
 import { useI18n } from '../i18n/useI18n';
 import { formatMoney, parseAmount } from '../lib/format';
+import { getRate } from '../lib/fx';
 import { loadBaseCurrency } from '../lib/prefs';
 
 function todayLocal(): string {
@@ -114,11 +115,31 @@ function TransactionFormInner({
   const [newTag, setNewTag] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [rateCache, setRateCache] = useState<Record<string, number | null>>({});
+  const [fxOverride, setFxOverride] = useState('');
 
   const isTransfer = kind === 'transfer';
+  const rateKey = `${currency}|${baseCurrency}|${date}`;
+
+  useEffect(() => {
+    if (currency === baseCurrency || rateCache[rateKey] !== undefined) return;
+    let live = true;
+    getRate(currency, baseCurrency, date)
+      .then((r) => {
+        if (live) setRateCache((c) => ({ ...c, [rateKey]: r }));
+      })
+      .catch(() => {
+        if (live) setRateCache((c) => ({ ...c, [rateKey]: null }));
+      });
+    return () => {
+      live = false;
+    };
+  }, [currency, baseCurrency, date, rateKey, rateCache]);
+
+  const knownRate = currency === baseCurrency ? 1 : rateCache[rateKey];
   const categories = useCategories(isTransfer ? undefined : kind, householdId);
   const accounts = useAccounts(householdId);
-  const balances = useAccountBalances(householdId);
+  const balances = useAccountBalances(householdId, baseCurrency);
   const tags = useTags(householdId);
   const balanceOf = (id: string) => balances.find((b) => b.account_id === id)?.balance ?? 0;
 
@@ -155,6 +176,9 @@ function TransactionFormInner({
     setError(null);
     setSaving(true);
     try {
+      const overrideText = knownRate === null ? fxOverride.trim() : '';
+      const override = overrideText ? Number(overrideText.replace(',', '.')) : null;
+      if (overrideText && !(override != null && override > 0)) throw new Error('tx.errFxRate');
       const input = {
         accountId,
         toAccountId: isTransfer ? toAccountId : undefined,
@@ -170,9 +194,9 @@ function TransactionFormInner({
         tagIds: isTransfer ? [] : tagIds,
       };
       if (mode === 'new' || !editId) {
-        await createTransaction(db, householdId, loadBaseCurrency(), input);
+        await createTransaction(db, householdId, loadBaseCurrency(), input, override);
       } else {
-        await updateTransaction(db, editId, loadBaseCurrency(), input);
+        await updateTransaction(db, editId, loadBaseCurrency(), input, override);
       }
       navigate('/transactions');
     } catch (err) {
@@ -241,6 +265,27 @@ function TransactionFormInner({
             ))}
           </div>
         </div>
+        {currency === baseCurrency ? null : knownRate === undefined ? (
+          <p className="hint" aria-live="polite">
+            {t('common.loading')}
+          </p>
+        ) : knownRate !== null ? (
+          <p className="hint" aria-live="polite">
+            1 {currency} = {knownRate} {baseCurrency}
+          </p>
+        ) : (
+          <label className="label">
+            {t('tx.fxManual')}
+            <input
+              className="input"
+              inputMode="decimal"
+              value={fxOverride}
+              onChange={(e) => setFxOverride(e.target.value)}
+              placeholder="0.00"
+            />
+            <span className="hint">{t('tx.fxManualHint')}</span>
+          </label>
+        )}
       </section>
 
       {isTransfer ? null : (

@@ -60,15 +60,16 @@ export function Transactions() {
     filters.to,
   ].filter(Boolean).length;
 
+  const baseCurrency = loadBaseCurrency();
+
   // Fetch one extra row to know whether more pages exist.
-  const rows = useTransactions(householdId, filters, limit + 1, 0);
+  const rows = useTransactions(householdId, filters, limit + 1, 0, baseCurrency);
   const visible = rows.slice(0, limit);
   const hasMore = rows.length > limit;
 
   const categories = useCategories(undefined, householdId);
   const accounts = useAccounts(householdId);
   const tags = useTags(householdId);
-  const baseCurrency = loadBaseCurrency();
 
   const onDelete = async (id: string) => {
     if (!window.confirm(t('common.confirmDelete'))) return;
@@ -276,7 +277,9 @@ export function Transactions() {
                             {money(locale, row.amount, row.currency)}
                           </p>
                           {row.currency !== baseCurrency ? (
-                            <p className="hint">≈ {money(locale, row.base_amount, baseCurrency)}</p>
+                            <p className="hint">
+                              ≈ {money(locale, row.display_amount, baseCurrency)}
+                            </p>
                           ) : null}
                         </div>
                         <div className="flex gap-1.5">

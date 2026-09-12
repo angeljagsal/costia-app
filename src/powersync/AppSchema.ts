@@ -3,7 +3,7 @@ import { column, Schema, Table } from '@powersync/web';
 /**
  * Client SQLite schema. Mirrors supabase/migrations/0001_schema.sql
  * (+0008 ids, +0009 custom categories, +0010 recurring intervals,
- * +0011 transfers, +0012 account openings).
+ * +0011 transfers, +0012 account openings, +0013 fx display).
  * Type mapping: uuid/text/date/timestamptz -> text, numeric -> real, bool -> integer.
  * Table names must match the server tables exactly (uploads use them by name).
  */
@@ -30,6 +30,7 @@ const accounts = new Table(
     name: column.text,
     type: column.text,
     opening_base: column.real,
+    opening_amount: column.real,
     opening_currency: column.text,
     opening_date: column.text,
     created_at: column.text,
@@ -57,6 +58,8 @@ const transactions = new Table(
     amount: column.real,
     currency: column.text,
     base_amount: column.real,
+    base_currency: column.text,
+    fx_rate: column.real,
     txn_date: column.text,
     kind: column.text,
     note: column.text,

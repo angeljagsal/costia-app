@@ -14,7 +14,7 @@ export function BudgetProgressRow({ budget }: { budget: BudgetView }) {
   const householdId = useHouseholdId();
   const baseCurrency = loadBaseCurrency();
   const range = getPeriodRange(budget.period, todayLocal());
-  const spent = useBudgetSpent(householdId, budget.category_id, range.from, range.to);
+  const spent = useBudgetSpent(householdId, budget.category_id, range.from, range.to, baseCurrency);
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-baseline justify-between gap-2 text-sm">

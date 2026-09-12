@@ -10,6 +10,8 @@ export interface Account {
   type: AccountType;
   /** Signed net-worth contribution in base terms (credit debt stored negative). */
   opening_base: number;
+  /** Typed opening number (>= 0) so openings convert on base switch. */
+  opening_amount: number;
   opening_currency: string;
   opening_date: string | null;
   created_at: string;
@@ -43,6 +45,10 @@ export interface TransactionRow {
   amount: number;
   currency: string;
   base_amount: number;
+  /** Base the frozen base_amount is denominated in (0013; legacy rows backfilled). */
+  base_currency: string | null;
+  /** currency -> base_currency rate used at creation (audit + fallback). */
+  fx_rate: number | null;
   txn_date: string;
   kind: string;
   note: string | null;
@@ -63,6 +69,8 @@ export interface TransactionView extends TransactionRow {
   to_account_name: string | null;
   category_key: string | null;
   category_label: string | null;
+  /** Row value converted to the requested display base (see display.ts). */
+  display_amount: number;
 }
 
 export interface SplitInput {

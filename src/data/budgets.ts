@@ -1,5 +1,6 @@
 import { useQuery } from '@powersync/react';
 import type { AppDatabase } from '../powersync/db';
+import { txnDisplayParams, txnDisplaySQL } from './display';
 import type { BudgetPeriod } from './types';
 
 export interface BudgetRow {
@@ -42,23 +43,24 @@ export function useBudgets(householdId: string | null): BudgetView[] {
 }
 
 /**
- * Spent in base currency for an expense category over a date range.
- * Sums split rows converted proportionally (split × txn base / txn amount),
+ * Spent in the display base for an expense category over a date range.
+ * Sums split rows converted proportionally (split × txn display / txn amount),
  * so split and single-category transactions count uniformly.
  */
 export function useBudgetSpent(
   householdId: string | null,
   categoryId: string,
   from: string,
-  to: string
+  to: string,
+  displayBase: string
 ): number {
   const { data } = useQuery<{ spent: number }>(
-    `SELECT COALESCE(SUM(s.amount * t.base_amount / t.amount), 0) AS spent
+    `SELECT COALESCE(SUM(s.amount * (${txnDisplaySQL('t')}) / t.amount), 0) AS spent
      FROM transaction_splits s
      JOIN transactions t ON t.id = s.transaction_id
      WHERE t.household_id = ? AND s.category_id = ?
        AND t.kind = 'expense' AND t.txn_date >= ? AND t.txn_date <= ?`,
-    [householdId ?? '', categoryId, from, to]
+    [householdId ?? '', categoryId, from, to, ...txnDisplayParams(displayBase)]
   );
   return data[0]?.spent ?? 0;
 }

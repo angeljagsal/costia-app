@@ -45,10 +45,12 @@ export function Accounts() {
   const [opening, setOpening] = useState('');
   const [openingCurrency, setOpeningCurrency] = useState<Currency>('MXN');
   const [openingDate, setOpeningDate] = useState(todayLocal);
+  const [fxOverride, setFxOverride] = useState('');
+  const [needFxOverride, setNeedFxOverride] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const balances = useAccountBalances(householdId);
+  const balances = useAccountBalances(householdId, baseCurrency);
   const balanceOf = (id: string) => balances.find((b) => b.account_id === id)?.balance ?? 0;
   const isDebt = (a: Account) => a.type === 'credit';
   const assets = accounts.filter((a) => !isDebt(a));
@@ -59,7 +61,7 @@ export function Accounts() {
 
   const showError = (e: unknown) => {
     const msg = e instanceof Error ? e.message : String(e);
-    setError(msg.startsWith('accounts.') ? t(msg) : msg);
+    setError(msg.startsWith('accounts.') || msg.startsWith('tx.') ? t(msg) : msg);
   };
 
   const onCreate = async (e: FormEvent) => {
@@ -68,17 +70,31 @@ export function Accounts() {
     setError(null);
     setSaving(true);
     try {
-      await createAccount(db, householdId, name, type, baseCurrency, {
-        amount: opening.trim() ? parseAmount(opening) : 0,
-        currency: openingCurrency,
-        date: openingDate,
-      });
+      const overrideText = needFxOverride ? fxOverride.trim() : '';
+      const override = overrideText ? Number(overrideText.replace(',', '.')) : null;
+      if (overrideText && !(override != null && override > 0)) throw new Error('tx.errFxRate');
+      await createAccount(
+        db,
+        householdId,
+        name,
+        type,
+        baseCurrency,
+        {
+          amount: opening.trim() ? parseAmount(opening) : 0,
+          currency: openingCurrency,
+          date: openingDate,
+        },
+        override
+      );
       setName('');
       setType('bank');
       setOpening('');
       setOpeningCurrency('MXN');
       setOpeningDate(todayLocal());
+      setFxOverride('');
+      setNeedFxOverride(false);
     } catch (err) {
+      if (err instanceof Error && err.message === 'accounts.errNoFxRate') setNeedFxOverride(true);
       showError(err);
     } finally {
       setSaving(false);
@@ -174,6 +190,19 @@ export function Accounts() {
             <p className="hint">
               {type === 'credit' ? t('accounts.openingDebtHint') : t('accounts.openingHint')}
             </p>
+            {needFxOverride ? (
+              <label className="label">
+                {t('tx.fxManual')}
+                <input
+                  className="input"
+                  inputMode="decimal"
+                  value={fxOverride}
+                  onChange={(e) => setFxOverride(e.target.value)}
+                  placeholder="0.00"
+                />
+                <span className="hint">{t('tx.fxManualHint')}</span>
+              </label>
+            ) : null}
             {error ? (
               <p className="error-text" role="alert">
                 {error}
