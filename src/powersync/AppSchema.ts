@@ -103,6 +103,8 @@ const recurring_rules = new Table(
     amount: column.real,
     currency: column.text,
     cadence: column.text,
+    interval_n: column.integer,
+    interval_unit: column.text,
     next_due: column.text,
     note: column.text,
     is_active: column.integer,

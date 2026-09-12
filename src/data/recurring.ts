@@ -1,6 +1,10 @@
 import { useQuery } from '@powersync/react';
 import type { AppDatabase } from '../powersync/db';
-import type { BudgetPeriod, Currency } from './types';
+import type { Currency } from './types';
+
+export type IntervalUnit = 'day' | 'week' | 'month';
+
+export type Cadence = 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'yearly' | 'custom';
 
 export interface RecurringRule {
   id: string;
@@ -9,7 +13,9 @@ export interface RecurringRule {
   category_id: string;
   amount: number;
   currency: string;
-  cadence: BudgetPeriod;
+  cadence: string;
+  interval_n: number | null;
+  interval_unit: IntervalUnit | null;
   next_due: string;
   note: string | null;
   is_active: number;
@@ -28,7 +34,10 @@ export interface RecurringInput {
   categoryId: string;
   amount: number;
   currency: Currency;
-  cadence: BudgetPeriod;
+  cadence: Cadence;
+  /** Required when cadence is custom. */
+  intervalN?: number | null;
+  intervalUnit?: IntervalUnit | null;
   nextDue: string;
   note?: string;
 }
@@ -65,6 +74,10 @@ function validate(input: RecurringInput): void {
   if (!input.accountId || !input.categoryId || !input.nextDue)
     throw new Error('recurring.errRequired');
   if (!(input.amount > 0)) throw new Error('recurring.errRequired');
+  if (input.cadence === 'custom') {
+    if (!(input.intervalN != null && input.intervalN >= 1 && input.intervalUnit))
+      throw new Error('recurring.errInterval');
+  }
 }
 
 export async function createRecurring(
@@ -74,10 +87,12 @@ export async function createRecurring(
 ): Promise<string> {
   validate(input);
   const id = crypto.randomUUID();
+  const custom = input.cadence === 'custom';
   await db.execute(
     `INSERT INTO recurring_rules
-      (id, household_id, account_id, category_id, amount, currency, cadence, next_due, note, is_active, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)`,
+      (id, household_id, account_id, category_id, amount, currency, cadence,
+       interval_n, interval_unit, next_due, note, is_active, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)`,
     [
       id,
       householdId,
@@ -86,6 +101,8 @@ export async function createRecurring(
       input.amount,
       input.currency,
       input.cadence,
+      custom ? input.intervalN : null,
+      custom ? input.intervalUnit : null,
       input.nextDue,
       input.note?.trim() || null,
       new Date().toISOString(),
@@ -100,15 +117,18 @@ export async function updateRecurring(
   input: RecurringInput
 ): Promise<void> {
   validate(input);
+  const custom = input.cadence === 'custom';
   await db.execute(
     `UPDATE recurring_rules SET account_id = ?, category_id = ?, amount = ?, currency = ?,
-      cadence = ?, next_due = ?, note = ? WHERE id = ?`,
+      cadence = ?, interval_n = ?, interval_unit = ?, next_due = ?, note = ? WHERE id = ?`,
     [
       input.accountId,
       input.categoryId,
       input.amount,
       input.currency,
       input.cadence,
+      custom ? input.intervalN : null,
+      custom ? input.intervalUnit : null,
       input.nextDue,
       input.note?.trim() || null,
       id,
