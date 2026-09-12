@@ -1,0 +1,3 @@
+# Single-page app fallback: serve index.html for all routes so refresh and
+# deep links (e.g. /budgets, /transactions/new) never 404 on Cloudflare Pages.
+/* /index.html 200
