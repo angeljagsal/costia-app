@@ -12,7 +12,12 @@ Date: 2026-09-11.
   (household, category, period) surfaces `budgets.errDuplicate`.
 - `src/data/recurring.ts` — CRUD + pause/resume (`is_active`) + delete
   (past generated rows survive via server-side `SET NULL`) +
-  `useUpcomingBills(today → +7d)`.
+  `useUpcomingBills(today → +7d)`. Views carry `category_kind`; the form has
+  an expense/income toggle filtering categories, and amounts render signed
+  (+/−, green/red) in the rules list and Upcoming Bills. The server job
+  derives `kind` from the category, so no migration was needed.
+  (Income support added post-Phase 5; auth moved to password + OAuth the
+  same day — see decisions log.)
 
 ## Budgets page
 
